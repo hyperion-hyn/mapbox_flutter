@@ -96,6 +96,12 @@ class MapboxMapController extends ChangeNotifier {
   final int _id;
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
+    for(var entry in channelMethodCalls.entries) {
+      var ret = entry.value(call);
+      if(ret != null && ret != false) {
+        return ret;
+      }
+    }
     switch (call.method) {
       case 'infoWindow#onTap':
         final String symbolId = call.arguments['symbol'];
@@ -478,4 +484,10 @@ class MapboxMapController extends ChangeNotifier {
       return new Future.error(e);
     }
   }
+
+  /// for plugins
+  var channelMethodCalls = <String, HandleMethodCall>{};
 }
+
+///should return true if has handled
+typedef dynamic HandleMethodCall(MethodCall call);

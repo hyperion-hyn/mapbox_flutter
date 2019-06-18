@@ -12,6 +12,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 
 part 'src/bitmap.dart';
 part 'src/callbacks.dart';
@@ -24,3 +25,7 @@ part 'src/line.dart';
 part 'src/circle.dart';
 part 'src/ui.dart';
 part 'src/global.dart';
+
+//plugins
+part 'src/plugins/map_plugin.dart';
+part 'src/plugins/heaven/heaven.dart';

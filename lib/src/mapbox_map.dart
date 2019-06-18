@@ -24,7 +24,10 @@ class MapboxMap extends StatefulWidget {
     this.myLocationTrackingMode = MyLocationTrackingMode.Tracking,
     this.onMapClick,
     this.onCameraTrackingDismissed,
+    this.plugins = const <Widget>[]
   }) : assert(initialCameraPosition != null);
+
+  final List<Widget> plugins;
 
   final MapCreatedCallback onMapCreated;
 
@@ -122,8 +125,12 @@ class _MapboxMapState extends State<MapboxMap> {
       'initialCameraPosition': widget.initialCameraPosition?._toMap(),
       'options': _MapboxMapOptions.fromWidget(widget).toMap(),
     };
+
+    Widget nativeView = Text(
+        '$defaultTargetPlatform is not yet supported by the maps plugin');
+
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return AndroidView(
+      nativeView = AndroidView(
         viewType: 'plugins.flutter.io/mapbox_gl',
         onPlatformViewCreated: onPlatformViewCreated,
         gestureRecognizers: widget.gestureRecognizers,
@@ -131,7 +138,7 @@ class _MapboxMapState extends State<MapboxMap> {
         creationParamsCodec: const StandardMessageCodec(),
       );
     } else if (defaultTargetPlatform == TargetPlatform.iOS) {
-      return UiKitView(
+      nativeView = UiKitView(
         viewType: 'plugins.flutter.io/mapbox_gl',
         onPlatformViewCreated: onPlatformViewCreated,
         gestureRecognizers: widget.gestureRecognizers,
@@ -140,8 +147,13 @@ class _MapboxMapState extends State<MapboxMap> {
       );
     }
 
-    return Text(
-        '$defaultTargetPlatform is not yet supported by the maps plugin');
+    return Stack(
+      children: <Widget>[
+        nativeView,
+        for(var plugin in widget.plugins)
+          plugin
+      ],
+    );
   }
 
   @override
@@ -174,6 +186,11 @@ class _MapboxMapState extends State<MapboxMap> {
         onMapClick: widget.onMapClick,
         onCameraTrackingDismissed: widget.onCameraTrackingDismissed);
     _controller.complete(controller);
+    for(var plugin in widget.plugins) {
+      if(plugin is MapPluginMixin) {
+        (plugin as MapPluginMixin).onMapReady(controller);
+      }
+    }
     if (widget.onMapCreated != null) {
       widget.onMapCreated(controller);
     }

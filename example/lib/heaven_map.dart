@@ -22,16 +22,38 @@ class _HeavenMapPage extends StatefulWidget {
 }
 
 class _HeavenMapPageState extends State<_HeavenMapPage> {
+  var models = <HeavenDataModel>[
+    HeavenDataModel(
+        id: '1',
+        sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+        color: Colors.blue.value)
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
         MapboxMap(
-            initialCameraPosition: const CameraPosition(
-              target: LatLng(23.122592, 113.327356),
-              zoom: 11.0,
-            ),
-            styleString: 'https://static.hyn.space/maptiles/see-it-all.json')
+          initialCameraPosition: const CameraPosition(
+            target: LatLng(35.6803997, 139.7690174),
+            zoom: 8.0,
+          ),
+          styleString: 'https://static.hyn.space/maptiles/see-it-all.json',
+          plugins: <Widget>[HeavenPlugin(models: models)],
+        ),
+        RaisedButton(
+          onPressed: () {
+            setState(() {
+              models = <HeavenDataModel>[
+                HeavenDataModel(
+                    id: '2',
+                    sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+                    color: Colors.red.value)
+              ];
+            });
+          },
+          child: Text('ttt'),
+        )
       ],
     );
   }

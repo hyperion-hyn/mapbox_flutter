@@ -1,5 +1,6 @@
 package com.mapbox.mapboxgl.plugins.heaven
 
+import android.util.Log
 import com.mapbox.mapboxgl.plugins.interf.IMapPlugin
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
@@ -38,17 +39,17 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
                 val model = mapToModel(call.argument<Map<*, *>>("model"))
                 if (model != null) {
                     addData(model)
-                    result.success(null)
-                    return true;
                 }
+                result.success(null)
+                return true;
             }
             "heaven_map#removeData" -> {
-                val id = call.argument<String>("model")
+                val id = call.argument<String>("id")
                 if (id != null) {
                     removeData(id)
-                    result.success(null)
-                    return true
                 }
+                result.success(null)
+                return true
             }
         }
         return false
@@ -79,6 +80,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
             return
         }
         val color = String.format("#%06X", 0xFFFFFF.and(model.color))
+//        val color = String.format("#%06X", 0xFF00FF)
         val newLayer = CircleLayer(layerId, sourceId)
                 .withProperties(
                         circleRadius(8f),
@@ -107,8 +109,8 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
     }
 
     private fun mapToModel(map: Map<*, *>?): HeavenDataModel? {
-        if (map != null && map["id"] is String && map["sourceUrl"] is String && map["color"] is Int) {
-            return HeavenDataModel(map["id"] as String, map["sourceUrl"] as String, map["color"] as Int);
+        if (map != null && map["id"] is String && map["sourceUrl"] is String && map["color"] is Number) {
+            return HeavenDataModel(map["id"] as String, map["sourceUrl"] as String, (map["color"] as Number).toInt());
         }
         return null
     }
