@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'heaven_map.dart';
 import 'line.dart';
 import 'animate_camera.dart';
 import 'map_ui.dart';
@@ -20,6 +21,7 @@ final List<Page> _allPages = <Page>[
   LinePage(),
   PlaceCirclePage(),
   ScrollingMapPage(),
+  HeavenMap(),
 ];
 
 class MapsDemo extends StatelessWidget {

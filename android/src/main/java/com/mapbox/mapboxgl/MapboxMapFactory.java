@@ -4,6 +4,8 @@ import static io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import android.content.Context;
 
+import com.mapbox.mapboxgl.plugins.MapPluginsManager;
+import com.mapbox.mapboxgl.plugins.heaven.HeavenMapBuilder;
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 
 import io.flutter.plugin.common.StandardMessageCodec;
@@ -34,6 +36,9 @@ public class MapboxMapFactory extends PlatformViewFactory {
       CameraPosition position = Convert.toCameraPosition(params.get("initialCameraPosition"));
       builder.setInitialCameraPosition(position);
     }
+    //register plugins
+    MapPluginsManager.INSTANCE.registerBuilder(new HeavenMapBuilder().interpretOptions(params.get("plugins-options")));
+    MapPluginsManager.INSTANCE.buildPlugins();
     return builder.build(id, context, mActivityState, mPluginRegistrar);
   }
 }

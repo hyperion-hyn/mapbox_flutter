@@ -157,6 +157,6 @@ class SymbolBuilder implements SymbolOptionsSink {
 
   @Override
   public void setDraggable(boolean draggable) {
-    symbolOptions.setDraggable(draggable);
+    symbolOptions.withDraggable(draggable);
   }
 }

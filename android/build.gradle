@@ -8,7 +8,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:3.2.1'
+        classpath 'com.android.tools.build:gradle:3.4.1'
     }
 }
 
@@ -21,6 +21,9 @@ rootProject.allprojects {
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
@@ -37,8 +40,11 @@ android {
         targetCompatibility JavaVersion.VERSION_1_8
     }
     dependencies {
-        implementation "com.mapbox.mapboxsdk:mapbox-android-sdk:7.3.0"
-        implementation "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v7:0.5.0"
+        //kotlin
+        implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+        implementation "com.mapbox.mapboxsdk:mapbox-android-sdk:7.4.0"
+        implementation "com.mapbox.mapboxsdk:mapbox-android-plugin-annotation-v7:0.6.0"
     }
     compileOptions {
         sourceCompatibility 1.8
