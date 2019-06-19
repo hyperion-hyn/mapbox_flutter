@@ -22,9 +22,9 @@ object MapPluginsManager {
         }
     }
 
-    fun enablePlugins(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
+    fun onStyleLoaded(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
         for ((_, plugin) in plugins) {
-            plugin.enableManager(mapView, mapboxMap, style)
+            plugin.onMapboxStyleLoaded(mapView, mapboxMap, style)
         }
     }
 

@@ -10,7 +10,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
 
 public interface IMapPlugin {
-    void enableManager(MapView mapView, MapboxMap mapboxMap, @NonNull Style style);
+    void onMapboxStyleLoaded(MapView mapView, MapboxMap mapboxMap, @NonNull Style style);
 
     boolean onMethodCall(MethodCall call, MethodChannel.Result result);
 

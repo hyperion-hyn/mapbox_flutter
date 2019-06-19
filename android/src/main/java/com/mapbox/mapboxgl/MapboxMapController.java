@@ -290,7 +290,7 @@ final class MapboxMapController
       enableCircleManager(style);
       enableLocationComponent(style);
       //enable plugins
-      MapPluginsManager.INSTANCE.enablePlugins(mapView, mapboxMap, style);
+      MapPluginsManager.INSTANCE.onStyleLoaded(mapView, mapboxMap, style);
       // needs to be placed after SymbolManager#addClickListener,
       // is fixed with 0.6.0 of annotations plugin
       mapboxMap.addOnMapClickListener(MapboxMapController.this);

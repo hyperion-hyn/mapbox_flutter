@@ -26,12 +26,10 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   Future<dynamic> _addModel(HeavenDataModel model) async {
-    print('add model $model');
     return await _controller._channel.invokeMethod("${widget.getName()}#addData", <String, dynamic>{'model': model._toJson()});
   }
 
   Future<dynamic> _removeModel(String id) async {
-    print('remove model111 $id');
     return await _controller._channel.invokeMethod("${widget.getName()}#removeData", <String, String>{'id': id});
   }
 

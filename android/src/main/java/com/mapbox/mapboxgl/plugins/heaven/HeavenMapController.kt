@@ -20,7 +20,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
 
     private val methodChannel: MethodChannel? = null
 
-    override fun enableManager(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
+    override fun onMapboxStyleLoaded(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
         this.mapView = mapView
         this.mapboxMap = mapboxMap
         this.style = style
