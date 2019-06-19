@@ -5,6 +5,7 @@
 part of mapbox_gl;
 
 typedef void OnMapClickCallback(Point<double> point, LatLng coordinates);
+typedef void OnStyleLoadedCallback(MapboxMapController controller);
 
 typedef void OnCameraTrackingDismissedCallback();
 
@@ -26,7 +27,7 @@ typedef void OnCameraTrackingDismissedCallback();
 class MapboxMapController extends ChangeNotifier {
   MapboxMapController._(
       this._id, MethodChannel channel, CameraPosition initialCameraPosition,
-      {this.onMapClick, this.onCameraTrackingDismissed})
+      {this.onMapClick, this.onCameraTrackingDismissed, this.onStyleLoaded})
       : assert(_id != null),
         assert(channel != null),
         _channel = channel {
@@ -37,19 +38,23 @@ class MapboxMapController extends ChangeNotifier {
   static Future<MapboxMapController> init(
       int id, CameraPosition initialCameraPosition,
       {OnMapClickCallback onMapClick,
-      OnCameraTrackingDismissedCallback onCameraTrackingDismissed}) async {
+      OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
+      OnStyleLoadedCallback onStyleLoaded}) async {
     assert(id != null);
     final MethodChannel channel =
         MethodChannel('plugins.flutter.io/mapbox_maps_$id');
     await channel.invokeMethod('map#waitForMap');
     return MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
-        onCameraTrackingDismissed: onCameraTrackingDismissed);
+        onCameraTrackingDismissed: onCameraTrackingDismissed,
+        onStyleLoaded: onStyleLoaded);
   }
 
   final MethodChannel _channel;
 
   final OnMapClickCallback onMapClick;
+
+  final OnStyleLoadedCallback onStyleLoaded;
 
   final OnCameraTrackingDismissedCallback onCameraTrackingDismissed;
 
@@ -155,6 +160,11 @@ class MapboxMapController extends ChangeNotifier {
       case 'map#onCameraTrackingDismissed':
         if (onCameraTrackingDismissed != null) {
           onCameraTrackingDismissed();
+        }
+        break;
+      case 'map#onStyleLoaded':
+        if(onStyleLoaded != null) {
+          onStyleLoaded(this);
         }
         break;
       default:
@@ -487,6 +497,7 @@ class MapboxMapController extends ChangeNotifier {
 
   /// for plugins
   var channelMethodCalls = <String, HandleMethodCall>{};
+  MethodChannel get channel => _channel;
 }
 
 ///should return true if has handled

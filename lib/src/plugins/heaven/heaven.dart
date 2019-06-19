@@ -1,6 +1,6 @@
 part of mapbox_gl;
 
-class HeavenPlugin extends StatefulWidget with MapPluginMixin {
+class HeavenPlugin extends StatefulWidget {
 
   final List<HeavenDataModel> models;
 
@@ -10,39 +10,40 @@ class HeavenPlugin extends StatefulWidget with MapPluginMixin {
   State<StatefulWidget> createState() {
     return _HeavenPluginState();
   }
-
-  @override
-  String getName() {
-    return 'heaven_map';
-  }
 }
 
 class _HeavenPluginState extends State<HeavenPlugin> {
-  MapboxMapController _controller;
-  
   @override
   Widget build(BuildContext context) {
     return SizedBox.shrink();
   }
 
   Future<dynamic> _addModel(HeavenDataModel model) async {
-    return await _controller._channel.invokeMethod("${widget.getName()}#addData", <String, dynamic>{'model': model._toJson()});
+    if(MapboxMapParent.of(context).controller != null) {
+      return await MapboxMapParent.of(context).controller.channel.invokeMethod("heaven_map#addData", <String, dynamic>{'model': model._toJson()});
+    }
+    return null;
   }
 
   Future<dynamic> _removeModel(String id) async {
-    return await _controller._channel.invokeMethod("${widget.getName()}#removeData", <String, String>{'id': id});
+    if(MapboxMapParent.of(context).controller != null) {
+      return await MapboxMapParent.of(context).controller.channel.invokeMethod("heaven_map#removeData", <String, String>{'id': id});
+    }
+    return null;
   }
 
   @override
   void initState() {
     super.initState();
-    _initController();
   }
-  
-  void _initController() async {
-    _controller = await widget._controller.future;
-    for(var model in widget.models) {
-      _addModel(model);
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if(MapboxMapParent.of(context).controller != null) {  //如果没有引用 MapboxMapParent.of(context).controller ，第二次不会触发didChangeDependencies
+      if(widget.models != null && widget.models.isNotEmpty) {
+        updateOptions([], widget.models);
+      }
     }
   }
 
@@ -67,6 +68,12 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   List<HeavenDataModel> _findDeletedModels(List<HeavenDataModel> newModels, List<HeavenDataModel> oldModels) {
+    if(oldModels == null) {
+      oldModels = [];
+    }
+    if(newModels == null) {
+      newModels = [];
+    }
     var retDeletedModels = <HeavenDataModel>[];
     for(var oldModel in oldModels) {
       var haveSame = false;
@@ -84,6 +91,12 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   List<HeavenDataModel> _findNewAddModels(List<HeavenDataModel> newModels, List<HeavenDataModel> oldModels) {
+    if(oldModels == null) {
+      oldModels = [];
+    }
+    if(newModels == null) {
+      newModels = [];
+    }
     var retNewModels = <HeavenDataModel>[];
     for(var newModel in newModels) {
       var haveSame = false;

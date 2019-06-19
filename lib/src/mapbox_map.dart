@@ -24,12 +24,15 @@ class MapboxMap extends StatefulWidget {
     this.myLocationTrackingMode = MyLocationTrackingMode.Tracking,
     this.onMapClick,
     this.onCameraTrackingDismissed,
-    this.plugins = const <Widget>[]
+    this.onStyleLoaded,
+    this.children = const <Widget>[]
   }) : assert(initialCameraPosition != null);
 
-  final List<Widget> plugins;
+  final List<Widget> children;
 
   final MapCreatedCallback onMapCreated;
+
+  final OnStyleLoadedCallback onStyleLoaded;
 
   /// The initial position of the map's camera.
   final CameraPosition initialCameraPosition;
@@ -150,8 +153,8 @@ class _MapboxMapState extends State<MapboxMap> {
     return Stack(
       children: <Widget>[
         nativeView,
-        for(var plugin in widget.plugins)
-          plugin
+        for(var child in widget.children)
+          child
       ],
     );
   }
@@ -184,13 +187,9 @@ class _MapboxMapState extends State<MapboxMap> {
     final MapboxMapController controller = await MapboxMapController.init(
         id, widget.initialCameraPosition,
         onMapClick: widget.onMapClick,
-        onCameraTrackingDismissed: widget.onCameraTrackingDismissed);
+        onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
+        onStyleLoaded: widget.onStyleLoaded);
     _controller.complete(controller);
-    for(var plugin in widget.plugins) {
-      if(plugin is MapPluginMixin) {
-        (plugin as MapPluginMixin).onMapReady(controller);
-      }
-    }
     if (widget.onMapCreated != null) {
       widget.onMapCreated(controller);
     }

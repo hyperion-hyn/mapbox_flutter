@@ -27,5 +27,5 @@ part 'src/ui.dart';
 part 'src/global.dart';
 
 //plugins
-part 'src/plugins/map_plugin.dart';
+part 'src/plugins/mapbox_map_parent.dart';
 part 'src/plugins/heaven/heaven.dart';
