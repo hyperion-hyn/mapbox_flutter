@@ -20,6 +20,9 @@ rootProject.allprojects {
         maven(){
             url 'https://dl.bintray.com/hyn/maven'
         }
+        maven(){
+            url 'https://mapbox.bintray.com/mapbox'
+        }
     }
 }
 

@@ -72,7 +72,6 @@ class DriveRouteOverlay(
         this.paddingBottom = paddingBottom
     }
 
-
     private lateinit var routeLineGenjsonSource: GeoJsonSource
     private lateinit var routeLineFeatureCollection: FeatureCollection
 

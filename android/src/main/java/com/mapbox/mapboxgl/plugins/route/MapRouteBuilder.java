@@ -28,11 +28,8 @@ public class MapRouteBuilder implements MapRouteSink, IMapPluginBuilder {
         return this;
     }
 
-
-
     @Override
     public void addRouteOverlay(MapRouteDataModel routeDataModel) {
-
         options.setMapRouteDataModel(routeDataModel);
     }
 

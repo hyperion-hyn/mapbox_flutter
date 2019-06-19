@@ -17,8 +17,6 @@ data class MapRouteDataModel(
         val paddingRight: Int = 200,
         val paddingBottom: Int = 200
 ) {
-
-
     companion object {
         fun fromJson(json: String): MapRouteDataModel {
             val gson = GsonBuilder()

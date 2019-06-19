@@ -24,6 +24,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
                 routeDataModel.paddingLeft,
                 routeDataModel.paddingRight
         )
+        routeOverlay?.addToMap()
     }
 
     override fun removeRouteOverlay() {
@@ -36,7 +37,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
 
     private val methodChannel: MethodChannel? = null
 
-    override fun enableManager(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
+    override fun onMapboxStyleLoaded(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
         this.mapView = mapView
         this.mapboxMap = mapboxMap
         this.style = style
@@ -51,9 +52,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
         when (call.method) {
             "map_route#addRouteOverlay" -> {
                 val model = MapRouteDataModel.fromJson(call.argument<String>("model")!!)
-                if (model != null) {
-                    addRouteOverlay(model)
-                }
+                addRouteOverlay(model)
                 result.success(null)
                 return true;
             }
@@ -67,6 +66,4 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
     }
 
     override fun onDestroy() {}
-
-
 }
