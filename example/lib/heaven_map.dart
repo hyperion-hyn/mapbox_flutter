@@ -7,8 +7,7 @@ import 'dart:convert';
 import 'page.dart';
 
 class HeavenMap extends Page {
-  HeavenMap()
-      : super(const Icon(Icons.airline_seat_legroom_extra), 'Heaven Map');
+  HeavenMap() : super(const Icon(Icons.airline_seat_legroom_extra), 'Heaven Map');
 
   @override
   Widget build(BuildContext context) {
@@ -25,6 +24,9 @@ class _HeavenMapPage extends StatefulWidget {
 
 class _HeavenMapPageState extends State<_HeavenMapPage> {
   MapboxMapController controller;
+  CompassMargins compassMargins;
+  bool enableLogo;
+  bool enableAttribute;
 
   var layerId = "layer-heaven-1";
 
@@ -34,11 +36,9 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
     print("${point.x},${point.y}   ${latLng.latitude}/${latLng.longitude}");
 
     var range = 10;
-    Rect rect = Rect.fromLTRB(
-        point.x - range, point.y + range, point.x + range, point.y - range);
+    Rect rect = Rect.fromLTRB(point.x - range, point.y + range, point.x + range, point.y - range);
 
-    List features =
-        await controller.queryRenderedFeaturesInRect(rect, [layerId], null);
+    List features = await controller.queryRenderedFeaturesInRect(rect, [layerId], null);
     if (features.length > 0) {
       print(features[0]);
       if (showingMarker != null) {
@@ -64,7 +64,8 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
 
   Future<Symbol> _addSymbol(LatLng center) {
     return controller.addSymbol(
-      SymbolOptions(geometry: center, iconImage: "hyn-marker-image",iconAnchor: "bottom",iconOffset:Offset(0.0,3.0)),
+      SymbolOptions(
+          geometry: center, iconImage: "hyn-marker-image", iconAnchor: "bottom", iconOffset: Offset(0.0, 3.0)),
     );
   }
 
@@ -79,9 +80,9 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
         MapboxMapParent(
           controller: controller,
           child: MapboxMap(
-            enableAttribution: false,
-            enableLogo: false,
-            compassMargins: CompassMargins(left: 0, top: 80, right: 16, bottom: 0),
+            enableAttribution: enableAttribute,
+            enableLogo: enableLogo,
+            compassMargins: compassMargins,
             initialCameraPosition: const CameraPosition(
               target: LatLng(35.6803997, 139.7690174),
               zoom: 8.0,
@@ -97,6 +98,18 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
             children: <Widget>[HeavenMapScene()],
           ),
         ),
+        Positioned(
+          top: 80,
+          child: RaisedButton(
+              onPressed: () {
+                setState(() {
+                  compassMargins = CompassMargins(left: 0, top: 80, right: 16, bottom: 0);
+                  enableLogo = true;
+                  enableAttribute = true;
+                });
+              },
+              child: Text('update map options')),
+        )
       ],
     );
   }
@@ -113,8 +126,7 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
   List<HeavenDataModel> models = <HeavenDataModel>[
     HeavenDataModel(
         id: '1',
-        sourceUrl:
-            'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+        sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
         color: Colors.grey.value)
   ];
 
@@ -137,13 +149,12 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
               models = <HeavenDataModel>[
                 HeavenDataModel(
                     id: '2',
-                    sourceUrl:
-                        'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+                    sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
                     color: Colors.red.value)
               ];
             });
           },
-          child: Text('yy'),
+          child: Text('change heaven data'),
         )
       ],
     );
