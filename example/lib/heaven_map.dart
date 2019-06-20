@@ -64,7 +64,7 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
 
   Future<Symbol> _addSymbol(LatLng center) {
     return controller.addSymbol(
-      SymbolOptions(geometry: center, iconImage: "airport-15"),
+      SymbolOptions(geometry: center, iconImage: "hyn-marker-image",iconAnchor: "bottom",iconOffset:Offset(0.0,3.0)),
     );
   }
 
