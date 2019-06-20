@@ -17,7 +17,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
                 mapboxMap!!,
                 mapView!!,
                 routeDataModel!!.directionsResponse,
-                routeDataModel.startLatlng,
+                routeDataModel.startLatLng,
                 routeDataModel.endLatLng,
                 routeDataModel.paddingTop,
                 routeDataModel.paddingBottom,
@@ -51,8 +51,10 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result): Boolean {
         when (call.method) {
             "map_route#addRouteOverlay" -> {
-                val model = MapRouteDataModel.fromJson(call.argument<String>("model")!!)
-                addRouteOverlay(model)
+                val model = MapRouteDataModel.interpretOptions(call.argument<Map<*, *>>("model")!!)
+                if(model != null) {
+                    addRouteOverlay(model)
+                }
                 result.success(null)
                 return true;
             }

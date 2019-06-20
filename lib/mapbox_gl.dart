@@ -29,3 +29,4 @@ part 'src/global.dart';
 //plugins
 part 'src/plugins/mapbox_map_parent.dart';
 part 'src/plugins/heaven/heaven.dart';
+part 'src/plugins/route/route.dart';
