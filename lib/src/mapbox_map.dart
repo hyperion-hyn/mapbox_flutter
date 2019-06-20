@@ -25,10 +25,16 @@ class MapboxMap extends StatefulWidget {
     this.onMapClick,
     this.onCameraTrackingDismissed,
     this.onStyleLoaded,
-    this.children = const <Widget>[]
+    this.children = const <Widget>[],
+    this.compassMargins,
+    this.enableAttribution = true,
+    this.enableLogo = true,
   }) : assert(initialCameraPosition != null);
 
   final List<Widget> children;
+  final CompassMargins compassMargins;
+  final bool enableLogo;
+  final bool enableAttribution;
 
   final MapCreatedCallback onMapCreated;
 
@@ -213,6 +219,9 @@ class _MapboxMapOptions {
     this.zoomGesturesEnabled,
     this.myLocationEnabled,
     this.myLocationTrackingMode,
+    this.compassMargins,
+    this.enableAttribution,
+    this.enableLogo
   });
 
   static _MapboxMapOptions fromWidget(MapboxMap map) {
@@ -228,6 +237,9 @@ class _MapboxMapOptions {
       zoomGesturesEnabled: map.zoomGesturesEnabled,
       myLocationEnabled: map.myLocationEnabled,
       myLocationTrackingMode: map.myLocationTrackingMode,
+      compassMargins: map.compassMargins,
+      enableAttribution: map.enableAttribution,
+      enableLogo: map.enableLogo
     );
   }
 
@@ -253,6 +265,12 @@ class _MapboxMapOptions {
 
   final MyLocationTrackingMode myLocationTrackingMode;
 
+  final CompassMargins compassMargins;
+
+  final bool enableLogo;
+
+  final bool enableAttribution;
+
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> optionsMap = <String, dynamic>{};
 
@@ -273,6 +291,9 @@ class _MapboxMapOptions {
     addIfNonNull('trackCameraPosition', trackCameraPosition);
     addIfNonNull('myLocationEnabled', myLocationEnabled);
     addIfNonNull('myLocationTrackingMode', myLocationTrackingMode?.index);
+    addIfNonNull('compassMargins', compassMargins?._toJson());
+    addIfNonNull('enableLogo', enableLogo);
+    addIfNonNull('enableAttribution', enableAttribution);
     return optionsMap;
   }
 

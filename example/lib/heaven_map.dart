@@ -79,6 +79,9 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
         MapboxMapParent(
           controller: controller,
           child: MapboxMap(
+            enableAttribution: false,
+            enableLogo: false,
+            compassMargins: CompassMargins(left: 0, top: 80, right: 16, bottom: 0),
             initialCameraPosition: const CameraPosition(
               target: LatLng(35.6803997, 139.7690174),
               zoom: 8.0,

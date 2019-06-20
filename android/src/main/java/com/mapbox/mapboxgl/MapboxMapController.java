@@ -103,14 +103,20 @@ final class MapboxMapController
   private final Context context;
   private final String styleStringInitial;
   private LocationComponent locationComponent = null;
+  private List<Integer> compassMarginsInitial;
+  private boolean enableLogoInitial;
+  private boolean enableAttributionInitial;
 
   MapboxMapController(
-    int id,
-    Context context,
-    AtomicInteger activityState,
-    PluginRegistry.Registrar registrar,
-    MapboxMapOptions options,
-    String styleStringInitial) {
+          int id,
+          Context context,
+          AtomicInteger activityState,
+          PluginRegistry.Registrar registrar,
+          MapboxMapOptions options,
+          String styleStringInitial,
+          List<Integer> compassMargins,
+          boolean enableLogo,
+          boolean enableAttribution) {
     Mapbox.getInstance(context, getAccessToken(context));
     this.id = id;
     this.context = context;
@@ -126,6 +132,9 @@ final class MapboxMapController
       new MethodChannel(registrar.messenger(), "plugins.flutter.io/mapbox_maps_" + id);
     methodChannel.setMethodCallHandler(this);
     this.registrarActivityHashCode = registrar.activity().hashCode();
+    this.compassMarginsInitial = compassMargins;
+    this.enableLogoInitial = enableLogo;
+    this.enableAttributionInitial = enableAttribution;
   }
 
   private static String getAccessToken(@NonNull Context context) {
@@ -267,10 +276,17 @@ final class MapboxMapController
     mapboxMap.addOnCameraMoveListener(this);
     mapboxMap.addOnCameraIdleListener(this);
     setStyleString(styleStringInitial);
-
-    mapboxMap.getUiSettings().setLogoEnabled(false);
-    mapboxMap.getUiSettings().setAttributionEnabled(false);
     // updateMyLocationEnabled();
+
+    mapboxMap.getUiSettings().setAttributionEnabled(enableAttributionInitial);
+    mapboxMap.getUiSettings().setLogoEnabled(enableLogoInitial);
+    if(compassMarginsInitial != null) {
+      mapboxMap.getUiSettings().setCompassMargins(
+              compassMarginsInitial.get(0),
+              compassMarginsInitial.get(1),
+              compassMarginsInitial.get(2),
+              compassMarginsInitial.get(3));
+    }
   }
 
   @Override
@@ -720,6 +736,21 @@ final class MapboxMapController
     if (mapboxMap != null && locationComponent != null) {
       updateMyLocationTrackingMode();
     }
+  }
+
+  @Override
+  public void setEnableLogo(boolean enableLogo) {
+    mapboxMap.getUiSettings().setLogoEnabled(enableLogo);
+  }
+
+  @Override
+  public void setEnableAttribution(boolean enableAttribution) {
+    mapboxMap.getUiSettings().setAttributionEnabled(enableAttribution);
+  }
+
+  @Override
+  public void setCompassMargins(int left, int top, int right, int bottom) {
+    mapboxMap.getUiSettings().setCompassMargins(left, top, right, bottom);
   }
 
   private void updateMyLocationEnabled() {

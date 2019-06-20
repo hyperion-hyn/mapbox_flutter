@@ -14,6 +14,8 @@ import com.mapbox.mapboxsdk.maps.Style;
 
 import io.flutter.plugin.common.PluginRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -26,11 +28,15 @@ class MapboxMapBuilder implements MapboxMapOptionsSink {
   private boolean myLocationEnabled = false;
   private int myLocationTrackingMode = 0;
   private String styleString = Style.MAPBOX_STREETS;
+  private List<Integer> compassMargins;
+  private boolean enableLogo;
+  private boolean enableAttribution;
 
   MapboxMapController build(
     int id, Context context, AtomicInteger state, PluginRegistry.Registrar registrar) {
     final MapboxMapController controller =
-      new MapboxMapController(id, context, state, registrar, options, styleString);
+      new MapboxMapController(id, context, state, registrar, options, styleString,
+              compassMargins, enableLogo, enableAttribution);
     controller.init();
     controller.setMyLocationEnabled(myLocationEnabled);
     controller.setMyLocationTrackingMode(myLocationTrackingMode);
@@ -103,6 +109,25 @@ class MapboxMapBuilder implements MapboxMapOptionsSink {
   @Override
   public void setMyLocationTrackingMode(int myLocationTrackingMode) {
     this.myLocationTrackingMode = myLocationTrackingMode;
+  }
+
+  @Override
+  public void setEnableLogo(boolean enableLogo) {
+    this.enableLogo = enableLogo;
+  }
+
+  @Override
+  public void setEnableAttribution(boolean enableAttribution) {
+    this.enableAttribution = enableAttribution;
+  }
+
+  @Override
+  public void setCompassMargins(int left, int top, int right, int bottom) {
+    compassMargins = new ArrayList<>();
+    compassMargins.add(left);
+    compassMargins.add(top);
+    compassMargins.add(right);
+    compassMargins.add(bottom);
   }
 
 }

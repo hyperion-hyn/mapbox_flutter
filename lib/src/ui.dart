@@ -123,3 +123,14 @@ class MinMaxZoomPreference {
     return 'MinMaxZoomPreference(minZoom: $minZoom, maxZoom: $maxZoom)';
   }
 }
+
+class CompassMargins {
+  final int left;
+  final int top;
+  final int right;
+  final int bottom;
+
+  CompassMargins({this.left, this.top, this.right, this.bottom});
+
+  dynamic _toJson() => <dynamic>[left, top, right, bottom];
+}

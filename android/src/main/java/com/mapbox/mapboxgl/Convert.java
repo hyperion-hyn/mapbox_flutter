@@ -125,6 +125,11 @@ class Convert {
     return ((Number) o).intValue();
   }
 
+  private static Integer toIntWrapper(Object o) {
+    return (o == null) ? null : toInt(o);
+  }
+
+
   static Object toJson(CameraPosition position) {
     if (position == null) {
       return null;
@@ -249,6 +254,23 @@ class Convert {
     final Object myLocationTrackingMode = data.get("myLocationTrackingMode");
     if (myLocationTrackingMode != null) {
       sink.setMyLocationTrackingMode(toInt(myLocationTrackingMode));
+    }
+    final Object compassMargins = data.get("compassMargins");
+    if(compassMargins != null) {
+      List<?> compassMarginsList = toList(compassMargins);
+      sink.setCompassMargins(
+              toIntWrapper(compassMarginsList.get(0)),
+              toIntWrapper(compassMarginsList.get(1)),
+              toIntWrapper(compassMarginsList.get(2)),
+              toIntWrapper(compassMarginsList.get(3)));
+    }
+    final Object enableLogo = data.get("enableLogo");
+    if (enableLogo != null) {
+      sink.setEnableLogo(toBoolean(enableLogo));
+    }
+    final Object enableAttribution = data.get("enableAttribution");
+    if (enableAttribution != null) {
+      sink.setEnableAttribution(toBoolean(enableAttribution));
     }
   }
 
