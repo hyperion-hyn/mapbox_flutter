@@ -33,11 +33,6 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if(MapboxMapParent.of(context).controller != null) {  //如果没有引用 MapboxMapParent.of(context).controller ，第二次不会触发didChangeDependencies
