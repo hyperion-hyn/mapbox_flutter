@@ -1,10 +1,13 @@
 package com.mapbox.mapboxgl.plugins.heaven
 
+import android.graphics.BitmapFactory
 import android.util.Log
+import com.mapbox.mapboxgl.R
 import com.mapbox.mapboxgl.plugins.interf.IMapPlugin
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
+import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
@@ -20,6 +23,8 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
 
     private val methodChannel: MethodChannel? = null
 
+    val MARKER_IMAGE_ID = "hyn-marker-image"
+
     override fun onMapboxStyleLoaded(mapView: MapView, mapboxMap: MapboxMap, style: Style) {
         this.mapView = mapView
         this.mapboxMap = mapboxMap
@@ -31,6 +36,13 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
                 addData(model);
             }
         }
+        println(style.url)
+        style.addImage(
+                MARKER_IMAGE_ID,
+                BitmapFactory.decodeResource(
+                        mapView.context!!.resources, R.mipmap.marker_big
+                )
+        )
     }
 
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result): Boolean {
@@ -90,7 +102,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
                         circleStrokeOpacity(0.8f),
                         circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
                 ).withSourceLayer("road")
-        style?.addLayer(newLayer)
+        style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
     }
 
     override fun removeData(id: String) {
