@@ -267,6 +267,9 @@ final class MapboxMapController
     mapboxMap.addOnCameraMoveListener(this);
     mapboxMap.addOnCameraIdleListener(this);
     setStyleString(styleStringInitial);
+
+    mapboxMap.getUiSettings().setLogoEnabled(false);
+    mapboxMap.getUiSettings().setAttributionEnabled(false);
     // updateMyLocationEnabled();
   }
 
