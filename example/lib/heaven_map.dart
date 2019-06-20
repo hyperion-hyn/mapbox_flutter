@@ -32,8 +32,13 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
 
   void _mapClick(point, latLng) async {
     print("${point.x},${point.y}   ${latLng.latitude}/${latLng.longitude}");
+
+    var range = 10;
+    Rect rect = Rect.fromLTRB(
+        point.x - range, point.y + range, point.x + range, point.y - range);
+
     List features =
-        await controller.queryRenderedFeatures(point, [layerId], null);
+        await controller.queryRenderedFeaturesInRect(rect, [layerId], null);
     if (features.length > 0) {
       print(features[0]);
       if (showingMarker != null) {
