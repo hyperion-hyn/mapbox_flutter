@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'dart:convert';
 
 import 'page.dart';
 
 class HeavenMap extends Page {
-  HeavenMap() : super(const Icon(Icons.airline_seat_legroom_extra), 'Heaven Map');
+  HeavenMap()
+      : super(const Icon(Icons.airline_seat_legroom_extra), 'Heaven Map');
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +25,52 @@ class _HeavenMapPage extends StatefulWidget {
 
 class _HeavenMapPageState extends State<_HeavenMapPage> {
   MapboxMapController controller;
+
+  var layerId = "layer-heaven-1";
+
+  var showingMarker;
+
+  void _mapClick(point, latLng) async {
+    print("${point.x},${point.y}   ${latLng.latitude}/${latLng.longitude}");
+
+    var range = 10;
+    Rect rect = Rect.fromLTRB(
+        point.x - range, point.y + range, point.x + range, point.y - range);
+
+    List features =
+        await controller.queryRenderedFeaturesInRect(rect, [layerId], null);
+    if (features.length > 0) {
+      print(features[0]);
+      if (showingMarker != null) {
+        removeSymbol(showingMarker);
+        showingMarker = null;
+      }
+      var clickFeatureJsonString = features[0];
+      var clickFeatureJson = json.decode(clickFeatureJsonString);
+
+      var coordinates = clickFeatureJson["geometry"]["coordinates"];
+
+      var lon = coordinates[0];
+      var lat = coordinates[1];
+
+      showingMarker = await _addSymbol(new LatLng(lat, lon));
+
+      setState(() {});
+    } else {
+      removeSymbol(showingMarker);
+      showingMarker = null;
+    }
+  }
+
+  Future<Symbol> _addSymbol(LatLng center) {
+    return controller.addSymbol(
+      SymbolOptions(geometry: center, iconImage: "airport-15"),
+    );
+  }
+
+  void removeSymbol(Symbol symbol) {
+    controller.removeSymbol(symbol);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +90,7 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
                 controller = mapboxController;
               });
             },
+            onMapClick: _mapClick,
             children: <Widget>[HeavenMapScene()],
           ),
         ),
@@ -61,7 +110,8 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
   List<HeavenDataModel> models = <HeavenDataModel>[
     HeavenDataModel(
         id: '1',
-        sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+        sourceUrl:
+            'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
         color: Colors.grey.value)
   ];
 
@@ -84,7 +134,8 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
               models = <HeavenDataModel>[
                 HeavenDataModel(
                     id: '2',
-                    sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+                    sourceUrl:
+                        'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
                     color: Colors.red.value)
               ];
             });
