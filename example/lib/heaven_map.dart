@@ -73,6 +73,13 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
     controller.removeSymbol(symbol);
   }
 
+  var heavenDataModels = <HeavenDataModel>[
+    HeavenDataModel(
+        id: '1',
+        sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+        color: Colors.pink.value)
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -95,6 +102,7 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
               });
             },
             onMapClick: _mapClick,
+//            children: <Widget>[HeavenPlugin(models: heavenDataModels)],
             children: <Widget>[HeavenMapScene()],
           ),
         ),

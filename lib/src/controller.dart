@@ -43,11 +43,15 @@ class MapboxMapController extends ChangeNotifier {
     assert(id != null);
     final MethodChannel channel =
         MethodChannel('plugins.flutter.io/mapbox_maps_$id');
-    await channel.invokeMethod('map#waitForMap');
-    return MapboxMapController._(id, channel, initialCameraPosition,
+    bool styleReady = await channel.invokeMethod('map#waitForMap');
+    var controller = MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
         onCameraTrackingDismissed: onCameraTrackingDismissed,
         onStyleLoaded: onStyleLoaded);
+    if(styleReady && onStyleLoaded != null) {
+      onStyleLoaded(controller);
+    }
+    return controller;
   }
 
   final MethodChannel _channel;
@@ -490,6 +494,22 @@ class MapboxMapController extends ChangeNotifier {
         },
       );
       return reply['features'];
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
+
+  Future<void> enableLocation() async {
+    try {
+      await _channel.invokeMethod('location#enableLocation');
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
+
+  Future<void> disableLocation() async {
+    try {
+      await _channel.invokeMethod('location#disableLocation');
     } on PlatformException catch (e) {
       return new Future.error(e);
     }

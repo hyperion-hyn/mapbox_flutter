@@ -196,6 +196,7 @@ class _MapboxMapState extends State<MapboxMap> {
         onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
         onStyleLoaded: widget.onStyleLoaded);
     _controller.complete(controller);
+    print('heaven onPlatformViewCreated $id');
     if (widget.onMapCreated != null) {
       widget.onMapCreated(controller);
     }

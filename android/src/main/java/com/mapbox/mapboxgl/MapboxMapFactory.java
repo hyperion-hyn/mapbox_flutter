@@ -3,6 +3,7 @@ package com.mapbox.mapboxgl;
 import static io.flutter.plugin.common.PluginRegistry.Registrar;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.mapbox.mapboxgl.plugins.MapPluginsManager;
 import com.mapbox.mapboxgl.plugins.heaven.HeavenMapBuilder;
@@ -29,6 +30,7 @@ public class MapboxMapFactory extends PlatformViewFactory {
 
   @Override
   public PlatformView create(Context context, int id, Object args) {
+    Log.i("MapboxMapFactory", "create PlatformView " + id);
     Map<String, Object> params = (Map<String, Object>) args;
     final MapboxMapBuilder builder = new MapboxMapBuilder();
 

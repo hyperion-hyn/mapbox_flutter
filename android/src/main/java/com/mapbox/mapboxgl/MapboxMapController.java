@@ -269,7 +269,7 @@ final class MapboxMapController
   public void onMapReady(MapboxMap mapboxMap) {
     this.mapboxMap = mapboxMap;
     if (mapReadyResult != null) {
-      mapReadyResult.success(null);
+      mapReadyResult.success(false);
       mapReadyResult = null;
     }
     mapboxMap.addOnCameraMoveStartedListener(this);
@@ -325,9 +325,9 @@ final class MapboxMapController
         .build();
       locationComponent = mapboxMap.getLocationComponent();
       locationComponent.activateLocationComponent(context, style, locationComponentOptions);
-      locationComponent.setLocationComponentEnabled(true);
+      locationComponent.setLocationComponentEnabled(myLocationEnabled);
       locationComponent.setRenderMode(RenderMode.COMPASS);
-      updateMyLocationTrackingMode();
+//      updateMyLocationTrackingMode();
       setMyLocationTrackingMode(this.myLocationTrackingMode);
       locationComponent.addOnCameraTrackingChangedListener(this);
     } else {
@@ -366,7 +366,7 @@ final class MapboxMapController
     switch (call.method) {
       case "map#waitForMap":
         if (mapboxMap != null) {
-          result.success(null);
+          result.success(true);
           return;
         }
         mapReadyResult = result;
@@ -374,6 +374,17 @@ final class MapboxMapController
       case "map#update": {
         Convert.interpretMapboxMapOptions(call.argument("options"), this);
         result.success(Convert.toJson(getCameraPosition()));
+        break;
+      }
+      case "location#enableLocation": {
+        if(mapboxMap.getStyle() != null) {
+          this.myLocationEnabled = true;
+          enableLocationComponent(mapboxMap.getStyle());
+        }
+        break;
+      }
+      case "location#disableLocation": {
+        setMyLocationEnabled(false);
         break;
       }
       case "camera#move": {
@@ -718,9 +729,9 @@ final class MapboxMapController
 
   @Override
   public void setMyLocationEnabled(boolean myLocationEnabled) {
-    if (this.myLocationEnabled == myLocationEnabled) {
-      return;
-    }
+//    if (this.myLocationEnabled == myLocationEnabled) {
+//      return;
+//    }
     this.myLocationEnabled = myLocationEnabled;
     if (mapboxMap != null) {
       updateMyLocationEnabled();
@@ -729,9 +740,9 @@ final class MapboxMapController
 
   @Override
   public void setMyLocationTrackingMode(int myLocationTrackingMode) {
-    if (this.myLocationTrackingMode == myLocationTrackingMode) {
-      return;
-    }
+//    if (this.myLocationTrackingMode == myLocationTrackingMode) {
+//      return;
+//    }
     this.myLocationTrackingMode = myLocationTrackingMode;
     if (mapboxMap != null && locationComponent != null) {
       updateMyLocationTrackingMode();
@@ -754,8 +765,13 @@ final class MapboxMapController
   }
 
   private void updateMyLocationEnabled() {
-    //TODO: call location initialization if changed to true and not initialized yet.;
-    //Show/Hide use location as needed
+    if(locationComponent != null) {
+      locationComponent.setLocationComponentEnabled(this.myLocationEnabled);
+    } else {
+      if(mapboxMap.getStyle() != null) {
+        enableLocationComponent(mapboxMap.getStyle());
+      }
+    }
   }
 
   private void updateMyLocationTrackingMode() {
