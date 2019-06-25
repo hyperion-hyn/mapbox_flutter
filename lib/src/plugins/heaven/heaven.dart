@@ -15,9 +15,7 @@ class HeavenPlugin extends StatefulWidget {
 class _HeavenPluginState extends State<HeavenPlugin> {
   @override
   Widget build(BuildContext context) {
-    print('heaven build ${widget.models?.length}, ${MapboxMapParent.of(context).controller}');
-    return Text('heaven ${MapboxMapParent.of(context).controller?.toString()}');
-//    return SizedBox.shrink();
+    return SizedBox.shrink();
   }
 
   Future<dynamic> _addModel(HeavenDataModel model) async {
@@ -35,17 +33,9 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    print('heaven initState');
-  }
-
-  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('heaven didChangeDependencies 111 ${widget.models?.length} ${MapboxMapParent.of(context).controller}');
     if(MapboxMapParent.of(context).controller != null) {  //如果没有引用 MapboxMapParent.of(context).controller ，第二次不会触发didChangeDependencies
-      print('heaven didChangeDependencies 222 ${widget.models?.length}');
       if(widget.models != null && widget.models.isNotEmpty) {
         updateOptions([], widget.models);
       }
@@ -57,12 +47,10 @@ class _HeavenPluginState extends State<HeavenPlugin> {
     super.didUpdateWidget(oldWidget);
     var deletedModels = _findDeletedModels(widget.models, oldWidget.models);
     var newAddModels = _findNewAddModels(widget.models, oldWidget.models);
-    print('heaven didUpdateWidget ${deletedModels.length} ${newAddModels.length}');
     updateOptions(deletedModels, newAddModels);
   }
 
   void updateOptions(List<HeavenDataModel> deletedModels, List<HeavenDataModel> newAddModels) async {
-    print('heaven updateOptions ${deletedModels.length} ${newAddModels.length}');
     if(deletedModels.isNotEmpty) {
       for(var model in deletedModels)
         await _removeModel(model.id);

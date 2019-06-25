@@ -5,7 +5,7 @@ class MapboxMapParent extends InheritedWidget {
 
   final Widget child;
 
-  MapboxMapParent({Key key, @required this.child, this.controller});
+  MapboxMapParent({Key key, @required this.child, this.controller}): super(key: key, child: child);
 
   static MapboxMapParent of(BuildContext context) => context.inheritFromWidgetOfExactType(MapboxMapParent);
 
