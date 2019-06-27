@@ -101,7 +101,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
                         circleStrokeWidth(2f),
                         circleStrokeOpacity(0.8f),
                         circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
-                ).withSourceLayer("road")
+                ).withSourceLayer("heaven")
         style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
     }
 
