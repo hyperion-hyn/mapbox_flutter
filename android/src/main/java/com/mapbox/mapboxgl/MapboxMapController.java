@@ -201,8 +201,8 @@ final class MapboxMapController
     mapboxMap.moveCamera(cameraUpdate);
   }
 
-  private void animateCamera(CameraUpdate cameraUpdate) {
-    mapboxMap.animateCamera(cameraUpdate);
+  private void animateCamera(CameraUpdate cameraUpdate, MapboxMap.CancelableCallback callback) {
+    mapboxMap.animateCamera(cameraUpdate, callback);
   }
 
   private CameraPosition getCameraPosition() {
@@ -324,6 +324,9 @@ final class MapboxMapController
       LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(context)
         .trackingGesturesManagement(true)
         .build();
+      if(locationComponent != null) {
+        locationComponent.removeOnCameraTrackingChangedListener(this);
+      }
       locationComponent = mapboxMap.getLocationComponent();
       locationComponent.activateLocationComponent(context, style, locationComponentOptions);
       locationComponent.setLocationComponentEnabled(myLocationEnabled);
@@ -380,6 +383,7 @@ final class MapboxMapController
       case "location#enableLocation": {
         if(mapboxMap.getStyle() != null) {
           this.myLocationEnabled = true;
+          this.myLocationTrackingMode = CameraMode.TRACKING;
           enableLocationComponent(mapboxMap.getStyle());
         }
         break;
@@ -417,7 +421,16 @@ final class MapboxMapController
         final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
         if (cameraUpdate != null) {
           // camera transformation not handled yet
-          animateCamera(cameraUpdate);
+          animateCamera(cameraUpdate, new MapboxMap.CancelableCallback() {
+            @Override
+            public void onCancel() {
+            }
+
+            @Override
+            public void onFinish() {
+              methodChannel.invokeMethod("camera#animateFinish", Collections.singletonMap("map", id));
+            }
+          });
         }
         result.success(null);
         break;

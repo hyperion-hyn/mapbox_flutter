@@ -78,6 +78,14 @@ class Convert {
       case "newLatLng":
         return CameraUpdateFactory.newLatLng(toLatLng(data.get(1)));
       case "newLatLngBounds":
+        if(data.size() > 3) {
+          int left = toPixels(data.get(2), density);
+          int top = toPixels(data.get(3), density);
+          int right = toPixels(data.get(4), density);
+          int bottom = toPixels(data.get(4), density);
+          return CameraUpdateFactory.newLatLngBounds(
+                  toLatLngBounds(data.get(1)), left, top, right, bottom);
+        }
         return CameraUpdateFactory.newLatLngBounds(
           toLatLngBounds(data.get(1)), toPixels(data.get(2), density));
       case "newLatLngZoom":

@@ -120,6 +120,17 @@ class CameraUpdate {
     ]);
   }
 
+  static CameraUpdate newLatLngBounds2(LatLngBounds bounds, double left, double top, double right, double bottom) {
+    return CameraUpdate._(<dynamic>[
+      'newLatLngBounds',
+      bounds._toList(),
+      left,
+      top,
+      right,
+      bottom,
+    ]);
+  }
+
   /// Returns a camera update that moves the camera target to the specified
   /// geographical location and zoom level.
   static CameraUpdate newLatLngZoom(LatLng latLng, double zoom) {

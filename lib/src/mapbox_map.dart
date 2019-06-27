@@ -25,6 +25,7 @@ class MapboxMap extends StatefulWidget {
     this.onMapClick,
     this.onCameraTrackingDismissed,
     this.onStyleLoaded,
+    this.onAnimateCameraFinish,
     this.children = const <Widget>[],
     this.compassMargins,
     this.enableAttribution = true,
@@ -39,6 +40,8 @@ class MapboxMap extends StatefulWidget {
   final MapCreatedCallback onMapCreated;
 
   final OnStyleLoadedCallback onStyleLoaded;
+
+  final VoidCallback onAnimateCameraFinish;
 
   /// The initial position of the map's camera.
   final CameraPosition initialCameraPosition;
@@ -194,7 +197,9 @@ class _MapboxMapState extends State<MapboxMap> {
         id, widget.initialCameraPosition,
         onMapClick: widget.onMapClick,
         onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
-        onStyleLoaded: widget.onStyleLoaded);
+        onStyleLoaded: widget.onStyleLoaded,
+        onAnimateCameraFinish: widget.onAnimateCameraFinish,
+    );
     _controller.complete(controller);
     if (widget.onMapCreated != null) {
       widget.onMapCreated(controller);

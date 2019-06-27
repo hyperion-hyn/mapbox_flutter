@@ -26,7 +26,7 @@ typedef void OnCameraTrackingDismissedCallback();
 /// Circle tap events can be received by adding callbacks to [onCircleTapped].
 class MapboxMapController extends ChangeNotifier {
   MapboxMapController._(this._id, MethodChannel channel, CameraPosition initialCameraPosition,
-      {this.onMapClick, this.onCameraTrackingDismissed, this.onStyleLoaded})
+      {this.onMapClick, this.onCameraTrackingDismissed, this.onStyleLoaded, this.onAnimateCameraFinish})
       : assert(_id != null),
         assert(channel != null),
         _channel = channel {
@@ -37,7 +37,9 @@ class MapboxMapController extends ChangeNotifier {
   static Future<MapboxMapController> init(int id, CameraPosition initialCameraPosition,
       {OnMapClickCallback onMapClick,
         OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
-        OnStyleLoadedCallback onStyleLoaded}) async {
+        OnStyleLoadedCallback onStyleLoaded,
+        VoidCallback onAnimateCameraFinish,
+      }) async {
     assert(id != null);
     final MethodChannel channel =
     MethodChannel('plugins.flutter.io/mapbox_maps_$id');
@@ -45,7 +47,8 @@ class MapboxMapController extends ChangeNotifier {
     var controller = MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
         onCameraTrackingDismissed: onCameraTrackingDismissed,
-        onStyleLoaded: onStyleLoaded);
+        onStyleLoaded: onStyleLoaded,
+        onAnimateCameraFinish: onAnimateCameraFinish);
     if (styleReady && onStyleLoaded != null) {
       onStyleLoaded(controller);
     }
@@ -59,6 +62,8 @@ class MapboxMapController extends ChangeNotifier {
   final OnStyleLoadedCallback onStyleLoaded;
 
   final OnCameraTrackingDismissedCallback onCameraTrackingDismissed;
+
+  final VoidCallback onAnimateCameraFinish;
 
   /// Callbacks to receive tap events for symbols placed on this map.
   final ArgumentCallbacks<Symbol> onSymbolTapped = ArgumentCallbacks<Symbol>();
@@ -167,6 +172,11 @@ class MapboxMapController extends ChangeNotifier {
       case 'map#onStyleLoaded':
         if (onStyleLoaded != null) {
           onStyleLoaded(this);
+        }
+        break;
+      case 'camera#animateFinish':
+        if(onAnimateCameraFinish != null) {
+          onAnimateCameraFinish();
         }
         break;
       default:
