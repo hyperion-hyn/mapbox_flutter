@@ -25,8 +25,7 @@ typedef void OnCameraTrackingDismissedCallback();
 /// Line tap events can be received by adding callbacks to [onLineTapped].
 /// Circle tap events can be received by adding callbacks to [onCircleTapped].
 class MapboxMapController extends ChangeNotifier {
-  MapboxMapController._(
-      this._id, MethodChannel channel, CameraPosition initialCameraPosition,
+  MapboxMapController._(this._id, MethodChannel channel, CameraPosition initialCameraPosition,
       {this.onMapClick, this.onCameraTrackingDismissed, this.onStyleLoaded})
       : assert(_id != null),
         assert(channel != null),
@@ -35,20 +34,19 @@ class MapboxMapController extends ChangeNotifier {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  static Future<MapboxMapController> init(
-      int id, CameraPosition initialCameraPosition,
+  static Future<MapboxMapController> init(int id, CameraPosition initialCameraPosition,
       {OnMapClickCallback onMapClick,
-      OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
-      OnStyleLoadedCallback onStyleLoaded}) async {
+        OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
+        OnStyleLoadedCallback onStyleLoaded}) async {
     assert(id != null);
     final MethodChannel channel =
-        MethodChannel('plugins.flutter.io/mapbox_maps_$id');
+    MethodChannel('plugins.flutter.io/mapbox_maps_$id');
     bool styleReady = await channel.invokeMethod('map#waitForMap');
     var controller = MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
         onCameraTrackingDismissed: onCameraTrackingDismissed,
         onStyleLoaded: onStyleLoaded);
-    if(styleReady && onStyleLoaded != null) {
+    if (styleReady && onStyleLoaded != null) {
       onStyleLoaded(controller);
     }
     return controller;
@@ -70,7 +68,7 @@ class MapboxMapController extends ChangeNotifier {
 
   /// Callbacks to receive tap events for info windows on symbols
   final ArgumentCallbacks<Symbol> onInfoWindowTapped =
-      ArgumentCallbacks<Symbol>();
+  ArgumentCallbacks<Symbol>();
 
   /// The current set of symbols on this map.
   ///
@@ -105,9 +103,9 @@ class MapboxMapController extends ChangeNotifier {
   final int _id;
 
   Future<dynamic> _handleMethodCall(MethodCall call) async {
-    for(var entry in channelMethodCalls.entries) {
+    for (var entry in channelMethodCalls.entries) {
       var ret = entry.value(call);
-      if(ret != null && ret != false) {
+      if (ret != null && ret != false) {
         return ret;
       }
     }
@@ -167,7 +165,7 @@ class MapboxMapController extends ChangeNotifier {
         }
         break;
       case 'map#onStyleLoaded':
-        if(onStyleLoaded != null) {
+        if (onStyleLoaded != null) {
           onStyleLoaded(this);
         }
         break;
@@ -223,7 +221,7 @@ class MapboxMapController extends ChangeNotifier {
   /// been notified.
   Future<Symbol> addSymbol(SymbolOptions options) async {
     final SymbolOptions effectiveOptions =
-        SymbolOptions.defaultOptions.copyWith(options);
+    SymbolOptions.defaultOptions.copyWith(options);
     final String symbolId = await _channel.invokeMethod(
       'symbol#add',
       <String, dynamic>{
@@ -305,7 +303,7 @@ class MapboxMapController extends ChangeNotifier {
   /// been notified.
   Future<Line> addLine(LineOptions options) async {
     final LineOptions effectiveOptions =
-        LineOptions.defaultOptions.copyWith(options);
+    LineOptions.defaultOptions.copyWith(options);
     final String lineId = await _channel.invokeMethod(
       'line#add',
       <String, dynamic>{
@@ -461,8 +459,7 @@ class MapboxMapController extends ChangeNotifier {
     _circles.remove(id);
   }
 
-  Future<List> queryRenderedFeatures(
-      Point<double> point, List<String> layerIds, String filter) async {
+  Future<List> queryRenderedFeatures(Point<double> point, List<String> layerIds, String filter) async {
     try {
       final Map<Object, Object> reply = await _channel.invokeMethod(
         'map#queryRenderedFeatures',
@@ -479,8 +476,7 @@ class MapboxMapController extends ChangeNotifier {
     }
   }
 
-  Future<List> queryRenderedFeaturesInRect(
-      Rect rect, List<String> layerIds, String filter) async {
+  Future<List> queryRenderedFeaturesInRect(Rect rect, List<String> layerIds, String filter) async {
     try {
       final Map<Object, Object> reply = await _channel.invokeMethod(
         'map#queryRenderedFeatures',
@@ -515,8 +511,21 @@ class MapboxMapController extends ChangeNotifier {
     }
   }
 
+  Future<LatLng> lastKnownLocation() async {
+    try {
+      var location = await _channel.invokeMethod('location#lastKnownLocation');
+      if (location != null) {
+        return LatLng(location[0], location[1]);
+      }
+      return null;
+    } on PlatformException catch (e) {
+      return new Future.error(e);
+    }
+  }
+
   /// for plugins
   var channelMethodCalls = <String, HandleMethodCall>{};
+
   MethodChannel get channel => _channel;
 }
 

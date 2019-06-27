@@ -87,4 +87,9 @@ class RouteDataModel {
 
     return json;
   }
+
+  @override
+  String toString() {
+    return _toJson().toString();
+  }
 }

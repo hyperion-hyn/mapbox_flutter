@@ -12,6 +12,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import android.util.Log;
@@ -385,6 +386,22 @@ final class MapboxMapController
       }
       case "location#disableLocation": {
         setMyLocationEnabled(false);
+        break;
+      }
+      case "location#lastKnownLocation": {
+        if(locationComponent != null) {
+          Location location = locationComponent.getLastKnownLocation();
+          if(location != null) {
+            List<Double> latlng = new ArrayList<>();
+            latlng.add(location.getLatitude());
+            latlng.add(location.getLongitude());
+            result.success(latlng);
+          } else {
+            result.success(null);
+          }
+        } else {
+          result.success(null);
+        }
         break;
       }
       case "camera#move": {

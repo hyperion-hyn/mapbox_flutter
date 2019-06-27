@@ -119,7 +119,7 @@ class DriveRouteOverlay(
                 LatLng(
                     startWayPoint?.location()?.latitude()!!,
                     startWayPoint.location()?.longitude()!!
-                ), ROUTE_LINE_START_ICON, Property.ICON_ANCHOR_CENTER
+                ), ROUTE_LINE_START_ICON, Property.ICON_ANCHOR_BOTTOM
             )
         )
         startEndFeatureList.add(createStartEndFeature(end, ROUTE_LINE_END_ICON, Property.ICON_ANCHOR_BOTTOM))
@@ -150,9 +150,7 @@ class DriveRouteOverlay(
             PropertyFactory.lineWidth(
                 interpolate(
                     exponential(1.2f), zoom(),
-                    stop(5f, 0.4f),
-                    stop(6f, 0.6f),
-                    stop(7f, 1.5f),
+                    stop(5f, 10f),
                     stop(22.0f, 22f)
                 )
             ),
@@ -171,9 +169,7 @@ class DriveRouteOverlay(
             PropertyFactory.lineWidth(
                 interpolate(
                     exponential(1.2f), zoom(),
-                    stop(5f, 0.4f),
-                    stop(6f, 0.6f),
-                    stop(7f, 1.5f),
+                    stop(5f, 10f),
                     stop(22.0f, 22f)
                 )
             ),
@@ -199,9 +195,7 @@ class DriveRouteOverlay(
             PropertyFactory.symbolSpacing(
                 interpolate(
                     exponential(1f), zoom(),
-                    stop(5f, 15f),
-                    stop(6f, 20f),
-                    stop(7f, 25f),
+                    stop(5f, 30f),
                     stop(22.0f, 50f)
                 )
             ),
@@ -209,9 +203,7 @@ class DriveRouteOverlay(
             PropertyFactory.iconSize(
                 interpolate(
                     exponential(1.2f), zoom(),
-                    stop(5f, 0.1f),
-                    stop(6f, 0.1f),
-                    stop(7f, 0.15f),
+                    stop(7f, 0.4f),
                     stop(22.0f, 0.9f)
                 )
             )
@@ -227,7 +219,7 @@ class DriveRouteOverlay(
             mapboxMap.style!!.addImage(
                 ROUTE_LINE_START_ICON,
                 BitmapFactory.decodeResource(
-                    context.resources, R.mipmap.gray_point
+                    context.resources, R.mipmap.route_start
                 )
             )
         }
@@ -236,7 +228,7 @@ class DriveRouteOverlay(
             mapboxMap.style!!.addImage(
                 ROUTE_LINE_END_ICON,
                 BitmapFactory.decodeResource(
-                    context.resources, R.mipmap.red_marker
+                    context.resources, R.mipmap.route_end
                 )
             )
         }
