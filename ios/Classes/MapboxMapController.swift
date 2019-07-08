@@ -43,7 +43,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         switch(methodCall.method) {
         case "map#waitForMap":
             if isMapReady {
-                result(nil)
+                result(true)
             } else {
                 mapReadyResult = result
             }
@@ -93,7 +93,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             mapView.setCamera(camera, animated: false)
         }
         
-        mapReadyResult?(nil)
+        mapReadyResult?(false)
     }
     
     func mapView(_ mapView: MGLMapView, shouldChangeFrom oldCamera: MGLMapCamera, to newCamera: MGLMapCamera) -> Bool {

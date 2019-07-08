@@ -13,6 +13,7 @@ import 'place_symbol.dart';
 import 'place_circle.dart';
 import 'route_map.dart';
 import 'scrolling_map.dart';
+import 'ios_mapview.dart';
 
 final List<Page> _allPages = <Page>[
   MapUiPage(),
@@ -24,6 +25,7 @@ final List<Page> _allPages = <Page>[
   ScrollingMapPage(),
   HeavenMap(),
   RouteMap(),
+  IosMapPage(),
 ];
 
 class MapsDemo extends StatelessWidget {
