@@ -2,6 +2,7 @@ import 'page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:mapbox_gl/mapbox_gl.dart';
+import 'global.dart';
 
 class IosMapPage extends Page {
   IosMapPage() : super(const Icon(Icons.tablet_mac), 'IOS Map');
@@ -22,6 +23,20 @@ class IosMapScene extends StatefulWidget {
 class _IosMapSceneState extends State<IosMapScene> {
   MapboxMapController controller;
 
+  CompassMargins compassMargins;
+  bool enableLogo;
+  bool enableAttribute;
+
+  String mapStyle = 'https://static.hyn.space/maptiles/see-it-all-zh.json';
+  var myLocationTrackingMode = MyLocationTrackingMode.None;
+
+  void _onStyleLoaded(c) {
+    logger.i('on style loaded');
+    setState(() {
+      controller = c;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -33,14 +48,47 @@ class _IosMapSceneState extends State<IosMapScene> {
               target: LatLng(35.6803997, 139.7690174),
               zoom: 8.0,
             ),
-            onStyleLoaded: (c) {
+            onStyleLoaded: _onStyleLoaded,
+            onMapCreated: (c) {
+              print('on map loaded');
+            },
+            styleString: mapStyle,
+            myLocationEnabled: true,
+            myLocationTrackingMode: myLocationTrackingMode,
+            enableAttribution: enableAttribute,
+            enableLogo: enableLogo,
+            compassMargins: compassMargins,
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: RaisedButton(
+            onPressed: () {
               setState(() {
-                
-                controller = c;
+//                mapStyle = 'https://static.hyn.space/maptiles/see-it-all-en.json';
+                compassMargins = CompassMargins(left: 0, top: 80, right: 16, bottom: 0);
+                enableLogo = false;
+                enableAttribute = false;
               });
             },
+            child: Text('chagne style'),
           ),
-        )
+        ),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+            child: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  myLocationTrackingMode = MyLocationTrackingMode.Tracking;
+                });
+              },
+              mini: true,
+              child: Icon(Icons.location_on),
+            ),
+          ),
+        ),
       ],
     );
   }

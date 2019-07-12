@@ -179,6 +179,9 @@ class MapboxMapController extends ChangeNotifier {
           onAnimateCameraFinish();
         }
         break;
+      case 'print':
+        print('ios ${call.arguments}');
+        break;
       default:
         throw MissingPluginException();
     }
