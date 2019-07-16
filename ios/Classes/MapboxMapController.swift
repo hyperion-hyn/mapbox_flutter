@@ -44,6 +44,27 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 initialTilt = camera.pitch
             }
         }
+        
+        // Add a single tap gesture recognizer. This gesture requires the built-in MGLMapView tap gestures (such as those for zoom and annotation selection) to fail.
+        let singleTap = UITapGestureRecognizer(target: self, action: #selector(handleMapTap(sender:)))
+        for recognizer in mapView.gestureRecognizers! where recognizer is UITapGestureRecognizer {
+            singleTap.require(toFail: recognizer)
+        }
+        mapView.addGestureRecognizer(singleTap)
+    }
+    
+    @objc @IBAction func handleMapTap(sender: UITapGestureRecognizer) {
+        // Get the CGPoint where the user tapped.
+        let point = sender.location(in: mapView)
+        var arguments: [String: Any] = [:]
+        arguments["x"] = point.x
+        arguments["y"] = point.y
+        
+        let touchCoordinate = mapView.convert(point, toCoordinateFrom: sender.view!)
+        arguments["lng"] = touchCoordinate.longitude
+        arguments["lat"] = touchCoordinate.latitude
+        NSLog("mapClick \(arguments)")
+        channel.invokeMethod("map#onMapClick", arguments: arguments)
     }
 
     func onMethodCall(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -87,20 +108,22 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 mapView.setCamera(camera, animated: true)
             }
         case "map#queryRenderedFeatures":
+            channel.invokeMethod("print", arguments: "map#queryRenderedFeatures \(String(describing: methodCall.arguments))")
             var reply: [String: [String]] = [:]
         
             var features: [MGLFeature] = []
             if let arguments = methodCall.arguments as? [String: Any] {
-                if let layerIds = arguments["layerIds"] as? Set<String> {
+                if let layerIds = arguments["layerIds"] as? [String] {
+                    let layers = Set(layerIds)
                     if let x = arguments["x"] as? Double, let y = arguments["y"] as? Double {
                         let point = CGPoint(x: x, y: y)
-                        features = mapView.visibleFeatures(at: point, styleLayerIdentifiers: layerIds)
+                        features = mapView.visibleFeatures(at: point, styleLayerIdentifiers: layers)
                     } else if let left = arguments["left"] as? Double,
                         let top = arguments["top"] as? Double,
                         let right = arguments["right"] as? Double,
                         let bottom = arguments["bottom"] as? Double {
                         let rect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
-                        features = mapView.visibleFeatures(in: rect, styleLayerIdentifiers: layerIds)
+                        features = mapView.visibleFeatures(in: rect, styleLayerIdentifiers: layers)
                     }
                 }
             }
@@ -118,9 +141,35 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             reply["features"] = featuresJson
             result(reply)
         case "symbol#add":
+            channel.invokeMethod("print", arguments: "symbol#add \(String(describing: methodCall.arguments))")
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let options = arguments["options"] as? [String: Any] else { return }
+            let symbolId = addSymbol(data: options)
+            result(symbolId)
+        case "symbol#remove":
+            channel.invokeMethod("print", arguments: "symbol#remove \(String(describing: methodCall.arguments))")
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let symbolId = arguments["symbol"] as? String else { return }
+            removeSymbol(symbolId: symbolId)
+            result(nil)
+        /*plugins*/
+        case "heaven_map#addData":
+            channel.invokeMethod("print", arguments: "heaven_map#addData \(String(describing: methodCall.arguments))")
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let model = arguments["model"] as? [String: Any] else { return }
+            addHeavenMapSourceAndLayer(data: model)
+            result(nil)
+        case "heaven_map#removeData":
+            channel.invokeMethod("print", arguments: "heaven_map#removeData \(String(describing: methodCall.arguments))")
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            if let id = arguments["id"] as? String {
+                removeHeavenMap(id: id)
+            }
+            result(nil)
+        case "map_route#addRouteOverlay":
             //TODO
             result(FlutterMethodNotImplemented)
-        case "symbol#remove":
+        case "map_route#removeRouteOverlay":
             //TODO
             result(FlutterMethodNotImplemented)
         default:
@@ -135,6 +184,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private func getCamera() -> MGLMapCamera? {
         return trackCameraPosition ? mapView.camera : nil
     }
+
 
     /*
      *  MGLMapViewDelegate
@@ -249,4 +299,125 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         channel.invokeMethod("print", arguments: "set compass margins \(left) \(top) \(right) \(bottom)")
         mapView.compassViewMargins = CGPoint(x: right, y: top)
     }
+    
+    func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
+        if let symbol = annotation as? Symbol,
+            let iconImage = symbol.iconImage {
+            var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage)
+            if annotationImage == nil {
+                var image = UIImage(named: "marker_big")!
+                if let resizedImage = image.resize(maxWidthHeight: 50) {
+                    image = resizedImage
+                }
+            
+                if let iconOffset = symbol.iconOffset {
+                    let bottom: CGFloat = CGFloat(iconOffset[1])
+                    let right: CGFloat = CGFloat(iconOffset[0])
+                    if let adjustImage = image.adjustImage(offsetX: right, offsetY: bottom) {
+                        image = adjustImage
+                    }
+                } else {
+                    if let adjustImage = image.adjustImage(offsetX: 0, offsetY: 0) {
+                        image = adjustImage
+                    }
+                }
+                
+                image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
+                
+                annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: iconImage)
+            }
+            return annotationImage
+        }
+        return nil
+    }
+    
+    // MARK: symbol
+    private func addSymbol(data: [String: Any]) -> String {
+        if let geometry = data["geometry"] as? [Double] {
+            let symbol = Symbol()
+            symbol.coordinate = CLLocationCoordinate2D.fromArray(geometry)
+            if let iconImage = data["iconImage"] as? String {
+                symbol.iconImage = iconImage
+            }
+            if let iconOffset = data["iconOffset"] as? [Double] {
+                symbol.iconOffset = iconOffset
+            }
+            mapView.addAnnotation(symbol)
+            return symbol.id
+        }
+        return ""
+    }
+    
+    private func removeSymbol(symbolId: String) {
+        if mapView.annotations?.count != nil, let existingAnnotations = mapView.annotations {
+            for annotation in existingAnnotations {
+                if let symbol = annotation as? Symbol {
+                    if symbol.id == symbolId {
+                        mapView.removeAnnotation(symbol)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: heaven map
+    private func addHeavenMapSourceAndLayer(data: [String: Any]) {
+        guard let id = data["id"] as? String,
+            let sourceUrl = data["sourceUrl"] as? String,
+            let color = data["color"] as? Int
+            else { return }
+
+        let sourcId = getHeavenMapSourceId(sourceId: id)
+        guard mapView.style?.source(withIdentifier: sourcId) == nil else { return }
+        let source = MGLVectorTileSource(identifier: sourcId, tileURLTemplates: [sourceUrl])
+        mapView.style?.addSource(source)
+        
+        let layerId = getHeavenMapLayerId(id: id)
+        guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
+        let circlesLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
+        circlesLayer.sourceLayerIdentifier = "heaven"
+        circlesLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
+        circlesLayer.circleOpacity = NSExpression(forConstantValue: 0.8)
+        circlesLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+        circlesLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
+        circlesLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
+        //circlesLayer.predicate = NSPredicate(format: "cluster == YES")
+    
+        //let shapeID = "com.mapbox.annotations.shape."
+        let pointLayerID = "com.mapbox.annotations.points"
+        if let annotationPointLayer = mapView.style?.layer(withIdentifier: pointLayerID) {
+            mapView.style?.insertLayer(circlesLayer, below: annotationPointLayer)
+        } else {
+             mapView.style?.addLayer(circlesLayer)
+        }
+    }
+    
+    private func removeHeavenMap(id: String) {
+        let layerId = getHeavenMapLayerId(id: id)
+        if let layer = mapView.style?.layer(withIdentifier: layerId) {
+         mapView.style?.removeLayer(layer)
+        }
+        let sourcId = getHeavenMapSourceId(sourceId: id)
+        if let source = mapView.style?.source(withIdentifier: sourcId) {
+            mapView.style?.removeSource(source)
+        }
+    }
+    
+    private func getHeavenMapLayerId(id: String) -> String {
+        return "layer-heaven-\(id)"
+    }
+    
+    private func getHeavenMapSourceId(sourceId: String) -> String {
+        return "source-heaven-\(sourceId)"
+    }
+    
+    // MARK: router
+    //TODO
+}
+
+class Symbol: MGLPointAnnotation {
+    var id: String = "symbol_\(hash())"
+    var iconImage: String?
+    var iconOffset: [Double]?
+    var iconAnchor: [Int]?
 }
