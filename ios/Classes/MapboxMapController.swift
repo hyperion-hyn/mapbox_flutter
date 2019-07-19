@@ -1,40 +1,51 @@
 import Flutter
 import UIKit
 import Mapbox
+import MapboxDirections
+import MapboxCoreNavigation
+
+
+typealias JSONDictionary = [String: Any]
+
+extension String {
+    var nonEmptyString: String? {
+        return !isEmpty ? self : nil
+    }
+}
 
 class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, MapboxMapOptionsSink {
-
+    
     private var mapView: MGLMapView
     private var isMapReady = false
     private var mapReadyResult: FlutterResult?
-
+    
     private var initialTilt: CGFloat?
     private var cameraTargetBounds: MGLCoordinateBounds?
     private var trackCameraPosition = false
     private var myLocationEnabled = false
-
+    
     private var channel: FlutterMethodChannel
-
+    
     private var vId: Int64
     private var currentStyle: String?
-
+    
     func view() -> UIView {
         return mapView
     }
-
+    
     init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, binaryMessenger messenger: FlutterBinaryMessenger) {
         mapView = MGLMapView(frame: frame)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         vId = viewId
         channel = FlutterMethodChannel(name: "plugins.flutter.io/mapbox_maps_\(viewId)", binaryMessenger: messenger)
         channel.invokeMethod("print", arguments: "mapbox controller init \(viewId)")
-
+        
         super.init()
-
+        
         channel.setMethodCallHandler(onMethodCall)
-
+        
         mapView.delegate = self
-
+        
         if let args = args as? [String: Any] {
             Convert.interpretMapboxMapOptions(options: args["options"], delegate: self)
             if let initialCameraPosition = args["initialCameraPosition"] as? [String: Any],
@@ -66,7 +77,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         NSLog("mapClick \(arguments)")
         channel.invokeMethod("map#onMapClick", arguments: arguments)
     }
-
+    
     func onMethodCall(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
         switch(methodCall.method) {
         case "map#waitForMap":
@@ -110,7 +121,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         case "map#queryRenderedFeatures":
             channel.invokeMethod("print", arguments: "map#queryRenderedFeatures \(String(describing: methodCall.arguments))")
             var reply: [String: [String]] = [:]
-        
+            
             var features: [MGLFeature] = []
             if let arguments = methodCall.arguments as? [String: Any] {
                 if let layerIds = arguments["layerIds"] as? [String] {
@@ -152,7 +163,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let symbolId = arguments["symbol"] as? String else { return }
             removeSymbol(symbolId: symbolId)
             result(nil)
-        /*plugins*/
+            /*plugins*/
         case "heaven_map#addData":
             channel.invokeMethod("print", arguments: "heaven_map#addData \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -167,25 +178,32 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             }
             result(nil)
         case "map_route#addRouteOverlay":
+            channel.invokeMethod("print", arguments: "heaven_map#addRouteOverlay \(String(describing: methodCall.arguments))")
+            guard let arguments = methodCall.arguments as? [String: Any] else { return }
+            guard let model = arguments["model"] as? [String: Any] else { return }
+            addHeavenMapRouteOverlay(data: model,channel: channel)
             //TODO
-            result(FlutterMethodNotImplemented)
+            result(nil)
         case "map_route#removeRouteOverlay":
+            channel.invokeMethod("print", arguments: "heaven_map#removeRouteOverlay \(String(describing: methodCall.arguments))")
+            removeHeavenMapRouteOverlay()
+            result(nil)
             //TODO
             result(FlutterMethodNotImplemented)
         default:
             result(FlutterMethodNotImplemented)
         }
     }
-
+    
     private func updateMyLocationEnabled() {
         //TODO
     }
-
+    
     private func getCamera() -> MGLMapCamera? {
         return trackCameraPosition ? mapView.camera : nil
     }
-
-
+    
+    
     /*
      *  MGLMapViewDelegate
      */
@@ -196,44 +214,44 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
         currentStyle = style.name
     }
-
+    
     func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
         channel.invokeMethod("print", arguments: "map finish loading")
         isMapReady = true
         updateMyLocationEnabled()
-
+        
         if let initialTilt = initialTilt {
             let camera = mapView.camera
             camera.pitch = initialTilt
             mapView.setCamera(camera, animated: false)
         }
-
+        
         mapReadyResult?(currentStyle != nil)
         mapReadyResult = nil
     }
-
+    
     func mapView(_ mapView: MGLMapView, shouldChangeFrom oldCamera: MGLMapCamera, to newCamera: MGLMapCamera) -> Bool {
         guard let bbox = cameraTargetBounds else { return true }
         // Get the current camera to restore it after.
         let currentCamera = mapView.camera
-
+        
         // From the new camera obtain the center to test if it’s inside the boundaries.
         let newCameraCenter = newCamera.centerCoordinate
-
+        
         // Set the map’s visible bounds to newCamera.
         mapView.camera = newCamera
         let newVisibleCoordinates = mapView.visibleCoordinateBounds
-
+        
         // Revert the camera.
         mapView.camera = currentCamera
-
+        
         // Test if the newCameraCenter and newVisibleCoordinates are inside bbox.
         let inside = MGLCoordinateInCoordinateBounds(newCameraCenter, bbox)
         let intersects = MGLCoordinateInCoordinateBounds(newVisibleCoordinates.ne, bbox) && MGLCoordinateInCoordinateBounds(newVisibleCoordinates.sw, bbox)
-
+        
         return inside && intersects
     }
-
+    
     /*
      *  MapboxMapOptionsSink
      */
@@ -309,7 +327,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 if let resizedImage = image.resize(maxWidthHeight: 50) {
                     image = resizedImage
                 }
-            
+                
                 if let iconOffset = symbol.iconOffset {
                     let bottom: CGFloat = CGFloat(iconOffset[1])
                     let right: CGFloat = CGFloat(iconOffset[0])
@@ -366,7 +384,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             let sourceUrl = data["sourceUrl"] as? String,
             let color = data["color"] as? Int
             else { return }
-
+        
         let sourcId = getHeavenMapSourceId(sourceId: id)
         guard mapView.style?.source(withIdentifier: sourcId) == nil else { return }
         let source = MGLVectorTileSource(identifier: sourcId, tileURLTemplates: [sourceUrl])
@@ -382,20 +400,22 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         circlesLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
         circlesLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
         //circlesLayer.predicate = NSPredicate(format: "cluster == YES")
-    
+        
         //let shapeID = "com.mapbox.annotations.shape."
         let pointLayerID = "com.mapbox.annotations.points"
         if let annotationPointLayer = mapView.style?.layer(withIdentifier: pointLayerID) {
             mapView.style?.insertLayer(circlesLayer, below: annotationPointLayer)
         } else {
-             mapView.style?.addLayer(circlesLayer)
+            mapView.style?.addLayer(circlesLayer)
         }
     }
+    
+    
     
     private func removeHeavenMap(id: String) {
         let layerId = getHeavenMapLayerId(id: id)
         if let layer = mapView.style?.layer(withIdentifier: layerId) {
-         mapView.style?.removeLayer(layer)
+            mapView.style?.removeLayer(layer)
         }
         let sourcId = getHeavenMapSourceId(sourceId: id)
         if let source = mapView.style?.source(withIdentifier: sourcId) {
@@ -413,6 +433,22 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     
     // MARK: router
     //TODO
+    
+    
+    
+    
+    private func addHeavenMapRouteOverlay(data: [String: Any],channel: FlutterMethodChannel) {
+        
+        MapRouteDataModel.addToMap(data: data, mapview: mapView,channel:channel);
+    }
+    
+    private func removeHeavenMapRouteOverlay(){
+        
+        MapRouteDataModel.removeFromMap( mapview: mapView,channel:channel);
+        
+    }
+    
+    
 }
 
 class Symbol: MGLPointAnnotation {
@@ -420,4 +456,330 @@ class Symbol: MGLPointAnnotation {
     var iconImage: String?
     var iconOffset: [Double]?
     var iconAnchor: [Int]?
+}
+
+
+class MapRouteDataModel{
+    // MARK: heaven map
+    //Line
+    static let ROUTE_LINE_SOURCE_NAME = "hyn-route-line-source"
+    static let ROUTE_LINE_LAYER_NAME: String = "hyn-route-line-layer"
+    //Arrow on line
+    static let ROUTE_LINE_ARROW_LAYER_NAME: String = "hyn-route-line-arrow-layer"
+    static let ROUTE_LINE_ARROW_ICON: String = "hyn-route-line-arrow-icon"
+    //Supplement
+    static let ROUTE_SUPPLEMENT_LINE_SOURCE_NAME = "hyn-route-supplement-line-source"
+    static let ROUTE_SUPPLEMENT_LINE_LAYER_NAME = "hyn-route-supplement-line-layer"
+    //Start & End Marker
+    static let ROUTE_START_END_LAYER_NAME = "hyn-route-start-end-layer"
+    static let ROUTE_START_END_SOURCE_NAME = "hyn-route-start-end-source"
+    static let ROUTE_LINE_START_ICON: String = "hyn-route-line-start-icon"
+    static let ROUTE_LINE_END_ICON: String = "hyn-route-line-end-icon"
+    static let ROUTE_LINE_ICON_PROPERTY: String = "hyn-route-line-icon-property"
+    static let ROUTE_LINE_ICON_ANCHOR_PROPERTY: String = "hyn-route-line-icon-anchor-property"
+    
+    
+    
+    public static let MBRouteLineWidthByZoomLevel: [Int: NSExpression] = [
+        10: NSExpression(forConstantValue: 8),
+        13: NSExpression(forConstantValue: 9),
+        16: NSExpression(forConstantValue: 11),
+        19: NSExpression(forConstantValue: 22),
+        22: NSExpression(forConstantValue: 28)
+    ]
+    
+    
+    public static let MBRouteArrowSymbolSpaceByZoomLevel: [Int: NSExpression] = [
+        5: NSExpression(forConstantValue: 1),
+        22: NSExpression(forConstantValue: 1)
+        
+    ]
+    
+    
+    public static let MBRouteArrowIconSizeByZoomLevel: [Int: NSExpression] = [
+        7: NSExpression(forConstantValue: 0.1),
+        22: NSExpression(forConstantValue: 0.18)
+        
+    ]
+    
+    
+    
+    public static func addToMap(data:[String: Any],mapview:MGLMapView,channel: FlutterMethodChannel) {
+        
+        channel.invokeMethod("print", arguments: "enter addToMap fun")
+        guard let startLatLngDouble = data["startLatLng"] as? [Double] else {
+            channel.invokeMethod("print", arguments: "startLatlngDouble is nil")
+            return
+        }
+        let startPoint = CLLocationCoordinate2D.fromArray(startLatLngDouble)
+        
+        guard let endLatLngDouble = data["endLatLng"] as? [Double] else{
+            return
+        }
+        let endPoint = CLLocationCoordinate2D.fromArray(endLatLngDouble)
+        
+        let startWaypoint = Waypoint(coordinate: startPoint)
+        let endWaypoint = Waypoint(coordinate: endPoint)
+        
+        let routeOptions = NavigationRouteOptions(waypoints: [startWaypoint, endWaypoint])
+        
+        
+        
+        let responseString = data["directionsResponse"] as! String;
+        
+        let responseData = responseString.data(using: .utf8)
+        
+        var response: JSONDictionary = [:]
+        do{
+            response = try JSONSerialization.jsonObject(with: responseData!, options: []) as! JSONDictionary
+        }catch{
+            channel.invokeMethod("print", arguments: "convert json to map error")
+        }
+        
+        
+        
+        var namedWaypoints: [Waypoint]?
+        if let jsonWaypoints = (response["waypoints"] as? [JSONDictionary]) {
+            namedWaypoints = jsonWaypoints.map { (api) -> Waypoint in
+                let location = api["location"] as! [Double]
+                let coordinate = CLLocationCoordinate2D(latitude: location[1], longitude: location[0])
+                let possibleAPIName = api["name"] as? String
+                let apiName = possibleAPIName?.nonEmptyString;
+                let waypoint = Waypoint(coordinate: coordinate)
+                waypoint.name = waypoint.name ?? apiName
+                return waypoint
+            }
+        }
+        
+        guard let waypoints = namedWaypoints else{
+            return
+        }
+        waypoints.first?.separatesLegs = true
+        waypoints.last?.separatesLegs = true
+        let legSeparators = waypoints.filter { $0.separatesLegs }
+        
+        let routes = (response["routes"] as? [JSONDictionary])?.map {
+            Route(json: $0, waypoints: legSeparators, options: routeOptions)
+        }
+        //        return (waypoints, routes)
+        
+        
+        
+        //添加连接线
+        
+        
+        
+        var supplementLineFeatures: [MGLPolylineFeature] = []
+        
+        
+        let startSupplementCoordinates = [startPoint,waypoints[0].coordinate]
+        
+        let startSupplementPolyline = MGLPolylineFeature(coordinates: startSupplementCoordinates, count: UInt(startSupplementCoordinates.count))
+        
+        supplementLineFeatures.append(startSupplementPolyline)
+        
+        
+        let endSupplementCoordinates = [waypoints.last!.coordinate,endPoint]
+        
+        let endSupplementPolyline = MGLPolylineFeature(coordinates: endSupplementCoordinates, count: UInt(endSupplementCoordinates.count))
+        
+        supplementLineFeatures.append(endSupplementPolyline)
+        
+        let supplementCollectionFeature =  MGLShapeCollectionFeature(shapes: supplementLineFeatures)
+        
+        let supplementLineSource = MGLShapeSource(identifier: ROUTE_SUPPLEMENT_LINE_SOURCE_NAME, shape: supplementCollectionFeature, options: [.lineDistanceMetrics: false])
+        
+        
+        mapview.style?.addSource(supplementLineSource)
+        
+        
+        let supplementLine = MGLLineStyleLayer(identifier: ROUTE_SUPPLEMENT_LINE_LAYER_NAME, source: supplementLineSource)
+        supplementLine.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
+        supplementLine.lineColor = NSExpression(forConstantValue: #colorLiteral(red: 0.5882352941, green: 0.5882352941, blue: 0.5882352941, alpha: 1))
+        supplementLine.lineDashPattern = NSExpression(forConstantValue: [0.7,0.7])
+        
+        
+        mapview.style?.addLayer(supplementLine)
+        
+        
+        //添加导航线
+        
+        
+        var altRoutes: [MGLPolylineFeature] = []
+        
+        
+        let route = routes![0]
+        
+        let polyline = MGLPolylineFeature(coordinates: route.coordinates!, count: UInt(route.coordinates!.count))
+        altRoutes.append(polyline)
+        
+        let lineShapeCollectionFeature =  MGLShapeCollectionFeature(shapes: altRoutes)
+        
+        let lineSource = MGLShapeSource(identifier: ROUTE_LINE_SOURCE_NAME, shape: lineShapeCollectionFeature, options: [.lineDistanceMetrics: false])
+        
+        
+        mapview.style?.addSource(lineSource)
+        
+        channel.invokeMethod("print", arguments: "addSource")
+        
+        let line = MGLLineStyleLayer(identifier: ROUTE_LINE_LAYER_NAME, source: lineSource)
+        line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
+        line.lineColor = NSExpression(forConstantValue: #colorLiteral(red: 0.2705882353, green: 0.5882352941, blue: 0.9960784314, alpha: 1))
+        line.lineJoin = NSExpression(forConstantValue: "round")
+        line.lineCap = NSExpression(forConstantValue: "round")
+        
+        mapview.style?.addLayer(line)
+        channel.invokeMethod("print", arguments: "addLayer")
+        let currentCamera = mapview.camera
+        currentCamera.pitch = 0
+        currentCamera.heading = 0
+        
+        
+        let newCamera = mapview.camera(currentCamera, fitting: polyline, edgePadding: UIEdgeInsets.init(top: 100 , left: 50, bottom: 100, right: 50))
+        
+        mapview.setCamera(newCamera, withDuration: 1, animationTimingFunction: nil)
+        
+        
+        
+        
+        //add marker
+        
+        
+        var features = [MGLPointFeature]()
+        
+        //    for waypoint in waypoints{
+        //        let feature = MGLPointFeature()
+        //        feature.coordinate = waypoint.coordinate
+        //        features.append(feature)
+        //    }
+        
+        let startFeature = MGLPointFeature();
+        startFeature.coordinate = startPoint;
+        startFeature.attributes = [
+            ROUTE_LINE_ICON_PROPERTY:ROUTE_LINE_START_ICON
+        ]
+        
+        features.append(startFeature)
+        
+        
+        let endFeature = MGLPointFeature();
+        endFeature.coordinate = endPoint;
+        endFeature.attributes = [
+            ROUTE_LINE_ICON_PROPERTY:ROUTE_LINE_END_ICON
+        ]
+        
+        features.append(endFeature)
+        
+        
+        
+        let markerSourceFeature =  MGLShapeCollectionFeature(shapes: features)
+        
+        let markerSource = MGLShapeSource(identifier: ROUTE_START_END_SOURCE_NAME, shape: markerSourceFeature)
+        mapview.style?.addSource(markerSource)
+        
+        
+        let startAnnotationImage = mapview.dequeueReusableAnnotationImage(withIdentifier: ROUTE_LINE_START_ICON);
+        if(startAnnotationImage == nil){
+            if let image = UIImage(named: "route_start"){
+                mapview.style?.setImage(image, forName: ROUTE_LINE_START_ICON)
+            }
+        }
+        
+        
+        let endAnnotationImage = mapview.dequeueReusableAnnotationImage(withIdentifier: ROUTE_LINE_END_ICON);
+        if(endAnnotationImage == nil){
+            if let image = UIImage(named: "route_end"){
+                mapview.style?.setImage(image, forName: ROUTE_LINE_END_ICON)
+            }
+        }
+        
+        
+        
+        
+        let symbolLayer = MGLSymbolStyleLayer(identifier: ROUTE_START_END_LAYER_NAME, source: markerSource)
+        
+        //    symbolLayer.iconImageName = NSExpression(forConstantValue: ROUTE_LINE_START_ICON)
+        symbolLayer.iconImageName = NSExpression(forKeyPath: ROUTE_LINE_ICON_PROPERTY)
+        symbolLayer.iconAllowsOverlap = NSExpression(forConstantValue: true)
+        symbolLayer.iconScale =  NSExpression(forConstantValue: 0.4)
+        symbolLayer.iconAnchor = NSExpression(forConstantValue: "bottom")
+        //    symbolLayer.symbolSpacing = NSExpression(forConstantValue: 1)
+        
+        
+        mapview.style?.addLayer(symbolLayer)
+        
+        
+        //    添加箭头
+        
+        let arrowAnnotationImage = mapview.dequeueReusableAnnotationImage(withIdentifier: ROUTE_LINE_ARROW_ICON);
+        if(arrowAnnotationImage == nil){
+            if let image = UIImage(named: "line_arrow_white"){
+                mapview.style?.setImage(image, forName: ROUTE_LINE_ARROW_ICON)
+            }
+        }
+        
+        let routeArrowLayer  = MGLSymbolStyleLayer(identifier: ROUTE_LINE_ARROW_LAYER_NAME, source: lineSource)
+        
+        routeArrowLayer.symbolPlacement = NSExpression(forConstantValue: "line")
+        routeArrowLayer.iconAllowsOverlap = NSExpression(forConstantValue: true)
+        routeArrowLayer.iconImageName = NSExpression(forConstantValue: ROUTE_LINE_ARROW_ICON)
+        //    routeArrowLayer.symbolSpacing = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteArrowSymbolSpaceByZoomLevel)
+        
+        routeArrowLayer.symbolSpacing = NSExpression(forConstantValue: 1)
+        routeArrowLayer.iconScale = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteArrowIconSizeByZoomLevel)
+        
+        mapview.style?.addLayer(routeArrowLayer)
+        
+        
+        
+        
+        
+    }
+    
+    
+    public static func removeFromMap(mapview:MGLMapView,channel: FlutterMethodChannel) {
+        
+        //        移除导航线
+        if let lineLayer =  mapview.style?.layer(withIdentifier: ROUTE_LINE_LAYER_NAME) as MGLStyleLayer?{
+            mapview.style?.removeLayer(lineLayer)
+        }
+        
+        if let lineSource = mapview.style?.source(withIdentifier: ROUTE_LINE_SOURCE_NAME) as MGLSource?{
+            mapview.style?.removeSource(lineSource)
+        }
+        
+        //        移除导航线箭头
+        
+        
+        if let lineArrowLayer =  mapview.style?.layer(withIdentifier: ROUTE_LINE_ARROW_LAYER_NAME) as MGLStyleLayer?{
+            mapview.style?.removeLayer(lineArrowLayer)
+        }
+        
+        //移除起点和终点marker
+        
+        if let startEndMarkerLayer =  mapview.style?.layer(withIdentifier: ROUTE_START_END_LAYER_NAME) as MGLStyleLayer?{
+            mapview.style?.removeLayer(startEndMarkerLayer)
+        }
+        
+        if let startEndMarkerSource = mapview.style?.source(withIdentifier: ROUTE_START_END_SOURCE_NAME) as MGLSource?{
+            mapview.style?.removeSource(startEndMarkerSource)
+        }
+        
+        
+        //移除辅助线
+        
+        
+        if let supplementLineLayer =  mapview.style?.layer(withIdentifier: ROUTE_SUPPLEMENT_LINE_LAYER_NAME) as MGLStyleLayer?{
+            mapview.style?.removeLayer(supplementLineLayer)
+        }
+        
+        if let supplementLineSource = mapview.style?.source(withIdentifier: ROUTE_SUPPLEMENT_LINE_SOURCE_NAME) as MGLSource?{
+            mapview.style?.removeSource(supplementLineSource)
+        }
+        
+        
+    }
+    
+    
+    
 }
