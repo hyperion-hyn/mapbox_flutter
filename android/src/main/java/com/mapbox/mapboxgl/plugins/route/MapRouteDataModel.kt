@@ -32,7 +32,7 @@ data class MapRouteDataModel(
                 val paddingBottom = if (map.containsKey("paddingBottom")) map["paddingBottom"] as Int else 200
                 val paddingRight = if (map.containsKey("paddingRight")) map["paddingRight"] as Int else 200
                 return MapRouteDataModel(startLatLng, endLatLng, directionsResponse, paddingTop, paddingLeft, paddingRight, paddingBottom)
-            } catch (e: Error) {
+            } catch (e: Exception) {
                 return null
             }
         }
