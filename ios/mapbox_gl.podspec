@@ -13,10 +13,14 @@ A new Flutter plugin.
   s.author           = { 'Your Company' => 'email@example.com' }
   s.source           = { :path => '.' }
   s.source_files = 'Classes/**/*'
+  s.resource_bundles = {
+    'MapboxGl' => ['Assets/**/*.xcassets']
+  }
   s.public_header_files = 'Classes/**/*.h'
   s.dependency 'Flutter'
   s.dependency 'Mapbox-iOS-SDK', '~> 5.2.0'
   s.dependency 'MapboxNavigation', '~> 0.36.0'
+  s.dependency 'PodAsset', '~> 1.0'
   s.swift_version = '4.2'
   s.ios.deployment_target = '9.0'
 end
