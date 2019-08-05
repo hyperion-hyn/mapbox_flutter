@@ -331,26 +331,36 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage)
             if annotationImage == nil {
                 let bundle = PodAsset.bundle(forPod: "MapboxGl")
-                var image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
-                if let resizedImage = image.resize(maxWidthHeight: 50) {
+                var image:UIImage? = nil;
+                print(symbol.iconImage);
+                if(symbol.iconImage != nil){
+                    image = UIImage(named: symbol.iconImage!, in: bundle, compatibleWith: nil)!
+                }else{
+                    image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
+                }
+                
+                
+                print("iconSize: \(symbol.iconSize)");
+                
+                if let resizedImage = image!.resize(maxWidthHeight: symbol.iconSize ?? 50.0) {
                     image = resizedImage
                 }
                 
                 if let iconOffset = symbol.iconOffset {
                     let bottom: CGFloat = CGFloat(iconOffset[1])
                     let right: CGFloat = CGFloat(iconOffset[0])
-                    if let adjustImage = image.adjustImage(offsetX: right, offsetY: bottom) {
+                    if let adjustImage = image!.adjustImage(offsetX: right, offsetY: bottom) {
                         image = adjustImage
                     }
                 } else {
-                    if let adjustImage = image.adjustImage(offsetX: 0, offsetY: 0) {
+                    if let adjustImage = image!.adjustImage(offsetX: 0, offsetY: 0) {
                         image = adjustImage
                     }
                 }
                 
-                image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
+                image = image!.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image!.size.height/2, right: 0))
                 
-                annotationImage = MGLAnnotationImage(image: image, reuseIdentifier: iconImage)
+                annotationImage = MGLAnnotationImage(image: image!, reuseIdentifier: iconImage)
             }
             return annotationImage
         }
@@ -368,13 +378,16 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             if let iconOffset = data["iconOffset"] as? [Double] {
                 symbol.iconOffset = iconOffset
             }
+            if let iconSize = data["iconSize"] as? Double {
+                symbol.iconSize = iconSize
+            }
             mapView.addAnnotation(symbol)
             return symbol.id
         }
         return ""
     }
 
-    
+   
     // MARK: symbol
     private func addSymbols(datas: [[String: Any]]) -> [String] {
         
@@ -390,6 +403,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 }
                 if let iconOffset = data["iconOffset"] as? [Double] {
                     symbol.iconOffset = iconOffset
+                }
+                if let iconSize = data["iconSize"] as? Double {
+                    symbol.iconSize = iconSize
                 }
                 symbols.append(symbol);
                
@@ -490,6 +506,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 class Symbol: MGLPointAnnotation {
     var id: String = "symbol_\(hash())"
     var iconImage: String?
+    var iconSize: Double?
     var iconOffset: [Double]?
     var iconAnchor: [Int]?
 }
