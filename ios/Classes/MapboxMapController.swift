@@ -3,6 +3,7 @@ import UIKit
 import Mapbox
 import MapboxDirections
 import MapboxCoreNavigation
+import PodAsset
 
 
 typealias JSONDictionary = [String: Any]
@@ -323,7 +324,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             let iconImage = symbol.iconImage {
             var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage)
             if annotationImage == nil {
-                var image = UIImage(named: "marker_big")!
+                let bundle = PodAsset.bundle(forPod: "MapboxGl")
+                var image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
                 if let resizedImage = image.resize(maxWidthHeight: 50) {
                     image = resizedImage
                 }
@@ -680,7 +682,8 @@ class MapRouteDataModel{
         
         let startAnnotationImage = mapview.dequeueReusableAnnotationImage(withIdentifier: ROUTE_LINE_START_ICON);
         if(startAnnotationImage == nil){
-            if let image = UIImage(named: "route_start"){
+            let bundle = PodAsset.bundle(forPod: "MapboxGl")
+            if let image = UIImage(named: "route_start", in: bundle, compatibleWith: nil){
                 mapview.style?.setImage(image, forName: ROUTE_LINE_START_ICON)
             }
         }
@@ -688,7 +691,8 @@ class MapRouteDataModel{
         
         let endAnnotationImage = mapview.dequeueReusableAnnotationImage(withIdentifier: ROUTE_LINE_END_ICON);
         if(endAnnotationImage == nil){
-            if let image = UIImage(named: "route_end"){
+            let bundle = PodAsset.bundle(forPod: "MapboxGl")
+            if let image = UIImage(named: "route_end", in: bundle, compatibleWith: nil){
                 mapview.style?.setImage(image, forName: ROUTE_LINE_END_ICON)
             }
         }
@@ -713,7 +717,8 @@ class MapRouteDataModel{
         
         let arrowAnnotationImage = mapview.dequeueReusableAnnotationImage(withIdentifier: ROUTE_LINE_ARROW_ICON);
         if(arrowAnnotationImage == nil){
-            if let image = UIImage(named: "line_arrow_white"){
+            let bundle = PodAsset.bundle(forPod: "MapboxGl")
+            if let image = UIImage(named: "line_arrow_white", in: bundle, compatibleWith: nil){
                 mapview.style?.setImage(image, forName: ROUTE_LINE_ARROW_ICON)
             }
         }

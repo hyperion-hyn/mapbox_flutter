@@ -142,7 +142,6 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    print('heaven xxxx');
   }
 
   @override

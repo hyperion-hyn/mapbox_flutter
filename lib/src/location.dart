@@ -37,6 +37,8 @@ class LatLng {
     return LatLng(json[0], json[1]);
   }
 
+
+
   @override
   String toString() => '$runtimeType($latitude, $longitude)';
 
