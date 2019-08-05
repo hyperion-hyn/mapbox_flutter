@@ -25,8 +25,12 @@ typedef void OnCameraTrackingDismissedCallback();
 /// Line tap events can be received by adding callbacks to [onLineTapped].
 /// Circle tap events can be received by adding callbacks to [onCircleTapped].
 class MapboxMapController extends ChangeNotifier {
-  MapboxMapController._(this._id, MethodChannel channel, CameraPosition initialCameraPosition,
-      {this.onMapClick, this.onCameraTrackingDismissed, this.onStyleLoaded, this.onAnimateCameraFinish})
+  MapboxMapController._(
+      this._id, MethodChannel channel, CameraPosition initialCameraPosition,
+      {this.onMapClick,
+      this.onCameraTrackingDismissed,
+      this.onStyleLoaded,
+      this.onAnimateCameraFinish})
       : assert(_id != null),
         assert(channel != null),
         _channel = channel {
@@ -34,15 +38,17 @@ class MapboxMapController extends ChangeNotifier {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  static Future<MapboxMapController> init(int id, CameraPosition initialCameraPosition,
-      {OnMapClickCallback onMapClick,
-        OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
-        OnStyleLoadedCallback onStyleLoaded,
-        VoidCallback onAnimateCameraFinish,
-      }) async {
+  static Future<MapboxMapController> init(
+    int id,
+    CameraPosition initialCameraPosition, {
+    OnMapClickCallback onMapClick,
+    OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
+    OnStyleLoadedCallback onStyleLoaded,
+    VoidCallback onAnimateCameraFinish,
+  }) async {
     assert(id != null);
     final MethodChannel channel =
-    MethodChannel('plugins.flutter.io/mapbox_maps_$id');
+        MethodChannel('plugins.flutter.io/mapbox_maps_$id');
     bool styleReady = await channel.invokeMethod('map#waitForMap');
     var controller = MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
@@ -73,7 +79,7 @@ class MapboxMapController extends ChangeNotifier {
 
   /// Callbacks to receive tap events for info windows on symbols
   final ArgumentCallbacks<Symbol> onInfoWindowTapped =
-  ArgumentCallbacks<Symbol>();
+      ArgumentCallbacks<Symbol>();
 
   /// The current set of symbols on this map.
   ///
@@ -175,7 +181,7 @@ class MapboxMapController extends ChangeNotifier {
         }
         break;
       case 'camera#animateFinish':
-        if(onAnimateCameraFinish != null) {
+        if (onAnimateCameraFinish != null) {
           onAnimateCameraFinish();
         }
         break;
@@ -234,7 +240,7 @@ class MapboxMapController extends ChangeNotifier {
   /// been notified.
   Future<Symbol> addSymbol(SymbolOptions options) async {
     final SymbolOptions effectiveOptions =
-    SymbolOptions.defaultOptions.copyWith(options);
+        SymbolOptions.defaultOptions.copyWith(options);
     final String symbolId = await _channel.invokeMethod(
       'symbol#add',
       <String, dynamic>{
@@ -245,6 +251,33 @@ class MapboxMapController extends ChangeNotifier {
     _symbols[symbolId] = symbol;
     notifyListeners();
     return symbol;
+  }
+
+  Future<List<Symbol>> addSymbolList(List<SymbolOptions> optionsList) async {
+    List<SymbolOptions> effectiveOptionsList = List();
+    List<dynamic> effectiveOptionsJsonList = List();
+    for (SymbolOptions symbolOptions in optionsList) {
+      final SymbolOptions effectiveOptions =
+          SymbolOptions.defaultOptions.copyWith(symbolOptions);
+      effectiveOptionsList.add(effectiveOptions);
+      effectiveOptionsJsonList.add(effectiveOptions._toJson());
+    }
+
+    final List<dynamic> symbolIds = await _channel.invokeMethod(
+      'symbol#addList',
+       effectiveOptionsJsonList,
+    );
+
+    List<Symbol> symbolList = List();
+
+    symbolIds.asMap().forEach((index, symbolId) {
+      final Symbol symbol = Symbol(symbolId, effectiveOptionsList[index]);
+      _symbols[symbolId] = symbol;
+      symbolList.add(symbol);
+    });
+    notifyListeners();
+    return symbolList;
+//  return null;
   }
 
   /// Updates the specified [symbol] with the given [changes]. The symbol must
@@ -316,7 +349,7 @@ class MapboxMapController extends ChangeNotifier {
   /// been notified.
   Future<Line> addLine(LineOptions options) async {
     final LineOptions effectiveOptions =
-    LineOptions.defaultOptions.copyWith(options);
+        LineOptions.defaultOptions.copyWith(options);
     final String lineId = await _channel.invokeMethod(
       'line#add',
       <String, dynamic>{
@@ -398,7 +431,7 @@ class MapboxMapController extends ChangeNotifier {
   /// been notified.
   Future<Circle> addCircle(CircleOptions options) async {
     final CircleOptions effectiveOptions =
-    CircleOptions.defaultOptions.copyWith(options);
+        CircleOptions.defaultOptions.copyWith(options);
     final String circleId = await _channel.invokeMethod(
       'circle#add',
       <String, dynamic>{
@@ -429,7 +462,6 @@ class MapboxMapController extends ChangeNotifier {
     circle._options = circle._options.copyWith(changes);
     notifyListeners();
   }
-
 
   /// Removes the specified [circle] from the map. The circle must be a current
   /// member of the [circles] set.
@@ -472,7 +504,8 @@ class MapboxMapController extends ChangeNotifier {
     _circles.remove(id);
   }
 
-  Future<List> queryRenderedFeatures(Point<double> point, List<String> layerIds, String filter) async {
+  Future<List> queryRenderedFeatures(
+      Point<double> point, List<String> layerIds, String filter) async {
     try {
       final Map<Object, Object> reply = await _channel.invokeMethod(
         'map#queryRenderedFeatures',
@@ -489,7 +522,8 @@ class MapboxMapController extends ChangeNotifier {
     }
   }
 
-  Future<List> queryRenderedFeaturesInRect(Rect rect, List<String> layerIds, String filter) async {
+  Future<List> queryRenderedFeaturesInRect(
+      Rect rect, List<String> layerIds, String filter) async {
     try {
       final Map<Object, Object> reply = await _channel.invokeMethod(
         'map#queryRenderedFeatures',
