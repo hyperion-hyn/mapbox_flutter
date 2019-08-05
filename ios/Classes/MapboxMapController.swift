@@ -157,6 +157,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let options = arguments["options"] as? [String: Any] else { return }
             let symbolId = addSymbol(data: options)
             result(symbolId)
+        case "symbol#addList":
+            channel.invokeMethod("print", arguments: "symbol#addList \(String(describing: methodCall.arguments))")
+            guard let arguments = methodCall.arguments as? [[String: Any]] else { return }
+//            guard let options = arguments["options"] as? [String: Any] else { return }
+            let symbolIds = addSymbols(datas: arguments)
+            result(symbolIds)
         case "symbol#remove":
             channel.invokeMethod("print", arguments: "symbol#remove \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
@@ -365,7 +371,35 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
         return ""
     }
+
     
+    // MARK: symbol
+    private func addSymbols(datas: [[String: Any]]) -> [String] {
+        
+        var symbolIds = [String]();
+        var symbols = [Symbol]();
+        for data in datas{
+            
+            if let geometry = data["geometry"] as? [Double] {
+                let symbol = Symbol()
+                symbol.coordinate = CLLocationCoordinate2D.fromArray(geometry)
+                if let iconImage = data["iconImage"] as? String {
+                    symbol.iconImage = iconImage
+                }
+                if let iconOffset = data["iconOffset"] as? [Double] {
+                    symbol.iconOffset = iconOffset
+                }
+                symbols.append(symbol);
+               
+            }
+        }
+        mapView.addAnnotations(symbols);
+        
+        for symbol in symbols{
+            symbolIds.append(symbol.id);
+        }
+        return symbolIds
+    }
     private func removeSymbol(symbolId: String) {
         if mapView.annotations?.count != nil, let existingAnnotations = mapView.annotations {
             for annotation in existingAnnotations {
