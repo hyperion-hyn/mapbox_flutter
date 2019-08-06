@@ -143,17 +143,22 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             
             var features: [MGLFeature] = []
             if let arguments = methodCall.arguments as? [String: Any] {
+                var predicate:NSPredicate?
+                //TODO support expression
+                if let filter = arguments["filter"] as? String {
+                    predicate = NSPredicate(format: filter)
+                }
                 if let layerIds = arguments["layerIds"] as? [String] {
                     let layers = Set(layerIds)
                     if let x = arguments["x"] as? Double, let y = arguments["y"] as? Double {
                         let point = CGPoint(x: x, y: y)
-                        features = mapView.visibleFeatures(at: point, styleLayerIdentifiers: layers)
+                        features = mapView.visibleFeatures(at: point, styleLayerIdentifiers: layers, predicate: predicate)
                     } else if let left = arguments["left"] as? Double,
                         let top = arguments["top"] as? Double,
                         let right = arguments["right"] as? Double,
                         let bottom = arguments["bottom"] as? Double {
                         let rect = CGRect(x: left, y: top, width: right - left, height: bottom - top)
-                        features = mapView.visibleFeatures(in: rect, styleLayerIdentifiers: layers)
+                        features = mapView.visibleFeatures(in: rect, styleLayerIdentifiers: layers, predicate: predicate)
                     }
                 }
             }
