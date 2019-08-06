@@ -5,6 +5,7 @@
 part of mapbox_gl;
 
 typedef void OnMapClickCallback(Point<double> point, LatLng coordinates);
+typedef void OnMapLongPressCallback(Point<double> point, LatLng coordinates);
 typedef void OnStyleLoadedCallback(MapboxMapController controller);
 
 typedef void OnCameraTrackingDismissedCallback();
@@ -28,6 +29,7 @@ class MapboxMapController extends ChangeNotifier {
   MapboxMapController._(this._id, MethodChannel channel,
       CameraPosition initialCameraPosition,
       {this.onMapClick,
+        this.onMapLongPress,
         this.onCameraTrackingDismissed,
         this.onStyleLoaded,
         this.onAnimateCameraFinish})
@@ -41,6 +43,7 @@ class MapboxMapController extends ChangeNotifier {
   static Future<MapboxMapController> init(int id,
       CameraPosition initialCameraPosition, {
         OnMapClickCallback onMapClick,
+        OnMapLongPressCallback onMapLongPress,
         OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
         OnStyleLoadedCallback onStyleLoaded,
         VoidCallback onAnimateCameraFinish,
@@ -51,6 +54,7 @@ class MapboxMapController extends ChangeNotifier {
     bool styleReady = await channel.invokeMethod('map#waitForMap');
     var controller = MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
+        onMapLongPress: onMapLongPress,
         onCameraTrackingDismissed: onCameraTrackingDismissed,
         onStyleLoaded: onStyleLoaded,
         onAnimateCameraFinish: onAnimateCameraFinish);
@@ -63,6 +67,8 @@ class MapboxMapController extends ChangeNotifier {
   final MethodChannel _channel;
 
   final OnMapClickCallback onMapClick;
+
+  final OnMapLongPressCallback onMapLongPress;
 
   final OnStyleLoadedCallback onStyleLoaded;
 
@@ -167,6 +173,15 @@ class MapboxMapController extends ChangeNotifier {
         final double lat = call.arguments['lat'];
         if (onMapClick != null) {
           onMapClick(Point<double>(x, y), LatLng(lat, lng));
+        }
+        break;
+      case 'map#onMapLongPress':
+        final double x = call.arguments['x'];
+        final double y = call.arguments['y'];
+        final double lng = call.arguments['lng'];
+        final double lat = call.arguments['lat'];
+        if (onMapLongPress != null) {
+          onMapLongPress(Point<double>(x, y), LatLng(lat, lng));
         }
         break;
       case 'map#onCameraTrackingDismissed':

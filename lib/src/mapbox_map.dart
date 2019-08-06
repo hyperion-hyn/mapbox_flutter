@@ -23,6 +23,7 @@ class MapboxMap extends StatefulWidget {
     this.myLocationEnabled = false,
     this.myLocationTrackingMode = MyLocationTrackingMode.Tracking,
     this.onMapClick,
+    this.onMapLongPress,
     this.onCameraTrackingDismissed,
     this.onStyleLoaded,
     this.onAnimateCameraFinish,
@@ -117,6 +118,7 @@ class MapboxMap extends StatefulWidget {
   final Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers;
 
   final OnMapClickCallback onMapClick;
+  final OnMapLongPressCallback onMapLongPress;
 
   /// Called when the location tracking mode changes, such as when the user moves the map
   final OnCameraTrackingDismissedCallback onCameraTrackingDismissed;
@@ -196,6 +198,7 @@ class _MapboxMapState extends State<MapboxMap> {
     final MapboxMapController controller = await MapboxMapController.init(
         id, widget.initialCameraPosition,
         onMapClick: widget.onMapClick,
+        onMapLongPress: widget.onMapLongPress,
         onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
         onStyleLoaded: widget.onStyleLoaded,
         onAnimateCameraFinish: widget.onAnimateCameraFinish,

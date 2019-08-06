@@ -63,6 +63,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             singleTap.require(toFail: recognizer)
         }
         mapView.addGestureRecognizer(singleTap)
+         // Add a long press gesture recognizer to the map view
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
+        mapView.addGestureRecognizer(longPress)
     }
     
     @objc @IBAction func handleMapTap(sender: UITapGestureRecognizer) {
@@ -77,6 +80,21 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         arguments["lat"] = touchCoordinate.latitude
         NSLog("mapClick \(arguments)")
         channel.invokeMethod("map#onMapClick", arguments: arguments)
+    }
+    
+    @objc func didLongPress(_ sender: UILongPressGestureRecognizer) {
+        guard sender.state == .began else { return }
+        
+        // Converts point where user did a long press to map coordinates
+        let point = sender.location(in: mapView)
+        var arguments: [String: Any] = [:]
+        arguments["x"] = point.x
+        arguments["y"] = point.y
+        
+        let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
+        arguments["lng"] = coordinate.longitude
+        arguments["lat"] = coordinate.latitude
+        channel.invokeMethod("map#onMapLongPress", arguments: arguments)
     }
     
     func onMethodCall(methodCall: FlutterMethodCall, result: @escaping FlutterResult) {
@@ -161,7 +179,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         case "symbol#addList":
             channel.invokeMethod("print", arguments: "symbol#addList \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [[String: Any]] else { return }
-//            guard let options = arguments["options"] as? [String: Any] else { return }
+            //            guard let options = arguments["options"] as? [String: Any] else { return }
             let symbolIds = addSymbols(datas: arguments)
             result(symbolIds)
         case "symbol#remove":
@@ -189,14 +207,11 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let model = arguments["model"] as? [String: Any] else { return }
             addHeavenMapRouteOverlay(data: model,channel: channel)
-            //TODO
             result(nil)
         case "map_route#removeRouteOverlay":
             channel.invokeMethod("print", arguments: "heaven_map#removeRouteOverlay \(String(describing: methodCall.arguments))")
             removeHeavenMapRouteOverlay()
             result(nil)
-            //TODO
-            result(FlutterMethodNotImplemented)
         default:
             result(FlutterMethodNotImplemented)
         }
@@ -215,7 +230,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
      *  MGLMapViewDelegate
      */
     func mapView(_ mapView: MGLMapView, didFinishLoading style: MGLStyle) {
-        channel.invokeMethod("print", arguments: "style ready \(String(describing: currentStyle)) \(String(describing: style.name))")
         if(currentStyle != style.name) {
             channel.invokeMethod("map#onStyleLoaded", arguments: ["map": vId])
         }
@@ -223,7 +237,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     }
     
     func mapViewDidFinishLoadingMap(_ mapView: MGLMapView) {
-        channel.invokeMethod("print", arguments: "map finish loading")
         isMapReady = true
         updateMyLocationEnabled()
         
@@ -309,19 +322,15 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         updateMyLocationEnabled()
     }
     func setMyLocationTrackingMode(myLocationTrackingMode: MGLUserTrackingMode) {
-        channel.invokeMethod("print", arguments: "setMyLocationTrackingMode \(myLocationTrackingMode.rawValue)")
         mapView.userTrackingMode = myLocationTrackingMode
     }
     func setEnableLogo(enableLogo: Bool) {
-        channel.invokeMethod("print", arguments: "enable logo \(enableLogo)")
         mapView.logoView.isHidden = !enableLogo
     }
     func setEnableAttribution(enableAttribution: Bool) {
-        channel.invokeMethod("print", arguments: "enable attribution \(enableAttribution)")
         mapView.attributionButton.isHidden = !enableAttribution
     }
     func setCompassMargins(left: Int, top: Int, right: Int, bottom: Int) {
-        channel.invokeMethod("print", arguments: "set compass margins \(left) \(top) \(right) \(bottom)")
         mapView.compassViewMargins = CGPoint(x: right, y: top)
     }
     
@@ -332,15 +341,11 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             if annotationImage == nil {
                 let bundle = PodAsset.bundle(forPod: "MapboxGl")
                 var image:UIImage? = nil;
-                print(symbol.iconImage);
                 if(symbol.iconImage != nil){
                     image = UIImage(named: symbol.iconImage!, in: bundle, compatibleWith: nil)!
                 }else{
                     image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
                 }
-                
-                
-                print("iconSize: \(symbol.iconSize)");
                 
                 if let resizedImage = image!.resize(maxWidthHeight: symbol.iconSize ?? 50.0) {
                     image = resizedImage
@@ -386,8 +391,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
         return ""
     }
-
-   
+    
+    
     // MARK: symbol
     private func addSymbols(datas: [[String: Any]]) -> [String] {
         
@@ -408,7 +413,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                     symbol.iconSize = iconSize
                 }
                 symbols.append(symbol);
-               
+                
             }
         }
         mapView.addAnnotations(symbols);
@@ -463,7 +468,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     }
     
     
-    
     private func removeHeavenMap(id: String) {
         let layerId = getHeavenMapLayerId(id: id)
         if let layer = mapView.style?.layer(withIdentifier: layerId) {
@@ -485,8 +489,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     
     // MARK: router
     //TODO
-    
-    
     
     
     private func addHeavenMapRouteOverlay(data: [String: Any],channel: FlutterMethodChannel) {
@@ -532,7 +534,6 @@ class MapRouteDataModel{
     static let ROUTE_LINE_ICON_ANCHOR_PROPERTY: String = "hyn-route-line-icon-anchor-property"
     
     
-    
     public static let MBRouteLineWidthByZoomLevel: [Int: NSExpression] = [
         10: NSExpression(forConstantValue: 8),
         13: NSExpression(forConstantValue: 9),
@@ -552,16 +553,11 @@ class MapRouteDataModel{
     public static let MBRouteArrowIconSizeByZoomLevel: [Int: NSExpression] = [
         7: NSExpression(forConstantValue: 0.1),
         22: NSExpression(forConstantValue: 0.18)
-        
     ]
     
     
-    
     public static func addToMap(data:[String: Any],mapview:MGLMapView,channel: FlutterMethodChannel) {
-        
-        channel.invokeMethod("print", arguments: "enter addToMap fun")
         guard let startLatLngDouble = data["startLatLng"] as? [Double] else {
-            channel.invokeMethod("print", arguments: "startLatlngDouble is nil")
             return
         }
         let startPoint = CLLocationCoordinate2D.fromArray(startLatLngDouble)
@@ -588,8 +584,6 @@ class MapRouteDataModel{
         }catch{
             channel.invokeMethod("print", arguments: "convert json to map error")
         }
-        
-        
         
         var namedWaypoints: [Waypoint]?
         if let jsonWaypoints = (response["waypoints"] as? [JSONDictionary]) {
@@ -619,8 +613,6 @@ class MapRouteDataModel{
         
         
         //添加连接线
-        
-        
         
         var supplementLineFeatures: [MGLPolylineFeature] = []
         
