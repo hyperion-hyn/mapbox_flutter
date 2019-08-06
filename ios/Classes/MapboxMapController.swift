@@ -63,7 +63,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             singleTap.require(toFail: recognizer)
         }
         mapView.addGestureRecognizer(singleTap)
-         // Add a long press gesture recognizer to the map view
+        // Add a long press gesture recognizer to the map view
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(didLongPress(_:)))
         mapView.addGestureRecognizer(longPress)
     }
@@ -339,33 +339,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             let iconImage = symbol.iconImage {
             var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage)
             if annotationImage == nil {
-                let bundle = PodAsset.bundle(forPod: "MapboxGl")
-                var image:UIImage? = nil;
-                if(symbol.iconImage != nil){
-                    image = UIImage(named: symbol.iconImage!, in: bundle, compatibleWith: nil)!
-                }else{
-                    image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
-                }
-                
-                if let resizedImage = image!.resize(maxWidthHeight: symbol.iconSize ?? 50.0) {
-                    image = resizedImage
-                }
-                
-                if let iconOffset = symbol.iconOffset {
-                    let bottom: CGFloat = CGFloat(iconOffset[1])
-                    let right: CGFloat = CGFloat(iconOffset[0])
-                    if let adjustImage = image!.adjustImage(offsetX: right, offsetY: bottom) {
-                        image = adjustImage
-                    }
-                } else {
-                    if let adjustImage = image!.adjustImage(offsetX: 0, offsetY: 0) {
-                        image = adjustImage
-                    }
-                }
-                
-                image = image!.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image!.size.height/2, right: 0))
-                
-                annotationImage = MGLAnnotationImage(image: image!, reuseIdentifier: iconImage)
+                annotationImage = MGLAnnotationImage(image: symbol.makeImage(), reuseIdentifier: iconImage)
             }
             return annotationImage
         }
@@ -374,6 +348,44 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     
     // MARK: symbol
     private func addSymbol(data: [String: Any]) -> String {
+        if let symbol = parseToSymbol(data: data) {
+            mapView.addAnnotation(symbol)
+            return symbol.id
+        }
+        return ""
+    }
+    
+    
+    // MARK: symbol
+    private func addSymbols(datas: [[String: Any]]) -> [String] {
+        var symbolIds = [String]();
+        var symbols = [Symbol]();
+        for data in datas{
+            if let symbol = parseToSymbol(data: data) {
+                symbols.append(symbol);
+            }
+        }
+        mapView.addAnnotations(symbols);
+        
+        for symbol in symbols{
+            symbolIds.append(symbol.id);
+        }
+        return symbolIds
+    }
+    
+    private func removeSymbol(symbolId: String) {
+        if mapView.annotations?.count != nil, let existingAnnotations = mapView.annotations {
+            for annotation in existingAnnotations {
+                if let symbol = annotation as? Symbol {
+                    if symbol.id == symbolId {
+                        mapView.removeAnnotation(symbol)
+                    }
+                }
+            }
+        }
+    }
+    
+    private func parseToSymbol(data: [String: Any]) -> Symbol? {
         if let geometry = data["geometry"] as? [Double] {
             let symbol = Symbol()
             symbol.coordinate = CLLocationCoordinate2D.fromArray(geometry)
@@ -386,53 +398,12 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             if let iconSize = data["iconSize"] as? Double {
                 symbol.iconSize = iconSize
             }
-            mapView.addAnnotation(symbol)
-            return symbol.id
-        }
-        return ""
-    }
-    
-    
-    // MARK: symbol
-    private func addSymbols(datas: [[String: Any]]) -> [String] {
-        
-        var symbolIds = [String]();
-        var symbols = [Symbol]();
-        for data in datas{
-            
-            if let geometry = data["geometry"] as? [Double] {
-                let symbol = Symbol()
-                symbol.coordinate = CLLocationCoordinate2D.fromArray(geometry)
-                if let iconImage = data["iconImage"] as? String {
-                    symbol.iconImage = iconImage
-                }
-                if let iconOffset = data["iconOffset"] as? [Double] {
-                    symbol.iconOffset = iconOffset
-                }
-                if let iconSize = data["iconSize"] as? Double {
-                    symbol.iconSize = iconSize
-                }
-                symbols.append(symbol);
-                
+            if let iconAnchor = data["iconAnchor"] as? String {
+                symbol.iconAnchor = iconAnchor
             }
+            return symbol
         }
-        mapView.addAnnotations(symbols);
-        
-        for symbol in symbols{
-            symbolIds.append(symbol.id);
-        }
-        return symbolIds
-    }
-    private func removeSymbol(symbolId: String) {
-        if mapView.annotations?.count != nil, let existingAnnotations = mapView.annotations {
-            for annotation in existingAnnotations {
-                if let symbol = annotation as? Symbol {
-                    if symbol.id == symbolId {
-                        mapView.removeAnnotation(symbol)
-                    }
-                }
-            }
-        }
+        return nil
     }
     
     // MARK: heaven map
@@ -510,7 +481,35 @@ class Symbol: MGLPointAnnotation {
     var iconImage: String?
     var iconSize: Double?
     var iconOffset: [Double]?
-    var iconAnchor: [Int]?
+    var iconAnchor: String?
+    
+    func makeImage() -> UIImage {
+        let bundle = PodAsset.bundle(forPod: "MapboxGl")
+        var image:UIImage;
+        if(self.iconImage != nil){
+            image = UIImage(named: self.iconImage!, in: bundle, compatibleWith: nil)!
+        } else {
+            image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
+        }
+        
+        if let resizedImage = image.resize(maxWidthHeight: self.iconSize ?? 50.0) {
+            image = resizedImage
+        }
+        
+        let offsetX: CGFloat = CGFloat(iconOffset?[0] ?? 0)
+        let offsetY: CGFloat = CGFloat(iconOffset?[1] ?? 0)
+        let anchor: String = self.iconAnchor ?? "center"
+        
+        NSLog("anchor \(anchor) offsetX \(offsetX) offsetY \(offsetY)")
+        
+        if let offsetImage = image.offsetImage(anchor: anchor, offsetX: offsetX, offsetY: offsetY) {
+            image = offsetImage
+        }
+    
+//        image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
+        
+        return image
+    }
 }
 
 
@@ -546,7 +545,6 @@ class MapRouteDataModel{
     public static let MBRouteArrowSymbolSpaceByZoomLevel: [Int: NSExpression] = [
         5: NSExpression(forConstantValue: 1),
         22: NSExpression(forConstantValue: 1)
-        
     ]
     
     
@@ -641,7 +639,7 @@ class MapRouteDataModel{
         let supplementLine = MGLLineStyleLayer(identifier: ROUTE_SUPPLEMENT_LINE_LAYER_NAME, source: supplementLineSource)
         supplementLine.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
         supplementLine.lineColor = NSExpression(forConstantValue: #colorLiteral(red: 0.5882352941, green: 0.5882352941, blue: 0.5882352941, alpha: 1))
-        supplementLine.lineDashPattern = NSExpression(forConstantValue: [0.7,0.7])
+        supplementLine.lineDashPattern = NSExpression(forConstantValue: [0.7, 0.7])
         
         
         mapview.style?.addLayer(supplementLine)
@@ -665,7 +663,6 @@ class MapRouteDataModel{
         
         mapview.style?.addSource(lineSource)
         
-        channel.invokeMethod("print", arguments: "addSource")
         
         let line = MGLLineStyleLayer(identifier: ROUTE_LINE_LAYER_NAME, source: lineSource)
         line.lineWidth = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)", MBRouteLineWidthByZoomLevel)
@@ -739,8 +736,6 @@ class MapRouteDataModel{
                 mapview.style?.setImage(image, forName: ROUTE_LINE_END_ICON)
             }
         }
-        
-        
         
         
         let symbolLayer = MGLSymbolStyleLayer(identifier: ROUTE_START_END_LAYER_NAME, source: markerSource)

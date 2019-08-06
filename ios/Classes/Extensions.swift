@@ -83,11 +83,27 @@ extension UIImage {
         return scaledImage
     }
     
-    func adjustImage(offsetX: CGFloat, offsetY: CGFloat) -> UIImage? {
-        let newSize = CGSize(width: self.size.width + offsetX, height: (self.size.height - offsetY) * 2)
+    func offsetImage(anchor: String, offsetX: CGFloat, offsetY: CGFloat) -> UIImage? {
+        var newSize: CGSize
+        var drawX: CGFloat = offsetX;
+        var drawY: CGFloat = offsetY;
+        if(anchor == "bottom" || anchor == "top") {
+            newSize = CGSize(width: self.size.width + offsetX, height: self.size.height * 2 + offsetY)
+            if(anchor == "top") {
+                drawY = offsetY + self.size.height;
+            }
+        } else if(anchor == "left" || anchor == "right") {
+            newSize = CGSize(width: self.size.width * 2 + offsetX, height: self.size.height + offsetY)
+            if(anchor == "left") {
+                drawX = offsetX + self.size.width
+            }
+        } else {    //default is center
+            newSize = CGSize(width: self.size.width + offsetX, height: self.size.height + offsetY)
+        }
+        
         UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
         
-        self.draw(in: CGRect(x: offsetX, y: 0, width: self.size.width, height: self.size.height))
+        self.draw(in: CGRect(x: drawX, y: drawY, width: self.size.width, height: self.size.height))
         let newIamge = UIGraphicsGetImageFromCurrentImageContext()
         
         UIGraphicsEndImageContext()
