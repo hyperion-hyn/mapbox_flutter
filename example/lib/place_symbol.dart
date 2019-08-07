@@ -66,16 +66,56 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   }
 
   void _add() {
-    controller.addSymbol(
+//    controller.addSymbol(
+//      SymbolOptions(
+//          geometry: LatLng(
+//            center.latitude + sin(_symbolCount * pi / 6.0) / 20.0,
+//            center.longitude + cos(_symbolCount * pi / 6.0) / 20.0,
+//          ),
+//          iconImage: "airport-15"),
+//    );
+    var symbolOptions = [
       SymbolOptions(
           geometry: LatLng(
-            center.latitude + sin(_symbolCount * pi / 6.0) / 20.0,
-            center.longitude + cos(_symbolCount * pi / 6.0) / 20.0,
+            center.latitude + sin(1 * pi / 6.0) / 20.0,
+            center.longitude + cos(1 * pi / 6.0) / 20.0,
           ),
-          iconImage: "airport-15"),
-    );
+          iconSize: 20.0,
+          iconImage: "marker_gray"),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(2 * pi / 6.0) / 20.0,
+            center.longitude + cos(2 * pi / 6.0) / 20.0,
+          ),
+          iconSize: 20.0,
+          iconImage: "marker_gray"),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(3 * pi / 6.0) / 20.0,
+            center.longitude + cos(3 * pi / 6.0) / 20.0,
+          ),
+          iconSize: 20.0,
+          iconImage: "marker_gray"),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(4 * pi / 6.0) / 20.0,
+            center.longitude + cos(4 * pi / 6.0) / 20.0,
+          ),
+          iconSize: 20.0,
+          iconImage: "marker_gray"),
+      SymbolOptions(
+          geometry: LatLng(
+            center.latitude + sin(5 * pi / 6.0) / 20.0,
+            center.longitude + cos(5 * pi / 6.0) / 20.0,
+          ),
+          iconSize: 20.0,
+          iconImage: "marker_gray"),
+    ];
+
+    controller.addSymbolList(symbolOptions);
+
     setState(() {
-      _symbolCount += 1;
+      _symbolCount += symbolOptions.length;
     });
   }
 
@@ -156,8 +196,7 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
     }
 
     _updateSelectedSymbol(
-      SymbolOptions(
-          iconOpacity: current == 0.0 ? 1.0 : 0.0),
+      SymbolOptions(iconOpacity: current == 0.0 ? 1.0 : 0.0),
     );
   }
 
