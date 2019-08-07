@@ -447,10 +447,8 @@ final class MapboxMapController
                 List<Feature> features;
 
                 String[] layerIds = ((List<String>) call.argument("layerIds")).toArray(new String[0]);
-
                 String filter = (String) call.argument("filter");
-
-                Expression filterExpression = filter == null ? null : new Expression(filter);
+                Expression filterExpression = filter == null ? null : Expression.Converter.convert(filter);;
                 if (call.hasArgument("x")) {
                     Double x = call.argument("x");
                     Double y = call.argument("y");
@@ -483,7 +481,7 @@ final class MapboxMapController
             }
             case "symbol#addList": {
                 final SymbolListBuilder symbolBuilder = newSymbolListBuilder();
-                Log.i(TAG,"addList arguments"+call.arguments.toString());
+                Log.i(TAG,call.arguments.toString());
                 Convert.interpretSymbolListOptions(call.arguments, symbolBuilder);
                 final List<Symbol> symbolList = symbolBuilder.build();
 
