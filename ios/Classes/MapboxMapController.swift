@@ -30,6 +30,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private var vId: Int64
     private var currentStyle: String?
     
+    private var symbolIndex = 0;
+    
     func view() -> UIView {
         return mapView
     }
@@ -153,7 +155,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 }
                 var layers:Set<String>?
                 if let layerIds = arguments["layerIds"] as? [String] {
-                     print("layerIds \(layerIds)")
+                    print("layerIds \(layerIds)")
                     if(!layerIds.isEmpty){
                         layers = Set(layerIds)
                         print("layerIds set \(layerIds)")
@@ -193,13 +195,19 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             channel.invokeMethod("print", arguments: "symbol#addList \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [[String: Any]] else { return }
             //            guard let options = arguments["options"] as? [String: Any] else { return }
-            let symbolIds = addSymbols(datas: arguments)
+//            let symbolIds = addSymbols(datas: arguments)
+            
+            let symbolIds = batchAddMarkerToLayer( datas: arguments)
             result(symbolIds)
         case "symbol#remove":
             channel.invokeMethod("print", arguments: "symbol#remove \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let symbolId = arguments["symbol"] as? String else { return }
             removeSymbol(symbolId: symbolId)
+            result(nil)
+        case "symbol#removeList":
+            channel.invokeMethod("print", arguments: "symbol#removeList \(String(describing: methodCall.arguments))")
+            removeBatchAddMarker()
             result(nil)
             /*plugins*/
         case "heaven_map#addData":
@@ -368,7 +376,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         return ""
     }
     
-    
     // MARK: symbol
     private func addSymbols(datas: [[String: Any]]) -> [String] {
         var symbolIds = [String]();
@@ -487,6 +494,96 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     }
     
     
+    let BATCH_ADD_MARKER_SOURCE_NAME = "hyn-batch-add-marker-source";
+    
+    let BATCH_ADD_MARKER_LAYER_NAME = "hyn-batch-add-marker-layer";
+    
+    let BATCH_ADD_MARKER_IMAGE_NAME = "hyn-batch-add-marker-image";
+    
+    private func removeBatchAddMarker(){
+        if let layer =  mapView.style?.layer(withIdentifier: BATCH_ADD_MARKER_LAYER_NAME) as MGLStyleLayer?{
+            mapView.style?.removeLayer(layer)
+        }
+        if let source = mapView.style?.source(withIdentifier: BATCH_ADD_MARKER_SOURCE_NAME) as MGLSource?{
+            mapView.style?.removeSource(source)
+        }
+    }
+    
+    private func batchAddMarkerToLayer(datas: [[String: Any]]) -> [String]{
+        
+        var features = [MGLPointFeature]()
+        var ids = [String]()
+        
+        for data in datas{
+            
+            symbolIndex += 1
+            let feature = MGLPointFeature();
+            
+            if let geometry = data["geometry"] as? [Double] {
+                feature.coordinate = CLLocationCoordinate2D.fromArray(geometry)
+            }
+            
+            var attributes  =  [String:Any]();
+            if let iconImage = data["iconImage"] as? String {
+                attributes["iconImage"] = iconImage
+                //添加图标到mapbox 地图中
+                let markerAnnotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage);
+                if(markerAnnotationImage == nil){
+                    let bundle = PodAsset.bundle(forPod: "MapboxGl")
+                    if let image = UIImage(named: iconImage, in: bundle, compatibleWith: nil){
+                        mapView.style?.setImage(image, forName: iconImage)
+                    }
+                }
+            }
+            if let iconOffset = data["iconOffset"] as? [Double] {
+                attributes["iconOffset"] = iconOffset
+            }
+            if let iconSize = data["iconSize"] as? Double {
+                attributes["iconSize"] = iconSize
+                
+            }
+            if let iconAnchor = data["iconAnchor"] as? String {
+                attributes["iconAnchor"] = iconAnchor
+            }
+            feature.attributes = attributes
+            features.append(feature)
+            ids.append(String(symbolIndex))
+            
+        }
+        
+        let markerSourceFeature =  MGLShapeCollectionFeature(shapes: features)
+        
+        var markerSource = mapView.style?.source(withIdentifier: BATCH_ADD_MARKER_SOURCE_NAME)
+        if(markerSource == nil){
+            markerSource = MGLShapeSource(identifier: BATCH_ADD_MARKER_SOURCE_NAME, shape: markerSourceFeature)
+            mapView.style?.addSource(markerSource!)
+        }else{
+            (markerSource as! MGLShapeSource).shape = markerSourceFeature
+        }
+        
+        let symbolLayer = mapView.style?.layer(withIdentifier: BATCH_ADD_MARKER_LAYER_NAME);
+        if(symbolLayer == nil){
+            let  symbolLayerTemp = MGLSymbolStyleLayer(identifier: BATCH_ADD_MARKER_LAYER_NAME, source: markerSource!)
+            //    symbolLayer.iconImageName = NSExpression(forConstantValue: ROUTE_LINE_START_ICON)
+            symbolLayerTemp.iconImageName = NSExpression(forKeyPath: "iconImage")
+            symbolLayerTemp.iconAllowsOverlap = NSExpression(forConstantValue: true)
+            symbolLayerTemp.iconAnchor = NSExpression(forKeyPath:"iconAnchor")
+            symbolLayerTemp.iconScale = NSExpression(forKeyPath:"iconSize")
+            //    symbolLayer.symbolSpacing = NSExpression(forConstantValue: 1)
+            let systemAnnotationLayer = mapView.style?.layer(withIdentifier: "com.mapbox.annotations.points")
+            if(systemAnnotationLayer != nil){
+                 mapView.style?.insertLayer(symbolLayerTemp, below: systemAnnotationLayer!)
+            }else{
+                mapView.style?.addLayer(symbolLayerTemp)
+            }
+           
+        }
+        
+        return ids
+    
+    }
+    
+    
 }
 
 class Symbol: MGLPointAnnotation {
@@ -518,8 +615,8 @@ class Symbol: MGLPointAnnotation {
         if let offsetImage = image.offsetImage(anchor: anchor, offsetX: offsetX, offsetY: offsetY) {
             image = offsetImage
         }
-    
-//        image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
+        
+        //        image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
         
         return image
     }
@@ -793,6 +890,8 @@ class MapRouteDataModel{
     }
     
     
+    
+    
     public static func removeFromMap(mapview:MGLMapView,channel: FlutterMethodChannel) {
         
         //        移除导航线
@@ -835,6 +934,9 @@ class MapRouteDataModel{
         
         
     }
+    
+    
+    
     
     
     

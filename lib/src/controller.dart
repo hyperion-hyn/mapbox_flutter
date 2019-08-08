@@ -4,6 +4,7 @@
 
 part of mapbox_gl;
 
+
 typedef void OnMapClickCallback(Point<double> point, LatLng coordinates);
 typedef void OnMapLongPressCallback(Point<double> point, LatLng coordinates);
 typedef void OnStyleLoadedCallback(MapboxMapController controller);
@@ -341,6 +342,11 @@ class MapboxMapController extends ChangeNotifier {
     for (String id in symbolIds) {
       await _removeSymbol(id);
     }
+
+    if (Platform.isIOS) {
+      await _removeSymbolList();
+      _symbols.clear();
+    }
     notifyListeners();
   }
 
@@ -354,6 +360,11 @@ class MapboxMapController extends ChangeNotifier {
       'symbol': id,
     });
     _symbols.remove(id);
+  }
+
+  Future<void> _removeSymbolList() async {
+    await _channel.invokeMethod('symbol#removeList', <String, dynamic>{
+    });
   }
 
   /// Adds a line to the map, configured using the specified custom [options].
