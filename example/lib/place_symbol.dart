@@ -80,35 +80,35 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
             center.latitude + sin(1 * pi / 6.0) / 20.0,
             center.longitude + cos(1 * pi / 6.0) / 20.0,
           ),
-          iconSize: 20.0,
+          iconSize: 0.5,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(2 * pi / 6.0) / 20.0,
             center.longitude + cos(2 * pi / 6.0) / 20.0,
           ),
-          iconSize: 20.0,
+          iconSize: 0.5,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(3 * pi / 6.0) / 20.0,
             center.longitude + cos(3 * pi / 6.0) / 20.0,
           ),
-          iconSize: 20.0,
+          iconSize: 0.5,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(4 * pi / 6.0) / 20.0,
             center.longitude + cos(4 * pi / 6.0) / 20.0,
           ),
-          iconSize: 20.0,
+          iconSize: 0.5,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(5 * pi / 6.0) / 20.0,
             center.longitude + cos(5 * pi / 6.0) / 20.0,
           ),
-          iconSize: 20.0,
+          iconSize: 0.5,
           iconImage: "marker_gray"),
     ];
 
@@ -120,7 +120,8 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   }
 
   void _remove() {
-    controller.removeSymbol(_selectedSymbol);
+//    controller.removeSymbol(_selectedSymbol);
+    controller.clearSymbols();
     setState(() {
       _selectedSymbol = null;
       _symbolCount -= 1;
@@ -245,7 +246,7 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                         ),
                         FlatButton(
                           child: const Text('remove'),
-                          onPressed: (_selectedSymbol == null) ? null : _remove,
+                          onPressed: _remove,
                         ),
                       ],
                     ),
