@@ -80,35 +80,35 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
             center.latitude + sin(1 * pi / 6.0) / 20.0,
             center.longitude + cos(1 * pi / 6.0) / 20.0,
           ),
-          iconSize: 0.5,
+          iconSize: 1,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(2 * pi / 6.0) / 20.0,
             center.longitude + cos(2 * pi / 6.0) / 20.0,
           ),
-          iconSize: 0.5,
+          iconSize: 1,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(3 * pi / 6.0) / 20.0,
             center.longitude + cos(3 * pi / 6.0) / 20.0,
           ),
-          iconSize: 0.5,
+          iconSize: 1,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(4 * pi / 6.0) / 20.0,
             center.longitude + cos(4 * pi / 6.0) / 20.0,
           ),
-          iconSize: 0.5,
+          iconSize: 1,
           iconImage: "marker_gray"),
       SymbolOptions(
           geometry: LatLng(
             center.latitude + sin(5 * pi / 6.0) / 20.0,
             center.longitude + cos(5 * pi / 6.0) / 20.0,
           ),
-          iconSize: 0.5,
+          iconSize: 1,
           iconImage: "marker_gray"),
     ];
 

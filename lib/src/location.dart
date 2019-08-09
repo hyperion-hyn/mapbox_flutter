@@ -16,8 +16,7 @@ class LatLng {
   const LatLng(double latitude, double longitude)
       : assert(latitude != null),
         assert(longitude != null),
-        latitude =
-            (latitude < -90.0 ? -90.0 : (90.0 < latitude ? 90.0 : latitude)),
+        latitude = (latitude < -90.0 ? -90.0 : (90.0 < latitude ? 90.0 : latitude)),
         longitude = (longitude + 180.0) % 360.0 - 180.0;
 
   /// The latitude in degrees between -90.0 and 90.0, both inclusive.
@@ -37,7 +36,9 @@ class LatLng {
     return LatLng(json[0], json[1]);
   }
 
-
+  double distanceTo(LatLng other) {
+    return TurfMeasurement.distance(LatLng(latitude, longitude), other);
+  }
 
   @override
   String toString() => '$runtimeType($latitude, $longitude)';
@@ -90,6 +91,27 @@ class LatLngBounds {
     );
   }
 
+  static LatLngBounds fromLatLngs(final List<LatLng> latLngs) {
+    double minLat = 90;
+    double minLon = double.maxFinite;
+    double maxLat = -90;
+    double maxLon = -double.maxFinite;
+
+    for (final LatLng gp in latLngs) {
+      final double latitude = gp.latitude;
+      final double longitude = gp.longitude;
+      minLat = min(minLat, latitude);
+      minLon = min(minLon, longitude);
+      maxLat = max(maxLat, latitude);
+      maxLon = max(maxLon, longitude);
+    }
+
+    var southWest = LatLng(minLat,minLon);
+    var northEast = LatLng(maxLat,maxLon);
+
+    return new LatLngBounds(southwest:southWest,northeast:northEast);
+  }
+
   @override
   String toString() {
     return '$runtimeType($southwest, $northeast)';
@@ -97,9 +119,7 @@ class LatLngBounds {
 
   @override
   bool operator ==(Object o) {
-    return o is LatLngBounds &&
-        o.southwest == southwest &&
-        o.northeast == northeast;
+    return o is LatLngBounds && o.southwest == southwest && o.northeast == northeast;
   }
 
   @override
