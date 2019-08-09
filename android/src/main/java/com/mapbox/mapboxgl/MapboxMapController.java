@@ -369,6 +369,17 @@ final class MapboxMapController
                     )
             );
         }
+
+        if (style.getImage("marker_big") == null) {
+            style.addImage(
+                    "marker_big",
+                    BitmapFactory.decodeResource(
+                            context.getResources(), R.mipmap.marker_big
+                    )
+            );
+        }
+
+
     }
 
     private void enableLineManager(@NonNull Style style) {
