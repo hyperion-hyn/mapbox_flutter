@@ -545,6 +545,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             if let iconAnchor = data["iconAnchor"] as? String {
                 attributes["iconAnchor"] = iconAnchor
             }
+            attributes["id"] = symbolIndex
             feature.attributes = attributes
             features.append(feature)
             ids.append(String(symbolIndex))
@@ -800,7 +801,7 @@ class MapRouteDataModel{
         
         mapview.setCamera(newCamera, withDuration: 1, animationTimingFunction: nil)
         
-    
+
         //add marker
         
         
