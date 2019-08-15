@@ -115,6 +115,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             } else {
                 result(nil)
             }
+        case "map#getCameraPosition":
+            let camera = mapView.camera;
+            result(["position":camera.toDict(mapView: mapView)])
         case "location#enableLocation":
             setMyLocationTrackingMode(myLocationTrackingMode: MGLUserTrackingMode.follow)
             result(nil)

@@ -4,7 +4,6 @@
 
 part of mapbox_gl;
 
-
 typedef void OnMapClickCallback(Point<double> point, LatLng coordinates);
 typedef void OnMapLongPressCallback(Point<double> point, LatLng coordinates);
 typedef void OnStyleLoadedCallback(MapboxMapController controller);
@@ -27,13 +26,12 @@ typedef void OnCameraTrackingDismissedCallback();
 /// Line tap events can be received by adding callbacks to [onLineTapped].
 /// Circle tap events can be received by adding callbacks to [onCircleTapped].
 class MapboxMapController extends ChangeNotifier {
-  MapboxMapController._(this._id, MethodChannel channel,
-      CameraPosition initialCameraPosition,
+  MapboxMapController._(this._id, MethodChannel channel, CameraPosition initialCameraPosition,
       {this.onMapClick,
-        this.onMapLongPress,
-        this.onCameraTrackingDismissed,
-        this.onStyleLoaded,
-        this.onAnimateCameraFinish})
+      this.onMapLongPress,
+      this.onCameraTrackingDismissed,
+      this.onStyleLoaded,
+      this.onAnimateCameraFinish})
       : assert(_id != null),
         assert(channel != null),
         _channel = channel {
@@ -41,17 +39,17 @@ class MapboxMapController extends ChangeNotifier {
     _channel.setMethodCallHandler(_handleMethodCall);
   }
 
-  static Future<MapboxMapController> init(int id,
-      CameraPosition initialCameraPosition, {
-        OnMapClickCallback onMapClick,
-        OnMapLongPressCallback onMapLongPress,
-        OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
-        OnStyleLoadedCallback onStyleLoaded,
-        VoidCallback onAnimateCameraFinish,
-      }) async {
+  static Future<MapboxMapController> init(
+    int id,
+    CameraPosition initialCameraPosition, {
+    OnMapClickCallback onMapClick,
+    OnMapLongPressCallback onMapLongPress,
+    OnCameraTrackingDismissedCallback onCameraTrackingDismissed,
+    OnStyleLoadedCallback onStyleLoaded,
+    VoidCallback onAnimateCameraFinish,
+  }) async {
     assert(id != null);
-    final MethodChannel channel =
-    MethodChannel('plugins.flutter.io/mapbox_maps_$id');
+    final MethodChannel channel = MethodChannel('plugins.flutter.io/mapbox_maps_$id');
     bool styleReady = await channel.invokeMethod('map#waitForMap');
     var controller = MapboxMapController._(id, channel, initialCameraPosition,
         onMapClick: onMapClick,
@@ -84,8 +82,7 @@ class MapboxMapController extends ChangeNotifier {
   final ArgumentCallbacks<Circle> onCircleTapped = ArgumentCallbacks<Circle>();
 
   /// Callbacks to receive tap events for info windows on symbols
-  final ArgumentCallbacks<Symbol> onInfoWindowTapped =
-  ArgumentCallbacks<Symbol>();
+  final ArgumentCallbacks<Symbol> onInfoWindowTapped = ArgumentCallbacks<Symbol>();
 
   /// The current set of symbols on this map.
   ///
@@ -160,6 +157,7 @@ class MapboxMapController extends ChangeNotifier {
         notifyListeners();
         break;
       case 'camera#onMove':
+        print("camera#onMove");
         _cameraPosition = CameraPosition.fromMap(call.arguments['position']);
         notifyListeners();
         break;
@@ -226,14 +224,20 @@ class MapboxMapController extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Starts an animated change of the map camera position.
-  ///
-  /// The returned [Future] completes after the change has been started on the
-  /// platform side.
   Future<void> animateCamera(CameraUpdate cameraUpdate) async {
     await _channel.invokeMethod('camera#animate', <String, dynamic>{
       'cameraUpdate': cameraUpdate._toJson(),
     });
+  }
+
+  /// Starts an animated change of the map camera position.
+  ///
+  /// The returned [Future] completes after the change has been started on the
+  /// platform side.
+  Future<CameraPosition> getCameraPosition() async {
+    Map<dynamic, dynamic> resultMap = await _channel.invokeMethod('map#getCameraPosition', <String, dynamic>{});
+    CameraPosition cameraPosition = CameraPosition.fromMap(resultMap['position']);
+    return cameraPosition;
   }
 
   /// Changes the map camera position.
@@ -254,8 +258,7 @@ class MapboxMapController extends ChangeNotifier {
   /// The returned [Future] completes with the added symbol once listeners have
   /// been notified.
   Future<Symbol> addSymbol(SymbolOptions options) async {
-    final SymbolOptions effectiveOptions =
-    SymbolOptions.defaultOptions.copyWith(options);
+    final SymbolOptions effectiveOptions = SymbolOptions.defaultOptions.copyWith(options);
     final String symbolId = await _channel.invokeMethod(
       'symbol#add',
       <String, dynamic>{
@@ -272,8 +275,7 @@ class MapboxMapController extends ChangeNotifier {
     List<SymbolOptions> effectiveOptionsList = List();
     List<dynamic> effectiveOptionsJsonList = List();
     for (SymbolOptions symbolOptions in optionsList) {
-      final SymbolOptions effectiveOptions =
-      SymbolOptions.defaultOptions.copyWith(symbolOptions);
+      final SymbolOptions effectiveOptions = SymbolOptions.defaultOptions.copyWith(symbolOptions);
       effectiveOptionsList.add(effectiveOptions);
       effectiveOptionsJsonList.add(effectiveOptions._toJson());
     }
@@ -363,8 +365,7 @@ class MapboxMapController extends ChangeNotifier {
   }
 
   Future<void> _removeSymbolList() async {
-    await _channel.invokeMethod('symbol#removeList', <String, dynamic>{
-    });
+    await _channel.invokeMethod('symbol#removeList', <String, dynamic>{});
   }
 
   /// Adds a line to the map, configured using the specified custom [options].
@@ -375,8 +376,7 @@ class MapboxMapController extends ChangeNotifier {
   /// The returned [Future] completes with the added line once listeners have
   /// been notified.
   Future<Line> addLine(LineOptions options) async {
-    final LineOptions effectiveOptions =
-    LineOptions.defaultOptions.copyWith(options);
+    final LineOptions effectiveOptions = LineOptions.defaultOptions.copyWith(options);
     final String lineId = await _channel.invokeMethod(
       'line#add',
       <String, dynamic>{
@@ -457,8 +457,7 @@ class MapboxMapController extends ChangeNotifier {
   /// The returned [Future] completes with the added circle once listeners have
   /// been notified.
   Future<Circle> addCircle(CircleOptions options) async {
-    final CircleOptions effectiveOptions =
-    CircleOptions.defaultOptions.copyWith(options);
+    final CircleOptions effectiveOptions = CircleOptions.defaultOptions.copyWith(options);
     final String circleId = await _channel.invokeMethod(
       'circle#add',
       <String, dynamic>{
@@ -531,8 +530,7 @@ class MapboxMapController extends ChangeNotifier {
     _circles.remove(id);
   }
 
-  Future<List> queryRenderedFeatures(Point<double> point, List<String> layerIds,
-      String filter) async {
+  Future<List> queryRenderedFeatures(Point<double> point, List<String> layerIds, String filter) async {
     try {
       final Map<Object, Object> reply = await _channel.invokeMethod(
         'map#queryRenderedFeatures',
@@ -549,8 +547,7 @@ class MapboxMapController extends ChangeNotifier {
     }
   }
 
-  Future<List> queryRenderedFeaturesInRect(Rect rect, List<String> layerIds,
-      String filter) async {
+  Future<List> queryRenderedFeaturesInRect(Rect rect, List<String> layerIds, String filter) async {
     try {
       final Map<Object, Object> reply = await _channel.invokeMethod(
         'map#queryRenderedFeatures',
