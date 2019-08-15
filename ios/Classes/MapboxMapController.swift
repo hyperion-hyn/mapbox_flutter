@@ -792,15 +792,21 @@ class MapRouteDataModel{
         
         
         
-        let paddingTop:CGFloat = data["paddingTop"] as? CGFloat ?? 100
-        let paddingLeft:CGFloat = data["paddingLeft"] as? CGFloat ?? 100
-        let paddingRight:CGFloat = data["paddingRight"] as? CGFloat ?? 100
-        let paddingBottom:CGFloat = data["paddingBottom"] as? CGFloat ?? 100
+        let paddingTop:CGFloat = data["paddingTop"] as? CGFloat ?? 100.0
+        let paddingLeft:CGFloat = data["paddingLeft"] as? CGFloat ?? 100.0
+        let paddingRight:CGFloat = data["paddingRight"] as? CGFloat ?? 100.0
+        let paddingBottom:CGFloat = data["paddingBottom"] as? CGFloat ?? 100.0
+        
+        print("padding")
+        print("paddingTop:\(paddingTop)")
+        print("paddingLeft:\(paddingLeft)")
+        print("paddingRight:\(paddingRight)")
+        print("paddingBottom:\(paddingBottom)")
         
     
-//        let newCamera = mapview.camera(currentCamera, fitting: polyline, edgePadding: UIEdgeInsets.init(top: 100 , left: 50, bottom: 100, right: 50))
+//        let newCamera = mapview.camera(currentCamera, fitting: polyline, edgePadding: UIEdgeInsets.init(top: 200 , left: 50, bottom: 200, right: 50))
 
-        let newCamera = mapview.camera(currentCamera, fitting: polyline, edgePadding: UIEdgeInsets.init(top: paddingTop , left: paddingLeft, bottom: paddingBottom, right: paddingRight))
+        let newCamera = mapview.camera(currentCamera, fitting: polyline, edgePadding: UIEdgeInsets.init(top: paddingTop/2 , left: paddingLeft/8, bottom: paddingBottom/2, right: paddingRight/8))
         
         mapview.setCamera(newCamera, withDuration: 1, animationTimingFunction: nil)
         

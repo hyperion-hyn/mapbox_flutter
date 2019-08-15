@@ -334,9 +334,9 @@ class DriveRouteOverlay(
             mapboxMap.animateCamera(
                 CameraUpdateFactory.newLatLngBounds(
                     latLngBounds,
-                    paddingLeft,
+                    paddingLeft/4,
                     paddingTop,
-                    paddingRight,
+                    paddingRight/4,
                     paddingBottom
                 )
             )
