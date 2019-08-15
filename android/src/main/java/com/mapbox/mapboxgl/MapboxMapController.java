@@ -414,6 +414,12 @@ final class MapboxMapController
                 result.success(Convert.toJson(getCameraPosition()));
                 break;
             }
+            case "map#getCameraPosition": {
+                final Map<String, Object> arguments = new HashMap<>(2);
+                arguments.put("position", Convert.toJson(mapboxMap.getCameraPosition()));
+                result.success(arguments);
+                break;
+            }
             case "location#enableLocation": {
                 if (mapboxMap.getStyle() != null) {
                     this.myLocationEnabled = true;
