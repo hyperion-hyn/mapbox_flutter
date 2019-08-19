@@ -423,7 +423,7 @@ final class MapboxMapController
             case "location#enableLocation": {
                 if (mapboxMap.getStyle() != null) {
                     this.myLocationEnabled = true;
-                    this.myLocationTrackingMode = CameraMode.TRACKING;
+                    this.myLocationTrackingMode = 1;//CameraMode.TRACKING;
                     enableLocationComponent(mapboxMap.getStyle());
                 }
                 break;
