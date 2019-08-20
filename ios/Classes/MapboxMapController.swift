@@ -603,7 +603,7 @@ class Symbol: MGLPointAnnotation {
         if(self.iconImage != nil){
             image = UIImage(named: self.iconImage!, in: bundle, compatibleWith: nil)!
         } else {
-            image = UIImage(named: "marker_big", in: bundle, compatibleWith: nil)!
+            image = UIImage(named: "hyn_marker_big", in: bundle, compatibleWith: nil)!
         }
         
         if let resizedImage = image.resize(maxWidthHeight: self.iconSize ?? 50.0) {

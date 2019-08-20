@@ -372,9 +372,9 @@ final class MapboxMapController
             );
         }
 
-        if (style.getImage("marker_big") == null) {
+        if (style.getImage("hyn_marker_big") == null) {
             style.addImage(
-                    "marker_big",
+                    "hyn_marker_big",
                     BitmapFactory.decodeResource(
                             context.getResources(), R.mipmap.marker_big
                     )
