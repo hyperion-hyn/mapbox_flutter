@@ -85,29 +85,30 @@ class MapUiBodyState extends State<MapUiBody> {
     );
   }
 
+  void _getPosition() async {
+    _position = await mapController.getCameraPosition();
+    setState(() {
+    });
+  }
+
   Widget _compassToggler() {
     return FlatButton(
       child: Text('${_compassEnabled ? 'disable' : 'enable'} compasss'),
       onPressed: () {
-        setState(() {
-          _compassEnabled = !_compassEnabled;
-        });
+        _getPosition();
       },
-    ); 
+    );
   }
 
   Widget _latLngBoundsToggler() {
     return FlatButton(
       child: Text(
-        _cameraTargetBounds.bounds == null
-            ? 'bound camera target'
-            : 'release camera target',
+        _cameraTargetBounds.bounds == null ? 'bound camera target' : 'release camera target',
       ),
       onPressed: () {
         setState(() {
-          _cameraTargetBounds = _cameraTargetBounds.bounds == null
-              ? CameraTargetBounds(sydneyBounds)
-              : CameraTargetBounds.unbounded;
+          _cameraTargetBounds =
+              _cameraTargetBounds.bounds == null ? CameraTargetBounds(sydneyBounds) : CameraTargetBounds.unbounded;
         });
       },
     );
@@ -115,9 +116,7 @@ class MapUiBodyState extends State<MapUiBody> {
 
   Widget _zoomBoundsToggler() {
     return FlatButton(
-      child: Text(_minMaxZoomPreference.minZoom == null
-          ? 'bound zoom'
-          : 'release zoom'),
+      child: Text(_minMaxZoomPreference.minZoom == null ? 'bound zoom' : 'release zoom'),
       onPressed: () {
         setState(() {
           _minMaxZoomPreference = _minMaxZoomPreference.minZoom == null
@@ -197,32 +196,31 @@ class MapUiBodyState extends State<MapUiBody> {
   @override
   Widget build(BuildContext context) {
     final MapboxMap mapboxMap = MapboxMap(
-      onMapCreated: onMapCreated,
-      initialCameraPosition: _kInitialPosition,
-      trackCameraPosition: true,
-      compassEnabled: _compassEnabled,
-      cameraTargetBounds: _cameraTargetBounds,
-      minMaxZoomPreference: _minMaxZoomPreference,
-      styleString: _styleString,
-      rotateGesturesEnabled: _rotateGesturesEnabled,
-      scrollGesturesEnabled: _scrollGesturesEnabled,
-      tiltGesturesEnabled: _tiltGesturesEnabled,
-      zoomGesturesEnabled: _zoomGesturesEnabled,
-      myLocationEnabled: _myLocationEnabled,
-      myLocationTrackingMode: _myLocationTrackingMode,
-      onMapClick: (point, latLng) async {
-        print("${point.x},${point.y}   ${latLng.latitude}/${latLng.longitude}");
-        List features = await mapController.queryRenderedFeatures(point, [],null);
-        if (features.length>0) {
-          print(features[0]);
-        }
-      },
-      onCameraTrackingDismissed: () {
-        this.setState(() {
-          _myLocationTrackingMode = MyLocationTrackingMode.None;
+        onMapCreated: onMapCreated,
+        initialCameraPosition: _kInitialPosition,
+        trackCameraPosition: false,
+        compassEnabled: _compassEnabled,
+        cameraTargetBounds: _cameraTargetBounds,
+        minMaxZoomPreference: _minMaxZoomPreference,
+        styleString: _styleString,
+        rotateGesturesEnabled: _rotateGesturesEnabled,
+        scrollGesturesEnabled: _scrollGesturesEnabled,
+        tiltGesturesEnabled: _tiltGesturesEnabled,
+        zoomGesturesEnabled: _zoomGesturesEnabled,
+        myLocationEnabled: _myLocationEnabled,
+        myLocationTrackingMode: _myLocationTrackingMode,
+        onMapClick: (point, latLng) async {
+          print("${point.x},${point.y}   ${latLng.latitude}/${latLng.longitude}");
+          List features = await mapController.queryRenderedFeatures(point, [], null);
+          if (features.length > 0) {
+            print(features[0]);
+          }
+        },
+        onCameraTrackingDismissed: () {
+          this.setState(() {
+            _myLocationTrackingMode = MyLocationTrackingMode.None;
+          });
         });
-      }
-    );
 
     final List<Widget> columnChildren = <Widget>[
       Padding(
@@ -243,8 +241,7 @@ class MapUiBodyState extends State<MapUiBody> {
           child: ListView(
             children: <Widget>[
               Text('camera bearing: ${_position.bearing}'),
-              Text(
-                  'camera target: ${_position.target.latitude.toStringAsFixed(4)},'
+              Text('camera target: ${_position.target.latitude.toStringAsFixed(4)},'
                   '${_position.target.longitude.toStringAsFixed(4)}'),
               Text('camera zoom: ${_position.zoom}'),
               Text('camera tilt: ${_position.tilt}'),
@@ -273,7 +270,7 @@ class MapUiBodyState extends State<MapUiBody> {
 
   void onMapCreated(MapboxMapController controller) {
     mapController = controller;
-    mapController.addListener(_onMapChanged);
+//    mapController.addListener(_onMapChanged);
     _extractMapInfo();
     setState(() {});
   }
