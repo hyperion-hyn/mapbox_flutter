@@ -433,6 +433,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     private func addHeavenMapSourceAndLayer(data: [String: Any]) {
         guard let id = data["id"] as? String,
             let sourceUrl = data["sourceUrl"] as? String,
+            let sourceLayer = data["sourceLayer"] as? String,
             let color = data["color"] as? Int
             else { return }
         
@@ -444,7 +445,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let layerId = getHeavenMapLayerId(id: id)
         guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
         let circlesLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
-        circlesLayer.sourceLayerIdentifier = "heaven"
+        circlesLayer.sourceLayerIdentifier = sourceLayer
         circlesLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
         circlesLayer.circleOpacity = NSExpression(forConstantValue: 0.8)
         circlesLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)

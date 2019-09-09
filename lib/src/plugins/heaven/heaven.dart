@@ -1,7 +1,6 @@
 part of mapbox_gl;
 
 class HeavenPlugin extends StatefulWidget {
-
   final List<HeavenDataModel> models;
 
   HeavenPlugin({this.models});
@@ -19,15 +18,21 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   Future<dynamic> _addModel(HeavenDataModel model) async {
-    if(MapboxMapParent.of(context).controller != null) {
-      return await MapboxMapParent.of(context).controller.channel.invokeMethod("heaven_map#addData", <String, dynamic>{'model': model._toJson()});
+    if (MapboxMapParent.of(context).controller != null) {
+      return await MapboxMapParent.of(context)
+          .controller
+          .channel
+          .invokeMethod("heaven_map#addData", <String, dynamic>{'model': model._toJson()});
     }
     return null;
   }
 
   Future<dynamic> _removeModel(String id) async {
-    if(MapboxMapParent.of(context).controller != null) {
-      return await MapboxMapParent.of(context).controller.channel.invokeMethod("heaven_map#removeData", <String, String>{'id': id});
+    if (MapboxMapParent.of(context).controller != null) {
+      return await MapboxMapParent.of(context)
+          .controller
+          .channel
+          .invokeMethod("heaven_map#removeData", <String, String>{'id': id});
     }
     return null;
   }
@@ -35,8 +40,9 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(MapboxMapParent.of(context).controller != null) {  //如果没有引用 MapboxMapParent.of(context).controller ，第二次不会触发didChangeDependencies
-      if(widget.models != null && widget.models.isNotEmpty) {
+    if (MapboxMapParent.of(context).controller != null) {
+      //如果没有引用 MapboxMapParent.of(context).controller ，第二次不会触发didChangeDependencies
+      if (widget.models != null && widget.models.isNotEmpty) {
         updateOptions([], widget.models);
       }
     }
@@ -51,34 +57,33 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   void updateOptions(List<HeavenDataModel> deletedModels, List<HeavenDataModel> newAddModels) async {
-    if(deletedModels.isNotEmpty) {
-      for(var model in deletedModels)
-        await _removeModel(model.id);
+    if (deletedModels.isNotEmpty) {
+      for (var model in deletedModels) await _removeModel(model.id);
     }
-    if(newAddModels.isNotEmpty) {
-      for(var model in newAddModels) {
+    if (newAddModels.isNotEmpty) {
+      for (var model in newAddModels) {
         await _addModel(model);
       }
     }
   }
 
   List<HeavenDataModel> _findDeletedModels(List<HeavenDataModel> newModels, List<HeavenDataModel> oldModels) {
-    if(oldModels == null) {
+    if (oldModels == null) {
       oldModels = [];
     }
-    if(newModels == null) {
+    if (newModels == null) {
       newModels = [];
     }
     var retDeletedModels = <HeavenDataModel>[];
-    for(var oldModel in oldModels) {
+    for (var oldModel in oldModels) {
       var haveSame = false;
-      for(var newModel in newModels) {
-        if(oldModel.id == newModel.id) {
+      for (var newModel in newModels) {
+        if (oldModel.id == newModel.id) {
           haveSame = true;
           break;
         }
       }
-      if(!haveSame) {
+      if (!haveSame) {
         retDeletedModels.add(oldModel);
       }
     }
@@ -86,22 +91,22 @@ class _HeavenPluginState extends State<HeavenPlugin> {
   }
 
   List<HeavenDataModel> _findNewAddModels(List<HeavenDataModel> newModels, List<HeavenDataModel> oldModels) {
-    if(oldModels == null) {
+    if (oldModels == null) {
       oldModels = [];
     }
-    if(newModels == null) {
+    if (newModels == null) {
       newModels = [];
     }
     var retNewModels = <HeavenDataModel>[];
-    for(var newModel in newModels) {
+    for (var newModel in newModels) {
       var haveSame = false;
-      for(var oldModel in oldModels) {
-        if(oldModel.id == newModel.id) {
+      for (var oldModel in oldModels) {
+        if (oldModel.id == newModel.id) {
           haveSame = true;
           break;
         }
       }
-      if(!haveSame) {
+      if (!haveSame) {
         retNewModels.add(newModel);
       }
     }
@@ -113,18 +118,19 @@ class HeavenDataModel {
   final String id;
   final String sourceUrl;
   final int color;
+  final String sourceLayer;
 
-  const HeavenDataModel({this.id, this.sourceUrl, this.color});
+  const HeavenDataModel({this.id, this.sourceUrl, this.color, this.sourceLayer});
 
   HeavenDataModel copyWith(HeavenDataModel changes) {
-    if(changes == null) {
+    if (changes == null) {
       return this;
     }
     return HeavenDataModel(
-      id: changes.id ?? id,
-      sourceUrl: changes.sourceUrl ?? sourceUrl,
-      color: changes.color ?? color
-    );
+        id: changes.id ?? id,
+        sourceUrl: changes.sourceUrl ?? sourceUrl,
+        color: changes.color ?? color,
+        sourceLayer: changes.sourceLayer ?? sourceLayer);
   }
 
   dynamic _toJson() {
@@ -135,9 +141,11 @@ class HeavenDataModel {
         json[fieldName] = value;
       }
     }
+
     addIfPresent('id', id);
     addIfPresent('sourceUrl', sourceUrl);
     addIfPresent('color', color);
+    addIfPresent('sourceLayer', sourceLayer);
     return json;
   }
 }

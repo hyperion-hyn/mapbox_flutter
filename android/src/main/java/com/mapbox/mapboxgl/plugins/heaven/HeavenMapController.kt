@@ -101,7 +101,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
                         circleStrokeWidth(2f),
                         circleStrokeOpacity(0.8f),
                         circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
-                ).withSourceLayer("heaven")
+                ).withSourceLayer(model.sourceLayer)
         style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
     }
 
@@ -122,7 +122,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
 
     private fun mapToModel(map: Map<*, *>?): HeavenDataModel? {
         if (map != null && map["id"] is String && map["sourceUrl"] is String && map["color"] is Number) {
-            return HeavenDataModel(map["id"] as String, map["sourceUrl"] as String, (map["color"] as Number).toInt());
+            return HeavenDataModel(map["id"] as String, map["sourceUrl"] as String, (map["color"] as Number).toInt(),map["sourceLayer"] as String);
         }
         return null
     }
