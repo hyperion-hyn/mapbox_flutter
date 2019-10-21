@@ -40,6 +40,7 @@ class MapUiBodyState extends State<MapUiBody> {
   CameraPosition _position = _kInitialPosition;
   bool _isMoving = false;
   bool _compassEnabled = true;
+  bool _trackingCamera = true;
   CameraTargetBounds _cameraTargetBounds = CameraTargetBounds.unbounded;
   MinMaxZoomPreference _minMaxZoomPreference = MinMaxZoomPreference.unbounded;
   String _styleString = MapboxStyles.MAPBOX_STREETS;
@@ -56,13 +57,14 @@ class MapUiBodyState extends State<MapUiBody> {
   }
 
   void _onMapChanged() {
+    print("_onMapChanged 执行了");
     setState(() {
       _extractMapInfo();
     });
   }
 
   void _extractMapInfo() {
-    _position = mapController.cameraPosition;
+    _position = mapController.cameraPosition!=null?mapController.cameraPosition:_position;
     _isMoving = mapController.isCameraMoving;
   }
 
@@ -87,15 +89,36 @@ class MapUiBodyState extends State<MapUiBody> {
 
   void _getPosition() async {
     _position = await mapController.getCameraPosition();
-    setState(() {
-    });
+    setState(() {});
+  }
+
+  Widget _getCurrentCenterPosition() {
+    return FlatButton(
+      child: Text('get map center position'),
+      onPressed: () {
+        _getPosition();
+      },
+    );
   }
 
   Widget _compassToggler() {
     return FlatButton(
       child: Text('${_compassEnabled ? 'disable' : 'enable'} compasss'),
       onPressed: () {
-        _getPosition();
+        setState(() {
+          _compassEnabled = !_compassEnabled;
+        });
+      },
+    );
+  }
+
+  Widget _trackingCameraToggler() {
+    return FlatButton(
+      child: Text('${_trackingCamera ? 'disable' : 'enable'} trackingCamera'),
+      onPressed: () {
+        setState(() {
+          _trackingCamera = !_trackingCamera;
+        });
       },
     );
   }
@@ -198,7 +221,7 @@ class MapUiBodyState extends State<MapUiBody> {
     final MapboxMap mapboxMap = MapboxMap(
         onMapCreated: onMapCreated,
         initialCameraPosition: _kInitialPosition,
-        trackCameraPosition: false,
+        trackCameraPosition: _trackingCamera,
         compassEnabled: _compassEnabled,
         cameraTargetBounds: _cameraTargetBounds,
         minMaxZoomPreference: _minMaxZoomPreference,
@@ -246,6 +269,8 @@ class MapUiBodyState extends State<MapUiBody> {
               Text('camera zoom: ${_position.zoom}'),
               Text('camera tilt: ${_position.tilt}'),
               Text(_isMoving ? '(Camera moving)' : '(Camera idle)'),
+              _getCurrentCenterPosition(),
+              _trackingCameraToggler(),
               _compassToggler(),
               _myLocationTrackingModeCycler(),
               _latLngBoundsToggler(),
@@ -270,7 +295,7 @@ class MapUiBodyState extends State<MapUiBody> {
 
   void onMapCreated(MapboxMapController controller) {
     mapController = controller;
-//    mapController.addListener(_onMapChanged);
+    mapController.addListener(_onMapChanged);
     _extractMapInfo();
     setState(() {});
   }

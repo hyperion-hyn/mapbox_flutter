@@ -296,6 +296,33 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         return inside && intersects
     }
     
+    /**
+     
+        add camera listern
+     */
+    
+    func mapView(_ mapView: MGLMapView, regionWillChangeAnimated animated: Bool) {
+        
+        if(trackCameraPosition){
+            channel.invokeMethod("camera#onMoveStarted", arguments: ["map": vId])
+        }
+        
+    }
+    
+    func mapViewRegionIsChanging(_ mapView: MGLMapView) {
+        if(trackCameraPosition){
+            let camera = mapView.camera;
+            channel.invokeMethod("camera#onMove", arguments: ["position":camera.toDict(mapView: mapView)])
+        }
+    }
+    
+    func mapView(_ mapView: MGLMapView, regionDidChangeAnimated animated: Bool) {
+        
+        if(trackCameraPosition){
+             channel.invokeMethod("camera#onIdle", arguments: ["map": vId])
+        }
+    }
+    
     /*
      *  MapboxMapOptionsSink
      */
