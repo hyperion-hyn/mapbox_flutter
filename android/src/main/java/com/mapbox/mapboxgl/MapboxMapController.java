@@ -430,6 +430,7 @@ final class MapboxMapController
             }
             case "location#disableLocation": {
                 setMyLocationEnabled(false);
+                result.success(null);
                 break;
             }
             case "location#lastKnownLocation": {
