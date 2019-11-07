@@ -117,7 +117,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
         ).build()
 
 
-        val simulateRoute = true
+        val simulateRoute = false
 
         val initialPosition = CameraPosition.Builder()
                 .target(navigationDataModel.startLatLng)
