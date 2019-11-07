@@ -92,24 +92,41 @@ class _RouteMapPluginSceneState extends State<RouteMapPluginScene> {
       child: Stack(
         children: <Widget>[
           RoutePlugin(model: model),
-          RaisedButton(
-              onPressed: () async {
-                var start = LatLng(23.12076, 113.322058);
-                var end = LatLng(23.135843, 113.326554);
-                var result = await _fetchRoute(start, end);
-                setState(() {
-                  var padding = Random().nextInt(300);
-                  model = RouteDataModel(
-                      startLatLng: start,
-                      endLatLng: end,
-                      directionsResponse: result,
-                      paddingTop: padding,
-                      paddingLeft: padding,
-                      paddingBottom: padding,
-                      paddingRight: padding);
-                });
-              },
-              child: Text('fetch'))
+          Container(
+            child: Column(
+              children: <Widget>[
+                RaisedButton(
+                    onPressed: () async {
+                      var start = LatLng(23.12076, 113.322058);
+                      var end = LatLng(23.135843, 113.326554);
+                      var result = await _fetchRoute(start, end);
+                      setState(() {
+                        var padding = Random().nextInt(300);
+                        model = RouteDataModel(
+                            startLatLng: start,
+                            endLatLng: end,
+                            directionsResponse: result,
+                            paddingTop: padding,
+                            paddingLeft: padding,
+                            paddingBottom: padding,
+                            paddingRight: padding);
+                      });
+                    },
+                    child: Text('fetch')),
+                RaisedButton(
+                  onPressed: () {
+                    var start = LatLng(23.12076, 113.322058);
+                    var end = LatLng(23.135843, 113.326554);
+                    var result = model.directionsResponse;
+                    var navigatonModel = NavigationDataModel(
+                        startLatLng: start, endLatLng: end, directionsResponse: result, profile: "driving");
+                    Navigation.navigation(context, navigatonModel);
+                  },
+                  child: Text("navigation"),
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );

@@ -31,4 +31,5 @@ part 'src/global.dart';
 part 'src/plugins/mapbox_map_parent.dart';
 part 'src/plugins/heaven/heaven.dart';
 part 'src/plugins/route/route.dart';
+part 'src/plugins/navigation/navigation.dart';
 part 'src/truf/truf_measurement.dart';

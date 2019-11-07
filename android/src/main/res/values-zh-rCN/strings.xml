@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mapbox_default_style">https://cn.tile.map3.network/see-it-all-boundary-cdn-zh.json</string>
+    <string name="gps_signal_resume">Gps 信号已恢复</string>
+    <string name="gps_signal_weak">Gps 信号弱</string>
+    <string name="start_navigation">开始导航</string>
+</resources>

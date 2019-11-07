@@ -38,6 +38,7 @@ class _RoutePluginState extends State<RoutePlugin> {
     channel.invokeMethod('map_route#addRouteOverlay', <String, dynamic>{'model': model._toJson()});
   }
 
+
   Future<dynamic> _removeRouteOverlay() async {
     var channel = MapboxMapParent.of(context)?.controller?.channel;
     return channel?.invokeMethod("map_route#removeRouteOverlay");
@@ -93,3 +94,5 @@ class RouteDataModel {
     return _toJson().toString();
   }
 }
+
+

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="TitanNavigationTheme" parent="NavigationViewLight">
+        <item name="navigationViewMapStyle">@string/mapbox_default_style</item>
+    </style>
+</resources>
