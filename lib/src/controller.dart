@@ -230,6 +230,11 @@ class MapboxMapController extends ChangeNotifier {
     });
   }
 
+  Future<void> animateCameraWithTime(CameraUpdate cameraUpdate, int durationMs) async {
+    await _channel.invokeMethod(
+        'camera#animateWithTime', <String, dynamic>{'cameraUpdate': cameraUpdate._toJson(), "durationMs": durationMs.toString()});
+  }
+
   /// Starts an animated change of the map camera position.
   ///
   /// The returned [Future] completes after the change has been started on the

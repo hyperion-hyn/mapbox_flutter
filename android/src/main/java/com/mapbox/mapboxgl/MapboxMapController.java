@@ -210,6 +210,10 @@ final class MapboxMapController
         mapboxMap.animateCamera(cameraUpdate, callback);
     }
 
+    private void animateCamera(CameraUpdate cameraUpdate, int durationMs, MapboxMap.CancelableCallback callback) {
+        mapboxMap.animateCamera(cameraUpdate, durationMs, callback);
+    }
+
     private CameraPosition getCameraPosition() {
         return trackCameraPosition ? mapboxMap.getCameraPosition() : null;
     }
@@ -476,6 +480,25 @@ final class MapboxMapController
                 result.success(null);
                 break;
             }
+            case "camera#animateWithTime": {
+                final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
+                int durationMs = Integer.parseInt(call.argument("durationMs"));
+                if (cameraUpdate != null) {
+                    // camera transformation not handled yet
+                    animateCamera(cameraUpdate, durationMs, new MapboxMap.CancelableCallback() {
+                        @Override
+                        public void onCancel() {
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            methodChannel.invokeMethod("camera#animateFinish", Collections.singletonMap("map", id));
+                        }
+                    });
+                }
+                result.success(null);
+                break;
+            }
             case "map#queryRenderedFeatures": {
                 Map<String, Object> reply = new HashMap<>();
                 List<Feature> features;
@@ -683,6 +706,7 @@ final class MapboxMapController
         methodChannel.invokeMethod("map#onMapClick", arguments);
         return true;
     }
+
     @Override
     public boolean onMapLongClick(@NonNull LatLng point) {
         PointF pointf = mapboxMap.getProjection().toScreenLocation(point);

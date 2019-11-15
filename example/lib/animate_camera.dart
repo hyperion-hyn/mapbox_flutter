@@ -8,8 +8,7 @@ import 'package:mapbox_gl/mapbox_gl.dart';
 import 'page.dart';
 
 class AnimateCameraPage extends Page {
-  AnimateCameraPage()
-      : super(const Icon(Icons.map), 'Camera control, animated');
+  AnimateCameraPage() : super(const Icon(Icons.map), 'Camera control, animated');
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +41,7 @@ class AnimateCameraState extends State<AnimateCamera> {
             height: 200.0,
             child: MapboxMap(
               onMapCreated: _onMapCreated,
-              initialCameraPosition:
-                  const CameraPosition(target: LatLng(0.0, 0.0)),
+              initialCameraPosition: const CameraPosition(target: LatLng(0.0, 0.0)),
             ),
           ),
         ),
@@ -101,6 +99,17 @@ class AnimateCameraState extends State<AnimateCamera> {
                     );
                   },
                   child: const Text('newLatLngZoom'),
+                ),
+                FlatButton(
+                  onPressed: () {
+                    mapController.animateCameraWithTime(
+                        CameraUpdate.newLatLngZoom(
+                          const LatLng(37.4231613, -122.087159),
+                          11.0,
+                        ),
+                        1000);
+                  },
+                  child: const Text('newLatLngZoomWithTime'),
                 ),
                 FlatButton(
                   onPressed: () {
