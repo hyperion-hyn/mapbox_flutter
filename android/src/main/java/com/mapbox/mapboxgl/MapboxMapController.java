@@ -915,5 +915,12 @@ final class MapboxMapController
                 permission, android.os.Process.myPid(), android.os.Process.myUid());
     }
 
+    ///see https://github.com/flutter/flutter/issues/40126
+    @Override
+    public void onInputConnectionLocked() {
+    }
 
+    @Override
+    public void onInputConnectionUnlocked() {
+    }
 }
