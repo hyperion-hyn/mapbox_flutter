@@ -47,6 +47,9 @@ import com.mapbox.mapboxsdk.plugins.annotation.Line;
 import com.mapbox.mapboxsdk.plugins.annotation.LineManager;
 import com.mapbox.geojson.Feature;
 import com.mapbox.mapboxsdk.style.expressions.Expression;
+import com.mapbox.mapboxsdk.style.layers.Layer;
+import com.mapbox.mapboxsdk.style.layers.PropertyValue;
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 
 import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.common.MethodChannel;
@@ -66,6 +69,7 @@ import static com.mapbox.mapboxgl.MapboxMapsPlugin.PAUSED;
 import static com.mapbox.mapboxgl.MapboxMapsPlugin.RESUMED;
 import static com.mapbox.mapboxgl.MapboxMapsPlugin.STARTED;
 import static com.mapbox.mapboxgl.MapboxMapsPlugin.STOPPED;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.textField;
 
 /**
  * Controller of a single MapboxMaps MapView instance.
@@ -112,6 +116,7 @@ final class MapboxMapController
     private List<Integer> compassMarginsInitial;
     private boolean enableLogoInitial;
     private boolean enableAttributionInitial;
+    private String languageCode;
 
     MapboxMapController(
             int id,
@@ -122,7 +127,8 @@ final class MapboxMapController
             String styleStringInitial,
             List<Integer> compassMargins,
             boolean enableLogo,
-            boolean enableAttribution) {
+            boolean enableAttribution,
+            String languageCode) {
         Mapbox.getInstance(context, getAccessToken(context));
         this.id = id;
         this.context = context;
@@ -141,6 +147,7 @@ final class MapboxMapController
         this.compassMarginsInitial = compassMargins;
         this.enableLogoInitial = enableLogo;
         this.enableAttributionInitial = enableAttribution;
+        this.languageCode = languageCode;
     }
 
     private static String getAccessToken(@NonNull Context context) {
@@ -329,7 +336,12 @@ final class MapboxMapController
             // is fixed with 0.6.0 of annotations plugin
             mapboxMap.addOnMapClickListener(MapboxMapController.this);
             mapboxMap.addOnMapLongClickListener(MapboxMapController.this);
+
+            //set style language
+            setStyleLanguage(style,languageCode);
+
             methodChannel.invokeMethod("map#onStyleLoaded", Collections.singletonMap("map", id));
+
         }
     };
 
@@ -883,6 +895,41 @@ final class MapboxMapController
     @Override
     public void setCompassMargins(int left, int top, int right, int bottom) {
         mapboxMap.getUiSettings().setCompassMargins(left, top, right, bottom);
+    }
+
+    @Override
+    public void setLanguageCode(String languageCode) {
+        mapboxMap.getStyle(style -> {
+            if (style.isFullyLoaded()) {
+                setStyleLanguage(style, languageCode);
+            }else{
+                mapView.addOnDidFinishLoadingStyleListener(new MapView.OnDidFinishLoadingStyleListener() {
+                    @Override
+                    public void onDidFinishLoadingStyle() {
+
+                    }
+                });
+            }
+        });
+    }
+
+
+    private void setStyleLanguage(Style style, String languageCode) {
+        List<Layer> layerList = style.getLayers();
+        for (Layer layer : layerList) {
+            if (layer instanceof SymbolLayer) {
+                SymbolLayer symbolLayer = (SymbolLayer) layer;
+                PropertyValue<?> textFieldProperty = symbolLayer.getTextField();
+                if (textFieldProperty.isExpression() && !textFieldProperty.isNull()) {
+                    layer.setProperties(textField(getLanguageExpression(languageCode)));
+                }
+            }
+        }
+    }
+
+    private Expression getLanguageExpression(String languageCode) {
+        String firstName = "name:" + languageCode;
+        return Expression.coalesce(Expression.get(firstName), Expression.get("name_en"), Expression.get("name"));
     }
 
     private void updateMyLocationEnabled() {

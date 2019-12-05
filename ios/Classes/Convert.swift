@@ -45,6 +45,10 @@ class Convert {
         if let compassMargins = options["compassMargins"] as? [Int] {
             delegate.setCompassMargins(left: compassMargins[0], top: compassMargins[1], right: compassMargins[2], bottom: compassMargins[3])
         }
+        if let languageCode = options["languageCode"] as? String {
+            delegate.setLanguageCode(languageCode: languageCode)
+        }
+        
     }
     
     class func parseCameraUpdate(cameraUpdate: [Any], mapView: MGLMapView) -> MGLMapCamera? {

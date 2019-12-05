@@ -38,4 +38,6 @@ interface MapboxMapOptionsSink {
   void setEnableAttribution(boolean enableAttribution);
 
   void setCompassMargins(int left, int top, int right, int bottom);
+
+  void setLanguageCode(String languageCode);
 }

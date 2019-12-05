@@ -43,7 +43,7 @@ class MapUiBodyState extends State<MapUiBody> {
   bool _trackingCamera = true;
   CameraTargetBounds _cameraTargetBounds = CameraTargetBounds.unbounded;
   MinMaxZoomPreference _minMaxZoomPreference = MinMaxZoomPreference.unbounded;
-  String _styleString = MapboxStyles.MAPBOX_STREETS;
+  String _styleString = "https://cn.tile.map3.network/fiord-color.json";
   bool _rotateGesturesEnabled = true;
   bool _scrollGesturesEnabled = true;
   bool _tiltGesturesEnabled = true;
@@ -219,6 +219,7 @@ class MapUiBodyState extends State<MapUiBody> {
   @override
   Widget build(BuildContext context) {
     final MapboxMap mapboxMap = MapboxMap(
+        languageCode: "ko",
         onMapCreated: onMapCreated,
         initialCameraPosition: _kInitialPosition,
         trackCameraPosition: _trackingCamera,

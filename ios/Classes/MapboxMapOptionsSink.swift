@@ -17,4 +17,5 @@ protocol MapboxMapOptionsSink {
     func setEnableLogo(enableLogo: Bool)
     func setEnableAttribution(enableAttribution: Bool)
     func setCompassMargins(left: Int, top: Int, right: Int, bottom: Int)
+    func setLanguageCode(languageCode: String)
 }

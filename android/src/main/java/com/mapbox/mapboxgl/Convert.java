@@ -289,6 +289,10 @@ class Convert {
         if (enableAttribution != null) {
             sink.setEnableAttribution(toBoolean(enableAttribution));
         }
+        final Object languageCode = data.get("languageCode");
+        if (languageCode != null) {
+            sink.setLanguageCode(toString(languageCode));
+        }
     }
 
     static void interpretSymbolOptions(Object o, SymbolOptionsSink sink) {

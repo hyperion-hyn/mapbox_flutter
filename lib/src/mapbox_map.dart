@@ -31,6 +31,7 @@ class MapboxMap extends StatefulWidget {
     this.compassMargins,
     this.enableAttribution = true,
     this.enableLogo = true,
+    this.languageCode = "zh"
   }) : assert(initialCameraPosition != null);
 
   final List<Widget> children;
@@ -122,6 +123,10 @@ class MapboxMap extends StatefulWidget {
 
   /// Called when the location tracking mode changes, such as when the user moves the map
   final OnCameraTrackingDismissedCallback onCameraTrackingDismissed;
+
+
+
+  final String languageCode;
 
   @override
   State createState() => _MapboxMapState();
@@ -229,7 +234,8 @@ class _MapboxMapOptions {
     this.myLocationTrackingMode,
     this.compassMargins,
     this.enableAttribution,
-    this.enableLogo
+    this.enableLogo,
+    this.languageCode
   });
 
   static _MapboxMapOptions fromWidget(MapboxMap map) {
@@ -247,7 +253,8 @@ class _MapboxMapOptions {
       myLocationTrackingMode: map.myLocationTrackingMode,
       compassMargins: map.compassMargins,
       enableAttribution: map.enableAttribution,
-      enableLogo: map.enableLogo
+      enableLogo: map.enableLogo,
+      languageCode: map.languageCode
     );
   }
 
@@ -279,6 +286,8 @@ class _MapboxMapOptions {
 
   final bool enableAttribution;
 
+  final String languageCode;
+
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> optionsMap = <String, dynamic>{};
 
@@ -302,6 +311,7 @@ class _MapboxMapOptions {
     addIfNonNull('compassMargins', compassMargins?._toJson());
     addIfNonNull('enableLogo', enableLogo);
     addIfNonNull('enableAttribution', enableAttribution);
+    addIfNonNull('languageCode', languageCode);
     return optionsMap;
   }
 

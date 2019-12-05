@@ -34,6 +34,8 @@ class MapboxMapController: NSObject {
     
     private var symbolIndex = 0;
     
+    private var languageCode :String?;
+    
     init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, binaryMessenger messenger: FlutterBinaryMessenger) {
         mapView = MGLMapView(frame: frame)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -611,6 +613,8 @@ extension MapboxMapController: MGLMapViewDelegate {
             mapView.setCamera(camera, animated: false)
         }
         
+        setLanguageCode(languageCode: self.languageCode!)
+        
         mapReadyResult?(currentStyle != nil)
         mapReadyResult = nil
     }
@@ -753,6 +757,34 @@ extension MapboxMapController: MapboxMapOptionsSink {
     func setCompassMargins(left: Int, top: Int, right: Int, bottom: Int) {
         mapView.compassViewMargins = CGPoint(x: right, y: top)
     }
+    
+    func setLanguageCode(languageCode: String) {
+        self.languageCode = languageCode
+        if(mapView.style==nil){
+            return;
+        }
+        setLanguageCode(style: mapView.style!, languageCode: languageCode);
+    }
+    
+    func setLanguageCode(style: MGLStyle,languageCode: String) {
+        let layers = style.layers;
+        for layer in layers{
+            if layer is MGLSymbolStyleLayer{
+                let layerTemp = layer as! MGLSymbolStyleLayer
+                layerTemp.text = getLanguageExpression(languageCode: languageCode)
+            
+            }
+        }
+    }
+    
+    func getLanguageExpression(languageCode:String) -> NSExpression{
+        let firstName = "name:" + languageCode;
+        return NSExpression(format: "mgl_coalesce({%K,%K,%K})",argumentArray:["\(firstName)","name_en","name"])
+    
+    }
+    
+    
+    
     
 }
 

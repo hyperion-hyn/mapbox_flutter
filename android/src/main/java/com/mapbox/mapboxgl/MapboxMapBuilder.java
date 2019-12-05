@@ -31,12 +31,13 @@ class MapboxMapBuilder implements MapboxMapOptionsSink {
   private List<Integer> compassMargins;
   private boolean enableLogo;
   private boolean enableAttribution;
+  private String languageCode;
 
   MapboxMapController build(
     int id, Context context, AtomicInteger state, PluginRegistry.Registrar registrar) {
     final MapboxMapController controller =
       new MapboxMapController(id, context, state, registrar, options, styleString,
-              compassMargins, enableLogo, enableAttribution);
+              compassMargins, enableLogo, enableAttribution,languageCode);
     controller.init();
     controller.setMyLocationEnabled(myLocationEnabled);
     controller.setMyLocationTrackingMode(myLocationTrackingMode);
@@ -128,6 +129,11 @@ class MapboxMapBuilder implements MapboxMapOptionsSink {
     compassMargins.add(top);
     compassMargins.add(right);
     compassMargins.add(bottom);
+  }
+
+  @Override
+  public void setLanguageCode(String languageCode) {
+    this.languageCode = languageCode;
   }
 
 }
