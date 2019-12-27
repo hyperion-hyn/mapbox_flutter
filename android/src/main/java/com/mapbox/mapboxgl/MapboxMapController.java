@@ -331,14 +331,14 @@ final class MapboxMapController
             enableLocationComponent(style);
             enableSymbolMarker(style);
             //enable plugins
-            MapPluginsManager.INSTANCE.onStyleLoaded(mapView, mapboxMap, style);
+            MapPluginsManager.INSTANCE.onStyleLoaded(id, mapView, mapboxMap, style);
             // needs to be placed after SymbolManager#addClickListener,
             // is fixed with 0.6.0 of annotations plugin
             mapboxMap.addOnMapClickListener(MapboxMapController.this);
             mapboxMap.addOnMapLongClickListener(MapboxMapController.this);
 
             //set style language
-            setStyleLanguage(style,languageCode);
+            setStyleLanguage(style, languageCode);
 
             methodChannel.invokeMethod("map#onStyleLoaded", Collections.singletonMap("map", id));
 
@@ -416,7 +416,7 @@ final class MapboxMapController
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
-        if (MapPluginsManager.INSTANCE.onMethodCall(call, result)) return;
+        if (MapPluginsManager.INSTANCE.onMethodCall(id, call, result)) return;
         switch (call.method) {
             case "map#waitForMap":
                 if (mapboxMap != null) {
@@ -750,7 +750,7 @@ final class MapboxMapController
         if (circleManager != null) {
             circleManager.onDestroy();
         }
-        MapPluginsManager.INSTANCE.dispose();
+        MapPluginsManager.INSTANCE.dispose(id);
 
         mapView.onDestroy();
         registrar.activity().getApplication().unregisterActivityLifecycleCallbacks(this);
@@ -902,7 +902,7 @@ final class MapboxMapController
         mapboxMap.getStyle(style -> {
             if (style.isFullyLoaded()) {
                 setStyleLanguage(style, languageCode);
-            }else{
+            } else {
                 mapView.addOnDidFinishLoadingStyleListener(new MapView.OnDidFinishLoadingStyleListener() {
                     @Override
                     public void onDidFinishLoadingStyle() {
