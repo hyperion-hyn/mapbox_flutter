@@ -113,6 +113,7 @@ class _RouteMapPluginSceneState extends State<RouteMapPluginScene> {
                       });
                     },
                     child: Text('fetch')),
+                // todo: jison_test_navigation
                 RaisedButton(
                   onPressed: () {
                     var start = LatLng(23.12076, 113.322058);

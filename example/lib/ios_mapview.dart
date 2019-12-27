@@ -85,7 +85,7 @@ class _IosMapSceneState extends State<IosMapScene> {
                 });
               },
               mini: true,
-              child: Icon(Icons.location_on),
+              child: Icon(Icons.location_city),
             ),
           ),
         ),
