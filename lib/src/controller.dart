@@ -109,6 +109,10 @@ class MapboxMapController extends ChangeNotifier {
   bool get isCameraMoving => _isCameraMoving;
   bool _isCameraMoving = false;
 
+  //True if the map camera is currently moving by user drag
+  bool get isGesture => _isGesture;
+  bool _isGesture = false;
+
   /// Returns the most recent camera position reported by the platform side.
   /// Will be null, if [MapboxMap.trackCameraPosition] is false.
   CameraPosition get cameraPosition => _cameraPosition;
@@ -154,15 +158,17 @@ class MapboxMapController extends ChangeNotifier {
         break;
       case 'camera#onMoveStarted':
         _isCameraMoving = true;
+        _isGesture = call.arguments['isGesture'];
         notifyListeners();
         break;
       case 'camera#onMove':
-        print("camera#onMove");
+//        print("camera#onMove");
         _cameraPosition = CameraPosition.fromMap(call.arguments['position']);
         notifyListeners();
         break;
       case 'camera#onIdle':
         _isCameraMoving = false;
+        _isGesture = false;
         notifyListeners();
         break;
       case 'map#onMapClick':
