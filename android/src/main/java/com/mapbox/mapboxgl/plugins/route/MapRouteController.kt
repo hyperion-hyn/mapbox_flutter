@@ -63,7 +63,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
         }
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result): Boolean {
+    override fun onMethodCall(mapView: MapView ,call: MethodCall, result: MethodChannel.Result): Boolean {
         when (call.method) {
             "map_route#addRouteOverlay" -> {
                 val model = MapRouteDataModel.interpretOptions(call.argument<Map<*, *>>("model")!!)

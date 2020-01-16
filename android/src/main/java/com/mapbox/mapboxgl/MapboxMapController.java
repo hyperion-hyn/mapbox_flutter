@@ -416,7 +416,7 @@ final class MapboxMapController
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
-        if (MapPluginsManager.INSTANCE.onMethodCall(id, call, result)) return;
+        if (MapPluginsManager.INSTANCE.onMethodCall(id, mapView,call, result)) return;
         switch (call.method) {
             case "map#waitForMap":
                 if (mapboxMap != null) {

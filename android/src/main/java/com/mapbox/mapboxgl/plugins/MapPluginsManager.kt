@@ -42,10 +42,10 @@ object MapPluginsManager {
         }
     }
 
-    fun onMethodCall(id: Int, call: MethodCall, result: MethodChannel.Result): Boolean {
+    fun onMethodCall(id: Int, mapView: MapView, call: MethodCall, result: MethodChannel.Result): Boolean {
         val mapPlugins = plugins[id] ?: return false
         for ((_, plugin) in mapPlugins) {
-            if (plugin.onMethodCall(call, result)) {
+            if (plugin.onMethodCall(mapView,call, result)) {
                 return true;
             }
         }
