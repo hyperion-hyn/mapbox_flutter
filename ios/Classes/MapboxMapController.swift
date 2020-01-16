@@ -346,7 +346,7 @@ class MapboxMapController: NSObject {
         return nil
     }
     
-    // MARK: heaven map
+    // MARK: heaven map <警察局、大使馆>
     private func addHeavenMapSourceAndLayer(data: [String: Any]) {
         guard let id = data["id"] as? String,
             let sourceUrl = data["sourceUrl"] as? String,
@@ -354,28 +354,45 @@ class MapboxMapController: NSObject {
             let color = data["color"] as? Int
             else { return }
         
+        print("[Mapbox] --> addHeavenMapSourceAndLayer, data:\(data)")
+        
         let sourcId = getHeavenMapSourceId(sourceId: id)
+        let layerId = getHeavenMapLayerId(id: id)
+
         guard mapView.style?.source(withIdentifier: sourcId) == nil else { return }
         let source = MGLVectorTileSource(identifier: sourcId, tileURLTemplates: [sourceUrl])
         mapView.style?.addSource(source)
         
-        let layerId = getHeavenMapLayerId(id: id)
-        guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
-        let circlesLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
-        circlesLayer.sourceLayerIdentifier = sourceLayer
-        circlesLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
-        circlesLayer.circleOpacity = NSExpression(forConstantValue: 0.8)
-        circlesLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
-        circlesLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
-        circlesLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
-        //circlesLayer.predicate = NSPredicate(format: "cluster == YES")
+        let bundle = PodAsset.bundle(forPod: "MapboxGl")
+        var image = UIImage(named: sourceLayer, in: bundle, compatibleWith: nil)
+        var layer: MGLVectorStyleLayer!
+        //image = nil
+        if image != nil {
+            mapView.style?.setImage(image!, forName: sourceLayer)
+            guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
+            let circlesLayer = MGLSymbolStyleLayer(identifier: layerId, source: source)
+            circlesLayer.sourceLayerIdentifier = sourceLayer
+            circlesLayer.iconImageName = NSExpression(forConstantValue: sourceLayer);
+            layer = circlesLayer
+        }
+        else {
+            let circlesLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
+            circlesLayer.sourceLayerIdentifier = sourceLayer
+            circlesLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
+            circlesLayer.circleOpacity = NSExpression(forConstantValue: 0.8)
+            circlesLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+            circlesLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
+            circlesLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
+            //circlesLayer.predicate = NSPredicate(format: "cluster == YES")
+            layer = circlesLayer
+        }
         
         //let shapeID = "com.mapbox.annotations.shape."
         let pointLayerID = "com.mapbox.annotations.points"
         if let annotationPointLayer = mapView.style?.layer(withIdentifier: pointLayerID) {
-            mapView.style?.insertLayer(circlesLayer, below: annotationPointLayer)
+            mapView.style?.insertLayer(layer, below: annotationPointLayer)
         } else {
-            mapView.style?.addLayer(circlesLayer)
+            mapView.style?.addLayer(layer)
         }
     }
     
