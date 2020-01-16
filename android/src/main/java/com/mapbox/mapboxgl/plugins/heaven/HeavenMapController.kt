@@ -97,7 +97,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
             return
         }
 
-        var imageMap = mapOf("layer-heaven-police1" to R.mipmap.police
+        var imageMap = mapOf("layer-heaven-police" to R.mipmap.police
                 , "layer-heaven-embassy" to R.mipmap.embassy)
 
         val color = String.format("#%06X", 0xFFFFFF.and(model.color))
