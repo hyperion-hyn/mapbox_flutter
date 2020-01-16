@@ -364,7 +364,7 @@ class MapboxMapController: NSObject {
         mapView.style?.addSource(source)
         
         let bundle = PodAsset.bundle(forPod: "MapboxGl")
-        var image = UIImage(named: sourceLayer, in: bundle, compatibleWith: nil)
+        let image = UIImage(named: sourceLayer, in: bundle, compatibleWith: nil)
         var layer: MGLVectorStyleLayer!
         //image = nil
         if image != nil {
