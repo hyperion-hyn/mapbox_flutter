@@ -1,5 +1,6 @@
 package com.mapbox.mapboxgl.plugins.heaven
 
+import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.Log
 import com.mapbox.mapboxgl.R
@@ -11,6 +12,7 @@ import com.mapbox.mapboxsdk.plugins.annotation.SymbolManager
 import com.mapbox.mapboxsdk.style.layers.CircleLayer
 import com.mapbox.mapboxsdk.style.layers.Property
 import com.mapbox.mapboxsdk.style.layers.PropertyFactory.*
+import com.mapbox.mapboxsdk.style.layers.SymbolLayer
 import com.mapbox.mapboxsdk.style.sources.TileSet
 import com.mapbox.mapboxsdk.style.sources.VectorSource
 import io.flutter.plugin.common.MethodCall
@@ -31,9 +33,9 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
         this.style = style
         //init data layer
         val models = this.initModels
-        if (models != null && models.isNotEmpty()) {
+        if (models != null && models.isNotEmpty() && mapView.context != null) {
             for (model in models) {
-                addData(model);
+                addData(mapView.context, model)
             }
         }
         println(style.url)
@@ -45,12 +47,12 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
         )
     }
 
-    override fun onMethodCall(call: MethodCall, result: MethodChannel.Result): Boolean {
+    override fun onMethodCall(mapView: MapView, call: MethodCall, result: MethodChannel.Result): Boolean {
         when (call.method) {
             "heaven_map#addData" -> {
                 val model = mapToModel(call.argument<Map<*, *>>("model"))
                 if (model != null) {
-                    addData(model)
+                    addData(mapView.context, model)
                 }
                 result.success(null)
                 return true;
@@ -69,9 +71,9 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
 
     override fun onDestroy() {}
 
-    override fun addData(model: HeavenDataModel) {
+    override fun addData(context: Context, model: HeavenDataModel) {
         addSource(model)
-        addLayer(model)
+        addLayer(context, model)
     }
 
     private fun addSource(model: HeavenDataModel) {
@@ -85,24 +87,41 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
         style?.addSource(vectorSource)
     }
 
-    private fun addLayer(model: HeavenDataModel) {
+    private fun addLayer(context: Context, model: HeavenDataModel) {
+
+
         val sourceId = getSourceId(model.id)
         val layerId = getLayerId(model.id)
+        val sourceLayer = getLayerId(model.sourceLayer)
         if (style?.getLayer(layerId) != null) {
             return
         }
+
+        var imageMap = mapOf("layer-heaven-police1" to R.mipmap.police
+                , "layer-heaven-embassy" to R.mipmap.embassy)
+
         val color = String.format("#%06X", 0xFFFFFF.and(model.color))
-//        val color = String.format("#%06X", 0xFF00FF)
-        val newLayer = CircleLayer(layerId, sourceId)
-                .withProperties(
-                        circleRadius(8f),
-                        circleColor(color),
-                        circleStrokeColor("#ffffff"),
-                        circleStrokeWidth(2f),
-                        circleStrokeOpacity(0.8f),
-                        circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
-                ).withSourceLayer(model.sourceLayer)
-        style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
+
+        if (imageMap[sourceLayer] != null) {
+            val newLayer = SymbolLayer(layerId, sourceId)
+                    .withProperties(iconImage(sourceLayer))
+                    .withSourceLayer(model.sourceLayer)
+            style?.addImage(sourceLayer, BitmapFactory.decodeResource(
+                    context.resources, imageMap[sourceLayer]!!))
+            style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
+        } else {
+            val newLayer = CircleLayer(layerId, sourceId)
+                    .withProperties(
+                            circleRadius(8f),
+                            circleColor(color),
+                            circleStrokeColor("#ffffff"),
+                            circleStrokeWidth(2f),
+                            circleStrokeOpacity(0.8f),
+                            circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
+                    ).withSourceLayer(model.sourceLayer)
+            style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
+        }
+
     }
 
     override fun removeData(id: String) {
@@ -122,7 +141,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
 
     private fun mapToModel(map: Map<*, *>?): HeavenDataModel? {
         if (map != null && map["id"] is String && map["sourceUrl"] is String && map["color"] is Number) {
-            return HeavenDataModel(map["id"] as String, map["sourceUrl"] as String, (map["color"] as Number).toInt(),map["sourceLayer"] as String);
+            return HeavenDataModel(map["id"] as String, map["sourceUrl"] as String, (map["color"] as Number).toInt(), map["sourceLayer"] as String);
         }
         return null
     }

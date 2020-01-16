@@ -1,5 +1,7 @@
 package com.mapbox.mapboxgl.plugins.heaven;
 
+import android.content.Context;
+
 import com.mapbox.mapboxgl.plugins.interf.IMapPlugin;
 import com.mapbox.mapboxgl.plugins.interf.IMapPluginBuilder;
 
@@ -29,7 +31,7 @@ public class HeavenMapBuilder implements HeavenMapOptionsSink, IMapPluginBuilder
     }
 
     @Override
-    public void addData(HeavenDataModel model) {
+    public void addData(Context context, HeavenDataModel model) {
         options.getModels().add(model);
     }
 

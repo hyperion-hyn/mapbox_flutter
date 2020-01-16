@@ -12,7 +12,7 @@ import io.flutter.plugin.common.MethodChannel;
 public interface IMapPlugin {
     void onMapboxStyleLoaded(MapView mapView, MapboxMap mapboxMap, @NonNull Style style);
 
-    boolean onMethodCall(MethodCall call, MethodChannel.Result result);
+    boolean onMethodCall(MapView mapView, MethodCall call, MethodChannel.Result result);
 
     void onDestroy();
 }
