@@ -5,3 +5,6 @@ android/.project
 .idea/
 
 android/.settings/org.eclipse.buildship.core.prefs
+.dart_tool/package_config.json
+example/.flutter-plugins-dependencies
+example/android/res/values/strings_en.arb
