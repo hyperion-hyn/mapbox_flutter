@@ -289,6 +289,12 @@ class Convert {
         if (enableAttribution != null) {
             sink.setEnableAttribution(toBoolean(enableAttribution));
         }
+        final Object languageEnable = data.get("languageEnable");
+        if (languageEnable != null) {
+            sink.setLanguageEnable(toBoolean(languageEnable));
+        } else {
+            sink.setLanguageEnable(true);
+        }
         final Object languageCode = data.get("languageCode");
         if (languageCode != null) {
             sink.setLanguageCode(toString(languageCode));

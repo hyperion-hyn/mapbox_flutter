@@ -10,34 +10,36 @@ import com.mapbox.mapboxsdk.geometry.LatLngBounds;
  * Receiver of MapboxMap configuration options.
  */
 interface MapboxMapOptionsSink {
-  void setCameraTargetBounds(LatLngBounds bounds); //todo: dddd replace with CameraPosition.Builder target
+    void setCameraTargetBounds(LatLngBounds bounds); //todo: dddd replace with CameraPosition.Builder target
 
-  void setCompassEnabled(boolean compassEnabled);
+    void setCompassEnabled(boolean compassEnabled);
 
-  // TODO: styleString is not actually a part of options. consider moving
-  void setStyleString(String styleString);
+    // TODO: styleString is not actually a part of options. consider moving
+    void setStyleString(String styleString);
 
-  void setMinMaxZoomPreference(Float min, Float max);
+    void setMinMaxZoomPreference(Float min, Float max);
 
-  void setRotateGesturesEnabled(boolean rotateGesturesEnabled);
+    void setRotateGesturesEnabled(boolean rotateGesturesEnabled);
 
-  void setScrollGesturesEnabled(boolean scrollGesturesEnabled);
+    void setScrollGesturesEnabled(boolean scrollGesturesEnabled);
 
-  void setTiltGesturesEnabled(boolean tiltGesturesEnabled);
+    void setTiltGesturesEnabled(boolean tiltGesturesEnabled);
 
-  void setTrackCameraPosition(boolean trackCameraPosition);
+    void setTrackCameraPosition(boolean trackCameraPosition);
 
-  void setZoomGesturesEnabled(boolean zoomGesturesEnabled);
+    void setZoomGesturesEnabled(boolean zoomGesturesEnabled);
 
-  void setMyLocationEnabled(boolean myLocationEnabled);
+    void setMyLocationEnabled(boolean myLocationEnabled);
 
-  void setMyLocationTrackingMode(int myLocationTrackingMode);
+    void setMyLocationTrackingMode(int myLocationTrackingMode);
 
-  void setEnableLogo(boolean enableLogo);
+    void setEnableLogo(boolean enableLogo);
 
-  void setEnableAttribution(boolean enableAttribution);
+    void setEnableAttribution(boolean enableAttribution);
 
-  void setCompassMargins(int left, int top, int right, int bottom);
+    void setCompassMargins(int left, int top, int right, int bottom);
 
-  void setLanguageCode(String languageCode);
+    void setLanguageCode(String languageCode);
+
+    void setLanguageEnable(boolean languageEnable);
 }

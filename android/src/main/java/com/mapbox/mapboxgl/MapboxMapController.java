@@ -117,6 +117,7 @@ final class MapboxMapController
     private boolean enableLogoInitial;
     private boolean enableAttributionInitial;
     private String languageCode;
+    private boolean languageEnable;
 
     MapboxMapController(
             int id,
@@ -128,7 +129,8 @@ final class MapboxMapController
             List<Integer> compassMargins,
             boolean enableLogo,
             boolean enableAttribution,
-            String languageCode) {
+            String languageCode,
+            boolean languageEnable) {
         Mapbox.getInstance(context, getAccessToken(context));
         this.id = id;
         this.context = context;
@@ -148,6 +150,7 @@ final class MapboxMapController
         this.enableLogoInitial = enableLogo;
         this.enableAttributionInitial = enableAttribution;
         this.languageCode = languageCode;
+        this.languageEnable = languageEnable;
     }
 
     private static String getAccessToken(@NonNull Context context) {
@@ -337,8 +340,11 @@ final class MapboxMapController
             mapboxMap.addOnMapClickListener(MapboxMapController.this);
             mapboxMap.addOnMapLongClickListener(MapboxMapController.this);
 
-            //set style language
-            setStyleLanguage(style, languageCode);
+            if (languageEnable) {
+                //set style language
+                setStyleLanguage(style, languageCode);
+            }
+
 
             methodChannel.invokeMethod("map#onStyleLoaded", Collections.singletonMap("map", id));
 
@@ -416,7 +422,7 @@ final class MapboxMapController
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
-        if (MapPluginsManager.INSTANCE.onMethodCall(id, mapView,call, result)) return;
+        if (MapPluginsManager.INSTANCE.onMethodCall(id, mapView, call, result)) return;
         switch (call.method) {
             case "map#waitForMap":
                 if (mapboxMap != null) {
@@ -911,6 +917,11 @@ final class MapboxMapController
                 });
             }
         });
+    }
+
+    @Override
+    public void setLanguageEnable(boolean languageEnable) {
+        this.languageEnable = languageEnable;
     }
 
 

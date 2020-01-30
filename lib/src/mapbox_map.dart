@@ -31,7 +31,8 @@ class MapboxMap extends StatefulWidget {
     this.compassMargins,
     this.enableAttribution = true,
     this.enableLogo = true,
-    this.languageCode = "zh"
+    this.languageCode = "zh",
+    this.languageEnable = true
   }) : assert(initialCameraPosition != null);
 
   final List<Widget> children;
@@ -125,8 +126,9 @@ class MapboxMap extends StatefulWidget {
   final OnCameraTrackingDismissedCallback onCameraTrackingDismissed;
 
 
-
   final String languageCode;
+
+  final bool languageEnable;
 
   @override
   State createState() => _MapboxMapState();
@@ -134,7 +136,7 @@ class MapboxMap extends StatefulWidget {
 
 class _MapboxMapState extends State<MapboxMap> {
   final Completer<MapboxMapController> _controller =
-      Completer<MapboxMapController>();
+  Completer<MapboxMapController>();
 
   _MapboxMapOptions _mapboxMapOptions;
 
@@ -186,7 +188,7 @@ class _MapboxMapState extends State<MapboxMap> {
     super.didUpdateWidget(oldWidget);
     final _MapboxMapOptions newOptions = _MapboxMapOptions.fromWidget(widget);
     final Map<String, dynamic> updates =
-        _mapboxMapOptions.updatesMap(newOptions);
+    _mapboxMapOptions.updatesMap(newOptions);
     _updateOptions(updates);
     _mapboxMapOptions = newOptions;
   }
@@ -201,12 +203,12 @@ class _MapboxMapState extends State<MapboxMap> {
 
   Future<void> onPlatformViewCreated(int id) async {
     final MapboxMapController controller = await MapboxMapController.init(
-        id, widget.initialCameraPosition,
-        onMapClick: widget.onMapClick,
-        onMapLongPress: widget.onMapLongPress,
-        onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
-        onStyleLoaded: widget.onStyleLoaded,
-        onAnimateCameraFinish: widget.onAnimateCameraFinish,
+      id, widget.initialCameraPosition,
+      onMapClick: widget.onMapClick,
+      onMapLongPress: widget.onMapLongPress,
+      onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
+      onStyleLoaded: widget.onStyleLoaded,
+      onAnimateCameraFinish: widget.onAnimateCameraFinish,
     );
     _controller.complete(controller);
     if (widget.onMapCreated != null) {
@@ -235,26 +237,28 @@ class _MapboxMapOptions {
     this.compassMargins,
     this.enableAttribution,
     this.enableLogo,
-    this.languageCode
+    this.languageCode,
+    this.languageEnable
   });
 
   static _MapboxMapOptions fromWidget(MapboxMap map) {
     return _MapboxMapOptions(
-      compassEnabled: map.compassEnabled,
-      cameraTargetBounds: map.cameraTargetBounds,
-      styleString: map.styleString,
-      minMaxZoomPreference: map.minMaxZoomPreference,
-      rotateGesturesEnabled: map.rotateGesturesEnabled,
-      scrollGesturesEnabled: map.scrollGesturesEnabled,
-      tiltGesturesEnabled: map.tiltGesturesEnabled,
-      trackCameraPosition: map.trackCameraPosition,
-      zoomGesturesEnabled: map.zoomGesturesEnabled,
-      myLocationEnabled: map.myLocationEnabled,
-      myLocationTrackingMode: map.myLocationTrackingMode,
-      compassMargins: map.compassMargins,
-      enableAttribution: map.enableAttribution,
-      enableLogo: map.enableLogo,
-      languageCode: map.languageCode
+        compassEnabled: map.compassEnabled,
+        cameraTargetBounds: map.cameraTargetBounds,
+        styleString: map.styleString,
+        minMaxZoomPreference: map.minMaxZoomPreference,
+        rotateGesturesEnabled: map.rotateGesturesEnabled,
+        scrollGesturesEnabled: map.scrollGesturesEnabled,
+        tiltGesturesEnabled: map.tiltGesturesEnabled,
+        trackCameraPosition: map.trackCameraPosition,
+        zoomGesturesEnabled: map.zoomGesturesEnabled,
+        myLocationEnabled: map.myLocationEnabled,
+        myLocationTrackingMode: map.myLocationTrackingMode,
+        compassMargins: map.compassMargins,
+        enableAttribution: map.enableAttribution,
+        enableLogo: map.enableLogo,
+        languageCode: map.languageCode,
+        languageEnable: map.languageEnable
     );
   }
 
@@ -288,6 +292,8 @@ class _MapboxMapOptions {
 
   final String languageCode;
 
+  final bool languageEnable;
+
   Map<String, dynamic> toMap() {
     final Map<String, dynamic> optionsMap = <String, dynamic>{};
 
@@ -312,6 +318,7 @@ class _MapboxMapOptions {
     addIfNonNull('enableLogo', enableLogo);
     addIfNonNull('enableAttribution', enableAttribution);
     addIfNonNull('languageCode', languageCode);
+    addIfNonNull('languageEnable', languageEnable);
     return optionsMap;
   }
 
@@ -319,6 +326,6 @@ class _MapboxMapOptions {
     final Map<String, dynamic> prevOptionsMap = toMap();
     return newOptions.toMap()
       ..removeWhere(
-          (String key, dynamic value) => prevOptionsMap[key] == value);
+              (String key, dynamic value) => prevOptionsMap[key] == value);
   }
 }

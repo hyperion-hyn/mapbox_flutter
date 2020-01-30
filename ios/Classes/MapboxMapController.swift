@@ -36,6 +36,8 @@ class MapboxMapController: NSObject {
     
     private var languageCode :String?;
     
+    private var languageEnable :Bool?;
+    
     init(withFrame frame: CGRect, viewIdentifier viewId: Int64, arguments args: Any?, binaryMessenger messenger: FlutterBinaryMessenger) {
         mapView = MGLMapView(frame: frame)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
@@ -630,8 +632,10 @@ extension MapboxMapController: MGLMapViewDelegate {
             mapView.setCamera(camera, animated: false)
         }
         
-        setLanguageCode(languageCode: self.languageCode!)
-        
+        if(languageEnable!){
+            setLanguageCode(languageCode: self.languageCode!)
+        }
+       
         mapReadyResult?(currentStyle != nil)
         mapReadyResult = nil
     }
@@ -780,7 +784,14 @@ extension MapboxMapController: MapboxMapOptionsSink {
         if(mapView.style==nil){
             return;
         }
-        setLanguageCode(style: mapView.style!, languageCode: languageCode);
+        if(languageEnable!){
+            setLanguageCode(style: mapView.style!, languageCode: languageCode);
+        }
+        
+    }
+    
+    func setLanguageEnable(languageEnable: Bool) {
+        self.languageEnable = languageEnable
     }
     
     func setLanguageCode(style: MGLStyle,languageCode: String) {
