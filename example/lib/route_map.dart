@@ -36,10 +36,11 @@ class _RouteMapScneneState extends State<_RouteMapScnene> {
           zoom: 8.0,
         ),
         styleString: 'https://static.hyn.space/maptiles/see-it-all.json',
-        onStyleLoaded: (mapboxController) {
-          setState(() {
-            controller = mapboxController;
-          });
+        onStyleLoadedCallback: () {
+          setState(() {});
+        },
+        onMapCreated: (c) {
+          controller = c;
         },
         children: <Widget>[RouteMapPluginScene()],
       ),

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -112,6 +113,15 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
     _updateSelectedCircle(
       CircleOptions(
         draggable: !draggable,
+      ),
+    );
+  }
+
+  void _getLatLng() async {
+    LatLng latLng = await controller.getCircleLatLng(_selectedCircle);
+    Scaffold.of(context).showSnackBar(
+      SnackBar(
+        content: Text(latLng.toString()),
       ),
     );
   }
@@ -285,6 +295,12 @@ class PlaceCircleBodyState extends State<PlaceCircleBody> {
                           onPressed: (_selectedCircle == null)
                               ? null
                               : _changeDraggable,
+                        ),
+                        FlatButton(
+                          child: const Text('get current LatLng'),
+                          onPressed: (_selectedCircle == null)
+                              ? null
+                              : _getLatLng,
                         ),
                       ],
                     ),

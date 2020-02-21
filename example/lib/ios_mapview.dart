@@ -30,11 +30,9 @@ class _IosMapSceneState extends State<IosMapScene> {
   String mapStyle = 'https://static.hyn.space/maptiles/see-it-all-zh.json';
   var myLocationTrackingMode = MyLocationTrackingMode.None;
 
-  void _onStyleLoaded(c) {
+  void _onStyleLoaded() {
     logger.i('on style loaded');
-    setState(() {
-      controller = c;
-    });
+    setState(() {});
   }
 
   @override
@@ -48,9 +46,10 @@ class _IosMapSceneState extends State<IosMapScene> {
               target: LatLng(35.6803997, 139.7690174),
               zoom: 8.0,
             ),
-            onStyleLoaded: _onStyleLoaded,
+            onStyleLoadedCallback: _onStyleLoaded,
             onMapCreated: (c) {
               print('on map loaded');
+              controller = c;
             },
             styleString: mapStyle,
             myLocationEnabled: true,

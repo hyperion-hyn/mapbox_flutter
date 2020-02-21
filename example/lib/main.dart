@@ -4,19 +4,23 @@
 
 import 'package:flutter/material.dart';
 import 'heaven_map.dart';
-import 'line.dart';
+import 'package:location/location.dart';
+import 'package:mapbox_gl_example/full_map.dart';
 import 'animate_camera.dart';
+import 'full_map.dart';
+import 'line.dart';
 import 'map_ui.dart';
 import 'move_camera.dart';
 import 'page.dart';
-import 'place_symbol.dart';
 import 'place_circle.dart';
 import 'route_map.dart';
+import 'place_symbol.dart';
 import 'scrolling_map.dart';
 import 'ios_mapview.dart';
 
 final List<Page> _allPages = <Page>[
   MapUiPage(),
+  FullMapPage(),
   AnimateCameraPage(),
   MoveCameraPage(),
   PlaceSymbolPage(),
@@ -29,7 +33,13 @@ final List<Page> _allPages = <Page>[
 ];
 
 class MapsDemo extends StatelessWidget {
-  void _pushPage(BuildContext context, Page page) {
+  void _pushPage(BuildContext context, Page page) async {
+    final location = Location();
+    final hasPermissions = await location.hasPermission();
+    if (!hasPermissions) {
+      await location.requestPermission();
+    }
+
     Navigator.of(context).push(MaterialPageRoute<void>(
         builder: (_) => Scaffold(
               appBar: AppBar(title: Text(page.title)),
@@ -44,10 +54,10 @@ class MapsDemo extends StatelessWidget {
       body: ListView.builder(
         itemCount: _allPages.length,
         itemBuilder: (_, int index) => ListTile(
-              leading: _allPages[index].leading,
-              title: Text(_allPages[index].title),
-              onTap: () => _pushPage(context, _allPages[index]),
-            ),
+          leading: _allPages[index].leading,
+          title: Text(_allPages[index].title),
+          onTap: () => _pushPage(context, _allPages[index]),
+        ),
       ),
     );
   }

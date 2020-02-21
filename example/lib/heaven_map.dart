@@ -95,11 +95,13 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
               zoom: 8.0,
             ),
             styleString: 'https://static.hyn.space/maptiles/see-it-all.json',
-            onStyleLoaded: (mapboxController) {
+            onStyleLoadedCallback: () {
               setState(() {
                 print('heaven style ready');
-                controller = mapboxController;
               });
+            },
+            onMapCreated: (c) {
+              controller = c;
             },
             onMapClick: _mapClick,
 //            children: <Widget>[HeavenPlugin(models: heavenDataModels)],

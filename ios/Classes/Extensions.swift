@@ -39,30 +39,33 @@ extension MGLCoordinateBounds {
     }
 }
 
-extension UIColor {
-    convenience init(red: Int, green: Int, blue: Int, alpha: Int) {
-        assert(red >= 0 && red <= 255, "Invalid red component")
-        assert(green >= 0 && green <= 255, "Invalid green component")
-        assert(blue >= 0 && blue <= 255, "Invalid blue component")
-        
-        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: CGFloat(alpha) / 255.0)
-    }
-    
-    convenience init(argb: Int) {
-        self.init(
-            red: (argb >> 16) & 0xFF, green: (argb >> 8) & 0xFF, blue: argb & 0xFF, alpha: (argb >> 24) & 0xFF
-        )
-    }
-}
-
 extension UIImage {
-    
+    static func loadFromFile(imagePath: String, imageName: String) -> UIImage? {
+        // Add the trailing slash in path if missing.
+        let path = imagePath.hasSuffix("/") ? imagePath : "\(imagePath)/"
+        // Build scale dependant image path.
+        let scale = UIScreen.main.scale
+        var absolutePath = "\(path)\(scale)x/\(imageName)"
+        // Check if the image exists, if not try a an unscaled path.
+        if Bundle.main.path(forResource: absolutePath, ofType: nil) == nil {
+            absolutePath = "\(path)\(imageName)"
+        }
+        // Load image if it exists.
+        if let path = Bundle.main.path(forResource: absolutePath, ofType: nil) {
+            let imageUrl: URL = URL(fileURLWithPath: path)
+            if  let imageData: Data = try? Data(contentsOf: imageUrl),
+                let image: UIImage = UIImage(data: imageData, scale: UIScreen.main.scale) {
+                return image
+            }
+        }
+        return nil
+    }
     func resize(maxWidthHeight : Double)-> UIImage? {
         let actualHeight = Double(size.height)
         let actualWidth = Double(size.width)
         var maxWidth = 0.0
         var maxHeight = 0.0
-        
+
         if actualWidth > actualHeight {
             maxWidth = maxWidthHeight
             let per = (100.0 * maxWidthHeight / actualWidth)
@@ -72,17 +75,17 @@ extension UIImage {
             let per = (100.0 * maxWidthHeight / actualHeight)
             maxWidth = (actualWidth * per) / 100.0
         }
-        
+
         let hasAlpha = true
         let scale: CGFloat = 0.0
-        
+
         UIGraphicsBeginImageContextWithOptions(CGSize(width: maxWidth, height: maxHeight), !hasAlpha, scale)
         self.draw(in: CGRect(origin: .zero, size: CGSize(width: maxWidth, height: maxHeight)))
-        
+
         let scaledImage = UIGraphicsGetImageFromCurrentImageContext()
         return scaledImage
     }
-    
+
     func offsetImage(anchor: String, offsetX: CGFloat, offsetY: CGFloat) -> UIImage? {
         var newSize: CGSize
         var drawX: CGFloat = offsetX;
@@ -100,14 +103,56 @@ extension UIImage {
         } else {    //default is center
             newSize = CGSize(width: self.size.width + offsetX, height: self.size.height + offsetY)
         }
-        
+
         UIGraphicsBeginImageContextWithOptions(newSize, false, 0)
-        
+
         self.draw(in: CGRect(x: drawX, y: drawY, width: self.size.width, height: self.size.height))
         let newIamge = UIGraphicsGetImageFromCurrentImageContext()
-        
+
         UIGraphicsEndImageContext()
-        
+
         return newIamge
+    }
+}
+
+extension UIColor {
+    public convenience init?(hexString: String) {
+        let r, g, b, a: CGFloat
+
+        if hexString.hasPrefix("#") {
+            let start = hexString.index(hexString.startIndex, offsetBy: 1)
+            let hexColor = hexString[start...]
+
+            if hexColor.count == 6 {
+                let scanner = Scanner(string: String(hexColor))
+                var hexNumber: UInt64 = 0
+
+                if scanner.scanHexInt64(&hexNumber) {
+                    r = CGFloat((hexNumber & 0xff0000) >> 16) / 255
+                    g = CGFloat((hexNumber & 0x00ff00) >> 8) / 255
+                    b = CGFloat(hexNumber & 0x0000ff) / 255
+                    a = 255
+
+                    self.init(red: r, green: g, blue: b, alpha: a)
+                    return
+                }
+            }
+        }
+
+        return nil
+    }
+
+    convenience init(red: Int, green: Int, blue: Int, alpha: Int) {
+        assert(red >= 0 && red <= 255, "Invalid red component")
+        assert(green >= 0 && green <= 255, "Invalid green component")
+        assert(blue >= 0 && blue <= 255, "Invalid blue component")
+
+        self.init(red: CGFloat(red) / 255.0, green: CGFloat(green) / 255.0, blue: CGFloat(blue) / 255.0, alpha: CGFloat(alpha) / 255.0)
+    }
+
+    convenience init(argb: Int) {
+        self.init(
+            red: (argb >> 16) & 0xFF, green: (argb >> 8) & 0xFF, blue: argb & 0xFF, alpha: (argb >> 24) & 0xFF
+        )
     }
 }

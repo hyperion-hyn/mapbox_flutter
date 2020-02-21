@@ -102,13 +102,24 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
 
         val color = String.format("#%06X", 0xFFFFFF.and(model.color))
 
+
+        var layers = style?.layers;
+
+        var symbolGeojsonLayer = "";
+
+        for (layerTemp in style!!.layers) {
+            if (layerTemp.id.startsWith("mapbox-android-symbol-layer", true)) {
+                symbolGeojsonLayer = layerTemp.id
+            }
+        }
+
         if (imageMap[sourceLayer] != null) {
             val newLayer = SymbolLayer(layerId, sourceId)
                     .withProperties(iconImage(sourceLayer))
                     .withSourceLayer(model.sourceLayer)
             style?.addImage(sourceLayer, BitmapFactory.decodeResource(
                     context.resources, imageMap[sourceLayer]!!))
-            style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
+            style?.addLayerBelow(newLayer, symbolGeojsonLayer)
         } else {
             val newLayer = CircleLayer(layerId, sourceId)
                     .withProperties(
@@ -119,7 +130,7 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
                             circleStrokeOpacity(0.8f),
                             circlePitchAlignment(Property.CIRCLE_PITCH_ALIGNMENT_MAP)
                     ).withSourceLayer(model.sourceLayer)
-            style?.addLayerBelow(newLayer, SymbolManager.ID_GEOJSON_LAYER)
+            style?.addLayerBelow(newLayer, symbolGeojsonLayer)
         }
 
     }

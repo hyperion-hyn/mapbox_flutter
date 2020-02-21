@@ -6,8 +6,6 @@ package com.mapbox.mapboxgl;
 
 import android.graphics.Point;
 
-import android.util.Log;
-
 import com.mapbox.mapboxsdk.camera.CameraPosition;
 import com.mapbox.mapboxsdk.camera.CameraUpdate;
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory;
@@ -222,84 +220,107 @@ class Convert {
         return (String) o;
     }
 
-    static void interpretMapboxMapOptions(Object o, MapboxMapOptionsSink sink) {
-        final Map<?, ?> data = toMap(o);
-        final Object cameraTargetBounds = data.get("cameraTargetBounds");
-        if (cameraTargetBounds != null) {
-            final List<?> targetData = toList(cameraTargetBounds);
-            sink.setCameraTargetBounds(toLatLngBounds(targetData.get(0)));
-        }
-        final Object compassEnabled = data.get("compassEnabled");
-        if (compassEnabled != null) {
-            sink.setCompassEnabled(toBoolean(compassEnabled));
-        }
-        final Object styleString = data.get("styleString");
-        if (styleString != null) {
-            sink.setStyleString(toString(styleString));
-        }
-        final Object minMaxZoomPreference = data.get("minMaxZoomPreference");
-        if (minMaxZoomPreference != null) {
-            final List<?> zoomPreferenceData = toList(minMaxZoomPreference);
-            sink.setMinMaxZoomPreference( //
-                    toFloatWrapper(zoomPreferenceData.get(0)), //
-                    toFloatWrapper(zoomPreferenceData.get(1)));
-        }
-        final Object rotateGesturesEnabled = data.get("rotateGesturesEnabled");
-        if (rotateGesturesEnabled != null) {
-            sink.setRotateGesturesEnabled(toBoolean(rotateGesturesEnabled));
-        }
-        final Object scrollGesturesEnabled = data.get("scrollGesturesEnabled");
-        if (scrollGesturesEnabled != null) {
-            sink.setScrollGesturesEnabled(toBoolean(scrollGesturesEnabled));
-        }
-        final Object tiltGesturesEnabled = data.get("tiltGesturesEnabled");
-        if (tiltGesturesEnabled != null) {
-            sink.setTiltGesturesEnabled(toBoolean(tiltGesturesEnabled));
-        }
-        final Object trackCameraPosition = data.get("trackCameraPosition");
-        if (trackCameraPosition != null) {
-            sink.setTrackCameraPosition(toBoolean(trackCameraPosition));
-        }
-        final Object zoomGesturesEnabled = data.get("zoomGesturesEnabled");
-        if (zoomGesturesEnabled != null) {
-            sink.setZoomGesturesEnabled(toBoolean(zoomGesturesEnabled));
-        }
-        final Object myLocationEnabled = data.get("myLocationEnabled");
-        if (myLocationEnabled != null) {
-            sink.setMyLocationEnabled(toBoolean(myLocationEnabled));
-        }
-        final Object myLocationTrackingMode = data.get("myLocationTrackingMode");
-        if (myLocationTrackingMode != null) {
-            sink.setMyLocationTrackingMode(toInt(myLocationTrackingMode));
-        }
-        final Object compassMargins = data.get("compassMargins");
-        if (compassMargins != null) {
-            List<?> compassMarginsList = toList(compassMargins);
-            sink.setCompassMargins(
-                    toIntWrapper(compassMarginsList.get(0)),
-                    toIntWrapper(compassMarginsList.get(1)),
-                    toIntWrapper(compassMarginsList.get(2)),
-                    toIntWrapper(compassMarginsList.get(3)));
-        }
-        final Object enableLogo = data.get("enableLogo");
-        if (enableLogo != null) {
-            sink.setEnableLogo(toBoolean(enableLogo));
-        }
-        final Object enableAttribution = data.get("enableAttribution");
-        if (enableAttribution != null) {
-            sink.setEnableAttribution(toBoolean(enableAttribution));
-        }
-        final Object languageEnable = data.get("languageEnable");
-        if (languageEnable != null) {
-            sink.setLanguageEnable(toBoolean(languageEnable));
-        } else {
-            sink.setLanguageEnable(true);
-        }
-        final Object languageCode = data.get("languageCode");
-        if (languageCode != null) {
-            sink.setLanguageCode(toString(languageCode));
-        }
+  static void interpretMapboxMapOptions(Object o, MapboxMapOptionsSink sink) {
+    final Map<?, ?> data = toMap(o);
+    final Object cameraTargetBounds = data.get("cameraTargetBounds");
+    if (cameraTargetBounds != null) {
+      final List<?> targetData = toList(cameraTargetBounds);
+      sink.setCameraTargetBounds(toLatLngBounds(targetData.get(0)));
     }
+    final Object compassEnabled = data.get("compassEnabled");
+    if (compassEnabled != null) {
+      sink.setCompassEnabled(toBoolean(compassEnabled));
+    }
+    final Object styleString = data.get("styleString");
+    if (styleString != null) {
+      sink.setStyleString(toString(styleString));
+    }
+    final Object minMaxZoomPreference = data.get("minMaxZoomPreference");
+    if (minMaxZoomPreference != null) {
+      final List<?> zoomPreferenceData = toList(minMaxZoomPreference);
+      sink.setMinMaxZoomPreference( //
+        toFloatWrapper(zoomPreferenceData.get(0)), //
+        toFloatWrapper(zoomPreferenceData.get(1)));
+    }
+    final Object rotateGesturesEnabled = data.get("rotateGesturesEnabled");
+    if (rotateGesturesEnabled != null) {
+      sink.setRotateGesturesEnabled(toBoolean(rotateGesturesEnabled));
+    }
+    final Object scrollGesturesEnabled = data.get("scrollGesturesEnabled");
+    if (scrollGesturesEnabled != null) {
+      sink.setScrollGesturesEnabled(toBoolean(scrollGesturesEnabled));
+    }
+    final Object tiltGesturesEnabled = data.get("tiltGesturesEnabled");
+    if (tiltGesturesEnabled != null) {
+      sink.setTiltGesturesEnabled(toBoolean(tiltGesturesEnabled));
+    }
+    final Object trackCameraPosition = data.get("trackCameraPosition");
+    if (trackCameraPosition != null) {
+      sink.setTrackCameraPosition(toBoolean(trackCameraPosition));
+    }
+    final Object zoomGesturesEnabled = data.get("zoomGesturesEnabled");
+    if (zoomGesturesEnabled != null) {
+      sink.setZoomGesturesEnabled(toBoolean(zoomGesturesEnabled));
+    }
+    final Object myLocationEnabled = data.get("myLocationEnabled");
+    if (myLocationEnabled != null) {
+      sink.setMyLocationEnabled(toBoolean(myLocationEnabled));
+    }
+    final Object myLocationTrackingMode = data.get("myLocationTrackingMode");
+    if (myLocationTrackingMode != null) {
+      sink.setMyLocationTrackingMode(toInt(myLocationTrackingMode));
+    }
+    final Object myLocationRenderMode = data.get("myLocationRenderMode");
+    if (myLocationRenderMode != null) {
+      sink.setMyLocationRenderMode(toInt(myLocationRenderMode));
+    }
+    final Object logoViewMargins = data.get("logoViewMargins");
+    if(logoViewMargins != null){
+      final List logoViewMarginsData = toList(logoViewMargins);
+      sink.setLogoViewMargins(toInt(logoViewMarginsData.get(0)), toInt(logoViewMarginsData.get(1)));
+    }
+    final Object compassGravity = data.get("compassViewPosition");
+    if(compassGravity != null){
+      sink.setCompassGravity(toInt(compassGravity));
+    }
+    final Object compassViewMargins = data.get("compassViewMargins");
+    if(compassViewMargins != null){
+      final List compassViewMarginsData = toList(compassViewMargins);
+      sink.setCompassViewMargins(toInt(compassViewMarginsData.get(0)), toInt(compassViewMarginsData.get(1)));
+    }
+    final Object attributionButtonMargins = data.get("attributionButtonMargins");
+    if(attributionButtonMargins != null){
+      final List attributionButtonMarginsData = toList(attributionButtonMargins);
+      sink.setAttributionButtonMargins(toInt(attributionButtonMarginsData.get(0)), toInt(attributionButtonMarginsData.get(1)));
+    }
+    final Object compassMargins = data.get("compassMargins");
+    if (compassMargins != null) {
+      List<?> compassMarginsList = toList(compassMargins);
+      sink.setCompassMargins(
+              toIntWrapper(compassMarginsList.get(0)),
+              toIntWrapper(compassMarginsList.get(1)),
+              toIntWrapper(compassMarginsList.get(2)),
+              toIntWrapper(compassMarginsList.get(3)));
+    }
+    final Object enableLogo = data.get("enableLogo");
+    if (enableLogo != null) {
+      sink.setEnableLogo(toBoolean(enableLogo));
+    }
+    final Object enableAttribution = data.get("enableAttribution");
+    if (enableAttribution != null) {
+      sink.setEnableAttribution(toBoolean(enableAttribution));
+    }
+    final Object languageEnable = data.get("languageEnable");
+    if (languageEnable != null) {
+      sink.setLanguageEnable(toBoolean(languageEnable));
+    } else {
+      sink.setLanguageEnable(true);
+    }
+    final Object languageCode = data.get("languageCode");
+    if (languageCode != null) {
+      sink.setLanguageCode(toString(languageCode));
+    }
+  }
 
     static void interpretSymbolOptions(Object o, SymbolOptionsSink sink) {
         final Map<?, ?> data = toMap(o);
@@ -403,9 +424,9 @@ class Convert {
         if (geometry != null) {
             sink.setGeometry(toLatLng(geometry));
         }
-        final Object zIndex = data.get("zIndex");
-        if (zIndex != null) {
-            sink.setZIndex(toInt(zIndex));
+        final Object symbolSortKey = data.get("symbolSortKey");
+        if (symbolSortKey != null) {
+            sink.setSymbolSortKey(toFloat(symbolSortKey));
         }
         final Object draggable = data.get("draggable");
         if (draggable != null) {

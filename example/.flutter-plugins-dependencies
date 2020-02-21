@@ -1,1 +1,1 @@
-{"_info":"// This is a generated file; do not edit or check into version control.","dependencyGraph":[{"name":"mapbox_gl","dependencies":[]}]}
+{"_info":"// This is a generated file; do not edit or check into version control.","dependencyGraph":[{"name":"location","dependencies":[]},{"name":"mapbox_gl","dependencies":[]}]}

@@ -1,10 +1,11 @@
 import Mapbox
+import MapboxAnnotationExtension
 
 class Convert {
     class func interpretMapboxMapOptions(options: Any?, delegate: MapboxMapOptionsSink) {
         guard let options = options as? [String: Any] else { return }
-        if let cameraTargetBounds = options["cameraTargetBounds"] as? [[Double]] {
-            delegate.setCameraTargetBounds(bounds: MGLCoordinateBounds.fromArray(cameraTargetBounds))
+        if let cameraTargetBounds = options["cameraTargetBounds"] as? [[[Double]]] {
+            delegate.setCameraTargetBounds(bounds: MGLCoordinateBounds.fromArray(cameraTargetBounds[0]))
         }
         if let compassEnabled = options["compassEnabled"] as? Bool {
             delegate.setCompassEnabled(compassEnabled: compassEnabled)
@@ -35,6 +36,18 @@ class Convert {
         }
         if let myLocationTrackingMode = options["myLocationTrackingMode"] as? UInt, let trackingMode = MGLUserTrackingMode(rawValue: myLocationTrackingMode) {
             delegate.setMyLocationTrackingMode(myLocationTrackingMode: trackingMode)
+        }
+        if let logoViewMargins = options["logoViewMargins"] as? [Double] {
+            delegate.setLogoViewMargins(x: logoViewMargins[0], y: logoViewMargins[1])
+        }
+        if let compassViewPosition = options["compassViewPosition"] as? UInt, let position = MGLOrnamentPosition(rawValue: compassViewPosition) {
+            delegate.setCompassViewPosition(position: position)
+        }
+        if let compassViewMargins = options["compassViewMargins"] as? [Double] {
+            delegate.setCompassViewMargins(x: compassViewMargins[0], y: compassViewMargins[1])
+        }
+        if let attributionButtonMargins = options["attributionButtonMargins"] as? [Double] {
+            delegate.setAttributionButtonMargins(x: attributionButtonMargins[0], y: attributionButtonMargins[1])
         }
         if let enableLogo = options["enableLogo"] as? Bool {
             delegate.setEnableLogo(enableLogo: enableLogo)
@@ -146,5 +159,183 @@ class Convert {
     
     class func getAltitude(zoom: Double, mapView: MGLMapView) -> Double {
         return MGLAltitudeForZoomLevel(zoom, mapView.camera.pitch, mapView.camera.centerCoordinate.latitude, mapView.frame.size)
+    }
+
+    class func interpretSymbolOptions(options: Any?, delegate: MGLSymbolStyleAnnotation) {
+        guard let options = options as? [String: Any] else { return }
+        if let iconSize = options["iconSize"] as? CGFloat {
+            delegate.iconScale = iconSize
+        }
+        if let iconImage = options["iconImage"] as? String {
+            delegate.iconImageName = iconImage
+        }
+        if let iconRotate = options["iconRotate"] as? CGFloat {
+            delegate.iconRotation = iconRotate
+        }
+        if let iconOffset = options["iconOffset"] as? [Double] {
+            delegate.iconOffset = CGVector(dx: iconOffset[0], dy: iconOffset[1])
+        }
+        if let iconAnchorStr = options["iconAnchor"] as? String {
+            if let iconAnchor = Constants.symbolIconAnchorMapping[iconAnchorStr] {
+                delegate.iconAnchor = iconAnchor
+            } else {
+                delegate.iconAnchor = MGLIconAnchor.center
+            }
+        }
+        if let iconOpacity = options["iconOpacity"] as? CGFloat {
+            delegate.iconOpacity = iconOpacity
+        }
+        if let iconColor = options["iconColor"] as? String {
+            delegate.iconColor = UIColor(hexString: iconColor) ?? UIColor.black
+        }
+        if let iconHaloColor = options["iconHaloColor"] as? String {
+            delegate.iconHaloColor = UIColor(hexString: iconHaloColor) ?? UIColor.white
+        }
+        if let iconHaloWidth = options["iconHaloWidth"] as? CGFloat {
+            delegate.iconHaloWidth = iconHaloWidth
+        }
+        if let iconHaloBlur = options["iconHaloBlur"] as? CGFloat {
+            delegate.iconHaloBlur = iconHaloBlur
+        }
+        if let textField = options["textField"] as? String {
+            delegate.text = textField
+        }
+        if let textSize = options["textSize"] as? CGFloat {
+            delegate.textFontSize = textSize
+        }
+        if let textMaxWidth = options["textMaxWidth"] as? CGFloat {
+            delegate.maximumTextWidth = textMaxWidth
+        }
+        if let textLetterSpacing = options["textLetterSpacing"] as? CGFloat {
+            delegate.textLetterSpacing = textLetterSpacing
+        }
+        if let textJustify = options["textJustify"] as? String {
+            if let textJustifaction = Constants.symbolTextJustificationMapping[textJustify] {
+                delegate.textJustification = textJustifaction
+            } else {
+                delegate.textJustification = MGLTextJustification.center
+            }
+        }
+        if let textRadialOffset = options["textRadialOffset"] as? CGFloat {
+            delegate.textRadialOffset = textRadialOffset
+        }
+        if let textAnchorStr = options["textAnchor"] as? String {
+            if let textAnchor = Constants.symbolTextAnchorMapping[textAnchorStr] {
+                delegate.textAnchor = textAnchor
+            } else {
+                delegate.textAnchor = MGLTextAnchor.center
+            }
+        }
+        if let textRotate = options["textRotate"] as? CGFloat {
+            delegate.textRotation = textRotate
+        }
+        if let textTransform = options["textTransform"] as? String {
+            if let textTransformation = Constants.symbolTextTransformationMapping[textTransform] {
+                delegate.textTransform = textTransformation
+            } else {
+                delegate.textTransform = MGLTextTransform.none
+            }
+        }
+        if let textTranslate = options["textTranslate"] as? [Double] {
+            delegate.textTranslation = CGVector(dx: textTranslate[0], dy: textTranslate[1])
+        }
+        if let textOffset = options["textOffset"] as? [Double] {
+            delegate.textOffset = CGVector(dx: textOffset[0], dy: textOffset[1])
+        }
+        if let textOpacity = options["textOpacity"] as? CGFloat {
+            delegate.textOpacity = textOpacity
+        }
+        if let textColor = options["textColor"] as? String {
+            delegate.textColor = UIColor(hexString: textColor) ?? UIColor.black
+        }
+        if let textHaloColor = options["textHaloColor"] as? String {
+            delegate.textHaloColor = UIColor(hexString: textHaloColor) ?? UIColor.white
+        }
+        if let textHaloWidth = options["textHaloWidth"] as? CGFloat {
+            delegate.textHaloWidth = textHaloWidth
+        }
+        if let textHaloBlur = options["textHaloBlur"] as? CGFloat {
+            delegate.textHaloBlur = textHaloBlur
+        }
+        if let geometry = options["geometry"] as? [Double] {
+            // We cannot set the geometry directy on the annotation so calculate
+            // the difference and update the coordinate using the delta.
+            let currCoord = delegate.feature.coordinate
+            let newCoord = CLLocationCoordinate2DMake(geometry[0], geometry[1])
+            let delta = CGVector(dx: newCoord.longitude - currCoord.longitude, dy: newCoord.latitude - currCoord.latitude)
+            delegate.updateGeometryCoordinates(withDelta: delta)
+        }
+        if let zIndex = options["zIndex"] as? Int {
+            delegate.symbolSortKey = zIndex
+        }
+        if let draggable = options["draggable"] as? Bool {
+            delegate.isDraggable = draggable
+        }
+    }
+
+    class func interpretCircleOptions(options: Any?, delegate: MGLCircleStyleAnnotation) {
+        guard let options = options as? [String: Any] else { return }
+        if let circleRadius = options["circleRadius"] as? CGFloat {
+            delegate.circleRadius = circleRadius
+        }
+        if let circleColor = options["circleColor"] as? String {
+            delegate.circleColor = UIColor(hexString: circleColor) ?? UIColor.black
+        }
+        if let circleBlur = options["circleBlur"] as? CGFloat {
+            delegate.circleBlur = circleBlur
+        }
+        if let circleOpacity = options["circleOpacity"] as? CGFloat {
+            delegate.circleOpacity = circleOpacity
+        }
+        if let circleStrokeWidth = options["circleStrokeWidth"] as? CGFloat {
+            delegate.circleStrokeWidth = circleStrokeWidth
+        }
+        if let circleStrokeColor = options["circleStrokeColor"] as? String {
+            delegate.circleStrokeColor = UIColor(hexString: circleStrokeColor) ?? UIColor.black
+        }
+        if let circleStrokeOpacity = options["circleStrokeOpacity"] as? CGFloat {
+            delegate.circleStrokeOpacity = circleStrokeOpacity
+        }
+        if let geometry = options["geometry"] as? [Double] {
+            delegate.center = CLLocationCoordinate2DMake(geometry[0], geometry[1])
+        }
+        if let draggable = options["draggable"] as? Bool {
+            delegate.isDraggable = draggable
+        }
+    }
+
+    class func interpretLineOptions(options: Any?, delegate: MGLLineStyleAnnotation) {
+        guard let options = options as? [String: Any] else { return }
+        if let lineJoinStr = options["lineJoin"] as? String {
+            if let lineJoin = Constants.lineJoinMapping[lineJoinStr] {
+                delegate.lineJoin = lineJoin
+            } else {
+                delegate.lineJoin = MGLLineJoin.miter
+            }
+        }
+        if let lineOpacity = options["lineOpacity"] as? CGFloat {
+            delegate.lineOpacity = lineOpacity
+        }
+        if let lineColor = options["lineColor"] as? String {
+            delegate.lineColor = UIColor(hexString: lineColor) ?? UIColor.black
+        }
+        if let lineWidth = options["lineWidth"] as? CGFloat {
+            delegate.lineWidth = lineWidth
+        }
+        if let lineGapWidth = options["lineGapWidth"] as? CGFloat {
+            delegate.lineGapWidth = lineGapWidth
+        }
+        if let lineOffset = options["lineOffset"] as? CGFloat {
+            delegate.lineOffset = lineOffset
+        }
+        if let lineBlur = options["lineBlur"] as? CGFloat {
+            delegate.lineBlur = lineBlur
+        }
+        if let linePattern = options["linePattern"] as? String {
+            delegate.linePattern = linePattern
+        }
+        if let draggable = options["draggable"] as? Bool {
+            delegate.isDraggable = draggable
+        }
     }
 }

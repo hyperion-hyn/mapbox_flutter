@@ -10,6 +10,7 @@ class MapboxMap extends StatefulWidget {
   const MapboxMap({
     @required this.initialCameraPosition,
     this.onMapCreated,
+    this.onStyleLoadedCallback,
     this.gestureRecognizers,
     this.compassEnabled = true,
     this.cameraTargetBounds = CameraTargetBounds.unbounded,
@@ -22,10 +23,16 @@ class MapboxMap extends StatefulWidget {
     this.trackCameraPosition = false,
     this.myLocationEnabled = false,
     this.myLocationTrackingMode = MyLocationTrackingMode.Tracking,
+    this.myLocationRenderMode = MyLocationRenderMode.COMPASS,
+    this.logoViewMargins,
+    this.compassViewPosition,
+    this.compassViewMargins,
+    this.attributionButtonMargins,
     this.onMapClick,
     this.onMapLongPress,
     this.onCameraTrackingDismissed,
-    this.onStyleLoaded,
+    this.onCameraTrackingChanged,
+    this.onMapIdle,
     this.onAnimateCameraFinish,
     this.children = const <Widget>[],
     this.compassMargins,
@@ -41,8 +48,7 @@ class MapboxMap extends StatefulWidget {
   final bool enableAttribution;
 
   final MapCreatedCallback onMapCreated;
-
-  final OnStyleLoadedCallback onStyleLoaded;
+  final OnStyleLoadedCallback onStyleLoadedCallback;
 
   final VoidCallback onAnimateCameraFinish;
 
@@ -108,6 +114,21 @@ class MapboxMap extends StatefulWidget {
   /// The mode used to track the user location on the map
   final MyLocationTrackingMode myLocationTrackingMode;
 
+  /// The mode to render the user location symbol
+  final MyLocationRenderMode myLocationRenderMode;
+
+  /// Set the layout margins for the Mapbox Logo
+  final Point logoViewMargins;
+
+  /// Set the position for the Mapbox Compass
+  final CompassViewPosition compassViewPosition;
+
+  /// Set the layout margins for the Mapbox Compass
+  final Point compassViewMargins;
+
+  /// Set the layout margins for the Mapbox Attribution Buttons
+  final Point attributionButtonMargins;
+
   /// Which gestures should be consumed by the map.
   ///
   /// It is possible for other gesture recognizers to be competing with the map on pointer
@@ -124,6 +145,15 @@ class MapboxMap extends StatefulWidget {
 
   /// Called when the location tracking mode changes, such as when the user moves the map
   final OnCameraTrackingDismissedCallback onCameraTrackingDismissed;
+  final OnCameraTrackingChangedCallback onCameraTrackingChanged;
+
+  /// Called when map view is entering an idle state, and no more drawing will
+  /// be necessary until new data is loaded or there is some interaction with
+  /// the map.
+  /// * No camera transitions are in progress
+  /// * All currently requested tiles have loaded
+  /// * All fade/transition animations have completed
+  final OnMapIdleCallback onMapIdle;
 
 
   final String languageCode;
@@ -203,13 +233,14 @@ class _MapboxMapState extends State<MapboxMap> {
 
   Future<void> onPlatformViewCreated(int id) async {
     final MapboxMapController controller = await MapboxMapController.init(
-      id, widget.initialCameraPosition,
-      onMapClick: widget.onMapClick,
-      onMapLongPress: widget.onMapLongPress,
-      onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
-      onStyleLoaded: widget.onStyleLoaded,
-      onAnimateCameraFinish: widget.onAnimateCameraFinish,
-    );
+        id, widget.initialCameraPosition,
+        onStyleLoadedCallback: widget.onStyleLoadedCallback,
+        onMapClick: widget.onMapClick,
+        onMapLongPress: widget.onMapLongPress,
+        onCameraTrackingDismissed: widget.onCameraTrackingDismissed,
+        onCameraTrackingChanged: widget.onCameraTrackingChanged,
+        onAnimateCameraFinish: widget.onAnimateCameraFinish,
+        onMapIdle: widget.onMapIdle);
     _controller.complete(controller);
     if (widget.onMapCreated != null) {
       widget.onMapCreated(controller);
@@ -234,6 +265,11 @@ class _MapboxMapOptions {
     this.zoomGesturesEnabled,
     this.myLocationEnabled,
     this.myLocationTrackingMode,
+    this.myLocationRenderMode,
+    this.logoViewMargins,
+    this.compassViewPosition,
+    this.compassViewMargins,
+    this.attributionButtonMargins,
     this.compassMargins,
     this.enableAttribution,
     this.enableLogo,
@@ -243,22 +279,27 @@ class _MapboxMapOptions {
 
   static _MapboxMapOptions fromWidget(MapboxMap map) {
     return _MapboxMapOptions(
-        compassEnabled: map.compassEnabled,
-        cameraTargetBounds: map.cameraTargetBounds,
-        styleString: map.styleString,
-        minMaxZoomPreference: map.minMaxZoomPreference,
-        rotateGesturesEnabled: map.rotateGesturesEnabled,
-        scrollGesturesEnabled: map.scrollGesturesEnabled,
-        tiltGesturesEnabled: map.tiltGesturesEnabled,
-        trackCameraPosition: map.trackCameraPosition,
-        zoomGesturesEnabled: map.zoomGesturesEnabled,
-        myLocationEnabled: map.myLocationEnabled,
-        myLocationTrackingMode: map.myLocationTrackingMode,
-        compassMargins: map.compassMargins,
-        enableAttribution: map.enableAttribution,
-        enableLogo: map.enableLogo,
-        languageCode: map.languageCode,
-        languageEnable: map.languageEnable
+      compassEnabled: map.compassEnabled,
+      cameraTargetBounds: map.cameraTargetBounds,
+      styleString: map.styleString,
+      minMaxZoomPreference: map.minMaxZoomPreference,
+      rotateGesturesEnabled: map.rotateGesturesEnabled,
+      scrollGesturesEnabled: map.scrollGesturesEnabled,
+      tiltGesturesEnabled: map.tiltGesturesEnabled,
+      trackCameraPosition: map.trackCameraPosition,
+      zoomGesturesEnabled: map.zoomGesturesEnabled,
+      myLocationEnabled: map.myLocationEnabled,
+      myLocationTrackingMode: map.myLocationTrackingMode,
+      myLocationRenderMode: map.myLocationRenderMode,
+      logoViewMargins: map.logoViewMargins,
+      compassViewPosition: map.compassViewPosition,
+      compassViewMargins: map.compassViewMargins,
+      attributionButtonMargins: map.attributionButtonMargins,
+      compassMargins: map.compassMargins,
+      enableAttribution: map.enableAttribution,
+      enableLogo: map.enableLogo,
+      languageCode: map.languageCode,
+      languageEnable: map.languageEnable
     );
   }
 
@@ -284,6 +325,16 @@ class _MapboxMapOptions {
 
   final MyLocationTrackingMode myLocationTrackingMode;
 
+  final MyLocationRenderMode myLocationRenderMode;
+
+  final Point logoViewMargins;
+
+  final CompassViewPosition compassViewPosition;
+
+  final Point compassViewMargins;
+
+  final Point attributionButtonMargins;
+
   final CompassMargins compassMargins;
 
   final bool enableLogo;
@@ -303,6 +354,14 @@ class _MapboxMapOptions {
       }
     }
 
+    List<dynamic> pointToArray(Point fieldName) {
+      if (fieldName != null) {
+        return <dynamic>[fieldName.x, fieldName.y];
+      }
+
+      return null;
+    }
+
     addIfNonNull('compassEnabled', compassEnabled);
     addIfNonNull('cameraTargetBounds', cameraTargetBounds?._toJson());
     addIfNonNull('styleString', styleString);
@@ -314,6 +373,11 @@ class _MapboxMapOptions {
     addIfNonNull('trackCameraPosition', trackCameraPosition);
     addIfNonNull('myLocationEnabled', myLocationEnabled);
     addIfNonNull('myLocationTrackingMode', myLocationTrackingMode?.index);
+    addIfNonNull('myLocationRenderMode', myLocationRenderMode?.index);
+    addIfNonNull('logoViewMargins', pointToArray(logoViewMargins));
+    addIfNonNull('compassViewPosition', compassViewPosition?.index);
+    addIfNonNull('compassViewMargins', pointToArray(compassViewMargins));
+    addIfNonNull('attributionButtonMargins', pointToArray(attributionButtonMargins));
     addIfNonNull('compassMargins', compassMargins?._toJson());
     addIfNonNull('enableLogo', enableLogo);
     addIfNonNull('enableAttribution', enableAttribution);

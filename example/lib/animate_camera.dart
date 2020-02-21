@@ -61,7 +61,7 @@ class AnimateCameraState extends State<AnimateCamera> {
                           zoom: 17.0,
                         ),
                       ),
-                    );
+                    ).then((result)=>print("mapController.animateCamera() returned $result"));
                   },
                   child: const Text('newCameraPosition'),
                 ),
@@ -71,7 +71,7 @@ class AnimateCameraState extends State<AnimateCamera> {
                       CameraUpdate.newLatLng(
                         const LatLng(56.1725505, 10.1850512),
                       ),
-                    );
+                    ).then((result)=>print("mapController.animateCamera() returned $result"));
                   },
                   child: const Text('newLatLng'),
                 ),
