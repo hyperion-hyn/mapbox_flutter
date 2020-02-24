@@ -542,9 +542,9 @@ class Convert {
                 LatLng latLng = toLatLng(geometry);
                 options.withGeometry(com.mapbox.geojson.Point.fromLngLat(latLng.getLongitude(), latLng.getLatitude()));
             }
-            final Object zIndex = data.get("zIndex");
-            if (zIndex != null) {
-                options.withZIndex(toInt(zIndex));
+            final Object symbolSortKey = data.get("symbolSortKey");
+            if (symbolSortKey != null) {
+                options.withSymbolSortKey(toFloat(symbolSortKey));
             }
             final Object draggable = data.get("draggable");
             if (draggable != null) {

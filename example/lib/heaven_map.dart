@@ -75,9 +75,11 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
 
   var heavenDataModels = <HeavenDataModel>[
     HeavenDataModel(
-        id: '1',
-        sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
-        color: Colors.pink.value)
+      id: 'c1b7c5102eca43029f0416892447e0ed',
+      sourceLayer: 'embassy',
+      sourceUrl: "https://store.tile.map3.network/maps/global/embassy/{z}/{x}/{y}.vector.pbf",
+      color: 0xff59B45F,
+    )
   ];
 
   @override

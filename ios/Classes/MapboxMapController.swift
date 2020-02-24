@@ -53,9 +53,9 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         mapView = MGLMapView(frame: frame)
         mapView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         self.registrar = registrar
-
-        super.init()
         vId = viewId
+        super.init()
+        
         channel = FlutterMethodChannel(name: "plugins.flutter.io/mapbox_maps_\(viewId)", binaryMessenger: registrar.messenger())
         channel!.setMethodCallHandler(onMethodCall)
         
@@ -200,7 +200,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             }
 
         case "map#queryRenderedFeatures":
-            channel.invokeMethod("print", arguments: "map#queryRenderedFeatures \(String(describing: methodCall.arguments))")
+            channel!.invokeMethod("print", arguments: "map#queryRenderedFeatures \(String(describing: methodCall.arguments))")
             var reply: [String: [String]] = [:]
 
             var features: [MGLFeature] = []
@@ -267,7 +267,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 result(nil)
             }
          case "symbol#addList":
-            channel.invokeMethod("print", arguments: "symbol#addList \(String(describing: methodCall.arguments))")
+            channel!.invokeMethod("print", arguments: "symbol#addList \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [[String: Any]] else { return }
 
             let symbolIds = batchAddMarkerToLayer( datas: arguments)
@@ -303,7 +303,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             }
             result(nil)
          case "symbol#removeList":
-            channel.invokeMethod("print", arguments: "symbol#removeList \(String(describing: methodCall.arguments))")
+            channel!.invokeMethod("print", arguments: "symbol#removeList \(String(describing: methodCall.arguments))")
             removeBatchAddMarker()
             result(nil)
         case "circle#add":
@@ -411,7 +411,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             //channel.invokeMethod("print", arguments: "heaven_map#addRouteOverlay \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let model = arguments["model"] as? [String: Any] else { return }
-            addHeavenMapRouteOverlay(data: model, channel: channel)
+            addHeavenMapRouteOverlay(data: model, channel: channel!)
             result(nil)
 
         case "map_route#removeRouteOverlay":
@@ -424,7 +424,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             //channel.invokeMethod("print", arguments: "heaven_map#startNavigation \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let model = arguments["model"] as? [String: Any] else { return }
-            startNavigation(data: model, channel: channel)
+            startNavigation(data: model, channel: channel!)
             result(nil)
 
         default:
@@ -489,7 +489,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let coordinate = mapView.convert(point, toCoordinateFrom: mapView)
         arguments["lng"] = coordinate.longitude
         arguments["lat"] = coordinate.latitude
-        channel.invokeMethod("map#onMapLongPress", arguments: arguments)
+        channel!.invokeMethod("map#onMapLongPress", arguments: arguments)
     }
 
     /*
@@ -517,67 +517,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         return MGLAnnotationView(frame: CGRect(x: 0, y: 0, width: 10, height: 10))
     }
     
-
-
-    // MARK: symbol
-    private func addSymbol(data: [String: Any]) -> String {
-        if let symbol = parseToSymbol(data: data) {
-            mapView.addAnnotation(symbol)
-            return symbol.id
-        }
-        return ""
-    }
-
-    // MARK: symbol
-    private func addSymbols(datas: [[String: Any]]) -> [String] {
-        var symbolIds = [String]();
-        var symbols = [Symbol]();
-        for data in datas{
-            if let symbol = parseToSymbol(data: data) {
-                symbols.append(symbol);
-            }
-        }
-        mapView.addAnnotations(symbols);
-
-        for symbol in symbols{
-            symbolIds.append(symbol.id);
-        }
-        return symbolIds
-    }
-
-    private func removeSymbol(symbolId: String) {
-        if mapView.annotations?.count != nil, let existingAnnotations = mapView.annotations {
-            for annotation in existingAnnotations {
-                if let symbol = annotation as? Symbol {
-                    if symbol.id == symbolId {
-                        mapView.removeAnnotation(symbol)
-                    }
-                }
-            }
-        }
-    }
-
-    private func parseToSymbol(data: [String: Any]) -> Symbol? {
-        if let geometry = data["geometry"] as? [Double] {
-            let symbol = Symbol()
-            symbol.coordinate = CLLocationCoordinate2D.fromArray(geometry)
-            if let iconImage = data["iconImage"] as? String {
-                symbol.iconImage = iconImage
-            }
-            if let iconOffset = data["iconOffset"] as? [Double] {
-                symbol.iconOffset = iconOffset
-            }
-            if let iconSize = data["iconSize"] as? Double {
-                symbol.iconSize = iconSize
-            }
-            if let iconAnchor = data["iconAnchor"] as? String {
-                symbol.iconAnchor = iconAnchor
-            }
-            return symbol
-        }
-        return nil
-    }
-
     // MARK: heaven map <警察局、大使馆>
     private func addHeavenMapSourceAndLayer(data: [String: Any]) {
         guard let id = data["id"] as? String,
@@ -659,7 +598,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 
     private func removeHeavenMapRouteOverlay(){
 
-        MapRouteDataModel.removeFromMap( mapview: mapView,channel:channel);
+        MapRouteDataModel.removeFromMap( mapview: mapView,channel:channel!);
     }
 
     // MARK: navigation
@@ -972,44 +911,6 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         }
     }
 
-    /**
-
-     add camera listern
-     */
-
-    func mapView(_ mapView: MGLMapView, regionWillChangeAnimated animated: Bool) {
-
-        if(trackCameraPosition){
-            channel.invokeMethod("camera#onMoveStarted", arguments: ["map": vId])
-        }
-    }
-
-    func mapViewRegionIsChanging(_ mapView: MGLMapView) {
-        if(trackCameraPosition){
-            let camera = mapView.camera;
-            channel.invokeMethod("camera#onMove", arguments: ["position":camera.toDict(mapView: mapView)])
-        }
-    }
-
-    func mapView(_ mapView: MGLMapView, regionDidChangeAnimated animated: Bool) {
-
-        if(trackCameraPosition){
-            channel.invokeMethod("camera#onIdle", arguments: ["map": vId])
-        }
-    }
-
-    func mapView(_ mapView: MGLMapView, imageFor annotation: MGLAnnotation) -> MGLAnnotationImage? {
-        if let symbol = annotation as? Symbol,
-            let iconImage = symbol.iconImage {
-            var annotationImage = mapView.dequeueReusableAnnotationImage(withIdentifier: iconImage)
-            if annotationImage == nil {
-                annotationImage = MGLAnnotationImage(image: symbol.makeImage(), reuseIdentifier: iconImage)
-            }
-            return annotationImage
-        }
-        return nil
-    }
-
     /*
      *  MapboxMapOptionsSink
      */
@@ -1119,42 +1020,42 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 }
 
 
-class Symbol: MGLPointAnnotation {
-
-    var id: String = "symbol_\(hash())"
-    var iconImage: String?
-    var iconSize: Double?
-    var iconOffset: [Double]?
-    var iconAnchor: String?
-
-    func makeImage() -> UIImage {
-        let bundle = PodAsset.bundle(forPod: "MapboxGl")
-        var image:UIImage;
-        if(self.iconImage != nil){
-            image = UIImage(named: self.iconImage!, in: bundle, compatibleWith: nil)!
-        } else {
-            image = UIImage(named: "hyn_marker_big", in: bundle, compatibleWith: nil)!
-        }
-
-        if let resizedImage = image.resize(maxWidthHeight: self.iconSize ?? 50.0) {
-            image = resizedImage
-        }
-
-        let offsetX: CGFloat = CGFloat(iconOffset?[0] ?? 0)
-        let offsetY: CGFloat = CGFloat(iconOffset?[1] ?? 0)
-        let anchor: String = self.iconAnchor ?? "center"
-
-        NSLog("anchor \(anchor) offsetX \(offsetX) offsetY \(offsetY)")
-
-        if let offsetImage = image.offsetImage(anchor: anchor, offsetX: offsetX, offsetY: offsetY) {
-            image = offsetImage
-        }
-
-        //  image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
-
-        return image
-    }
-}
+//class Symbol: MGLPointAnnotation {
+//
+//    var id: String = "symbol_\(hash())"
+//    var iconImage: String?
+//    var iconSize: Double?
+//    var iconOffset: [Double]?
+//    var iconAnchor: String?
+//
+//    func makeImage() -> UIImage {
+//        let bundle = PodAsset.bundle(forPod: "MapboxGl")
+//        var image:UIImage;
+//        if(self.iconImage != nil){
+//            image = UIImage(named: self.iconImage!, in: bundle, compatibleWith: nil)!
+//        } else {
+//            image = UIImage(named: "hyn_marker_big", in: bundle, compatibleWith: nil)!
+//        }
+//
+//        if let resizedImage = image.resize(maxWidthHeight: self.iconSize ?? 50.0) {
+//            image = resizedImage
+//        }
+//
+//        let offsetX: CGFloat = CGFloat(iconOffset?[0] ?? 0)
+//        let offsetY: CGFloat = CGFloat(iconOffset?[1] ?? 0)
+//        let anchor: String = self.iconAnchor ?? "center"
+//
+//        NSLog("anchor \(anchor) offsetX \(offsetX) offsetY \(offsetY)")
+//
+//        if let offsetImage = image.offsetImage(anchor: anchor, offsetX: offsetX, offsetY: offsetY) {
+//            image = offsetImage
+//        }
+//
+//        //  image = image.withAlignmentRectInsets(UIEdgeInsets(top: 0, left: 0, bottom: image.size.height/2, right: 0))
+//
+//        return image
+//    }
+//}
 
 class MapRouteDataModel {
 

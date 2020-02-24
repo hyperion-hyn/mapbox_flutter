@@ -67,22 +67,7 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   }
 
   void _add(String iconImage) {
-//    controller.addSymbol(
-//      SymbolOptions(
-//          geometry: LatLng(
-//            center.latitude + sin(_symbolCount * pi / 6.0) / 20.0,
-//            center.longitude + cos(_symbolCount * pi / 6.0) / 20.0,
-//          ),
-//          iconImage: "airport-15"),
-//    );
-    var symbolOptions = [
-      SymbolOptions(
-          geometry: LatLng(
-            center.latitude + sin(1 * pi / 6.0) / 20.0,
-            center.longitude + cos(1 * pi / 6.0) / 20.0,
-          ),
-          iconSize: 1,
-          iconImage: "marker_gray"),
+    controller.addSymbol(
       SymbolOptions(
         geometry: LatLng(
           center.latitude + sin(_symbolCount * pi / 6.0) / 20.0,
@@ -90,9 +75,9 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
         ),
         iconImage: iconImage,
       ),
-    ];
+    );
     setState(() {
-      _symbolCount += symbolOptions.length;
+      _symbolCount += 1;
     });
   }
 

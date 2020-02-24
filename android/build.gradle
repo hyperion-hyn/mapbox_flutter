@@ -54,7 +54,10 @@ android {
 
         //mapbox navigation
         implementation 'org.hyn.titan:hyn-android-navigation:0.38.1.3'
-        implementation 'org.hyn.titan:hyn-android-navigation-ui:0.38.1.3'
+        implementation ('org.hyn.titan:hyn-android-navigation-ui:0.38.1.3'){
+            exclude group: 'com.mapbox.mapboxsdk', module: 'mapbox-android-plugin-annotation-v7'
+        }
+
 
         implementation "com.jakewharton.timber:timber:4.5.1"
         implementation 'androidx.cardview:cardview:1.0.0'

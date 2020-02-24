@@ -59,7 +59,7 @@ class MapUiBodyState extends State<MapUiBody> {
   }
 
   void _onMapChanged() {
-    print("_onMapChanged 执行了");
+//    print("_onMapChanged 执行了");
     setState(() {
       _extractMapInfo();
     });
