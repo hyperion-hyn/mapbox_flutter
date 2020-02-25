@@ -91,47 +91,47 @@ import com.mapbox.mapboxsdk.plugins.localization.LocalizationPlugin;
  * Controller of a single MapboxMaps MapView instance.
  */
 final class MapboxMapController
-  implements Application.ActivityLifecycleCallbacks,
-  MapboxMap.OnCameraIdleListener,
-  MapboxMap.OnCameraMoveListener,
-  MapboxMap.OnCameraMoveStartedListener,
-  OnAnnotationClickListener,
-  MapboxMap.OnMapClickListener,
-    MapboxMap.OnMapLongClickListener,
-  MapboxMapOptionsSink,
-  MethodChannel.MethodCallHandler,
-  com.mapbox.mapboxsdk.maps.OnMapReadyCallback,
-  OnCameraTrackingChangedListener,
-  OnSymbolTappedListener,
-  OnLineTappedListener,
-  OnCircleTappedListener,
-  PlatformView {
-  private static final String TAG = "MapboxMapController";
-  private final int id;
-  private final AtomicInteger activityState;
-  private final MethodChannel methodChannel;
-  private final PluginRegistry.Registrar registrar;
-  private final MapView mapView;
-  private MapboxMap mapboxMap;
-  private final Map<String, SymbolController> symbols;
-  private final Map<String, LineController> lines;
-  private final Map<String, CircleController> circles;
-  private SymbolManager symbolManager;
-  private LineManager lineManager;
-  private CircleManager circleManager;
-  private boolean trackCameraPosition = false;
-  private boolean myLocationEnabled = false;
-  private int myLocationTrackingMode = 0;
-  private int myLocationRenderMode = 0;
-  private boolean disposed = false;
-  private final float density;
-  private MethodChannel.Result mapReadyResult;
-  private final int registrarActivityHashCode;
-  private final Context context;
-  private final String styleStringInitial;
-  private LocationComponent locationComponent = null;
-  private LocationEngine locationEngine = null;
-  private LocalizationPlugin localizationPlugin;
+        implements Application.ActivityLifecycleCallbacks,
+        MapboxMap.OnCameraIdleListener,
+        MapboxMap.OnCameraMoveListener,
+        MapboxMap.OnCameraMoveStartedListener,
+        OnAnnotationClickListener,
+        MapboxMap.OnMapClickListener,
+        MapboxMap.OnMapLongClickListener,
+        MapboxMapOptionsSink,
+        MethodChannel.MethodCallHandler,
+        com.mapbox.mapboxsdk.maps.OnMapReadyCallback,
+        OnCameraTrackingChangedListener,
+        OnSymbolTappedListener,
+        OnLineTappedListener,
+        OnCircleTappedListener,
+        PlatformView {
+    private static final String TAG = "MapboxMapController";
+    private final int id;
+    private final AtomicInteger activityState;
+    private final MethodChannel methodChannel;
+    private final PluginRegistry.Registrar registrar;
+    private final MapView mapView;
+    private MapboxMap mapboxMap;
+    private final Map<String, SymbolController> symbols;
+    private final Map<String, LineController> lines;
+    private final Map<String, CircleController> circles;
+    private SymbolManager symbolManager;
+    private LineManager lineManager;
+    private CircleManager circleManager;
+    private boolean trackCameraPosition = false;
+    private boolean myLocationEnabled = false;
+    private int myLocationTrackingMode = 0;
+    private int myLocationRenderMode = 0;
+    private boolean disposed = false;
+    private final float density;
+    private MethodChannel.Result mapReadyResult;
+    private final int registrarActivityHashCode;
+    private final Context context;
+    private final String styleStringInitial;
+    private LocationComponent locationComponent = null;
+    private LocationEngine locationEngine = null;
+    private LocalizationPlugin localizationPlugin;
     private List<Integer> compassMarginsInitial;
     private boolean enableLogoInitial;
     private boolean enableAttributionInitial;
@@ -177,14 +177,14 @@ final class MapboxMapController
             ApplicationInfo ai = context.getPackageManager().getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
             Bundle bundle = ai.metaData;
             String token = bundle.getString("com.mapbox.token");
-        if (token == null || token.isEmpty()) {
-            throw new NullPointerException();
-      }
-      return token;
+            if (token == null || token.isEmpty()) {
+                throw new NullPointerException();
+            }
+            return token;
         } catch (Exception e) {
             Log.e(TAG, "Failed to find an Access Token in the Application meta-data. Maps may not load correctly. " +
-        "Please refer to the installation guide at https://github.com/tobrun/flutter-mapbox-gl#mapbox-access-token " +
-        "for troubleshooting advice. " + e.getMessage());
+                    "Please refer to the installation guide at https://github.com/tobrun/flutter-mapbox-gl#mapbox-access-token " +
+                    "for troubleshooting advice. " + e.getMessage());
         }
         return null;
     }
@@ -322,13 +322,14 @@ final class MapboxMapController
         mapboxMap.addOnCameraMoveStartedListener(this);
         mapboxMap.addOnCameraMoveListener(this);
         mapboxMap.addOnCameraIdleListener(this);
-    mapView.addOnStyleImageMissingListener((id) -> {
-      DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-      final Bitmap bitmap = getScaledImage(id, displayMetrics.density);
-      if (bitmap != null) {
-        mapboxMap.getStyle().addImage(id, bitmap);
-      }
-    });    setStyleString(styleStringInitial);
+        mapView.addOnStyleImageMissingListener((id) -> {
+            DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+            final Bitmap bitmap = getScaledImage(id, displayMetrics.density);
+            if (bitmap != null) {
+                mapboxMap.getStyle().addImage(id, bitmap);
+            }
+        });
+        setStyleString(styleStringInitial);
         // updateMyLocationEnabled();
 
         mapboxMap.getUiSettings().setAttributionEnabled(enableAttributionInitial);
@@ -361,8 +362,8 @@ final class MapboxMapController
             enableSymbolManager(style);
             enableCircleManager(style);
             if (myLocationEnabled) {
-        enableLocationComponent(style);
-      }
+                enableLocationComponent(style);
+            }
             enableSymbolMarker(style);
             //enable plugins
             MapPluginsManager.INSTANCE.onStyleLoaded(id, mapView, mapboxMap, style);
@@ -380,16 +381,17 @@ final class MapboxMapController
             methodChannel.invokeMethod("map#onStyleLoaded", Collections.singletonMap("map", id));
 
 
-  localizationPlugin = new LocalizationPlugin(mapView, mapboxMap, style);
+            localizationPlugin = new LocalizationPlugin(mapView, mapboxMap, style);
 
-      methodChannel.invokeMethod("map#onStyleLoaded", null);
-    }
-  };
+            methodChannel.invokeMethod("map#onStyleLoaded", null);
+        }
+    };
 
     @SuppressWarnings({"MissingPermission"})
     private void enableLocationComponent(@NonNull Style style) {
         if (hasLocationPermission()) {
-            locationEngine = LocationEngineProvider.getBestLocationEngine(context);LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(context)
+            locationEngine = LocationEngineProvider.getBestLocationEngine(context);
+            LocationComponentOptions locationComponentOptions = LocationComponentOptions.builder(context)
                     .trackingGesturesManagement(true)
                     .build();
             if (locationComponent != null) {
@@ -399,11 +401,12 @@ final class MapboxMapController
             locationComponent.activateLocationComponent(context, style, locationComponentOptions);
             locationComponent.setLocationComponentEnabled(myLocationEnabled);
             // locationComponent.setRenderMode(RenderMode.COMPASS); // remove or keep default?
-      locationComponent.setLocationEngine(locationEngine);
-      locationComponent.setMaxAnimationFps(30);
+            locationComponent.setLocationEngine(locationEngine);
+            locationComponent.setMaxAnimationFps(30);
 //            updateMyLocationTrackingMode();
-            setMyLocationTrackingMode(this.myLocationTrackingMode);updateMyLocationRenderMode();
-      setMyLocationRenderMode(this.myLocationRenderMode);
+            setMyLocationTrackingMode(this.myLocationTrackingMode);
+            updateMyLocationRenderMode();
+            setMyLocationRenderMode(this.myLocationRenderMode);
             locationComponent.addOnCameraTrackingChangedListener(this);
         } else {
             Log.e(TAG, "missing location permissions");
@@ -458,165 +461,180 @@ final class MapboxMapController
         }
     }
 
-  @Override
-  public void onMethodCall(MethodCall call, MethodChannel.Result result) {
-    if (MapPluginsManager.INSTANCE.onMethodCall(id, mapView, call, result)) return;
-    switch (call.method) {
-      case "map#waitForMap":
-        if (mapboxMap != null) {
-          result.success(true);
-          return;
-        }
-        mapReadyResult = result;
-        break;
-      case "map#update": {
-        Convert.interpretMapboxMapOptions(call.argument("options"), this);
-        result.success(Convert.toJson(getCameraPosition()));
-        break;
-      }
-      case "map#updateMyLocationTrackingMode": {
-        int myLocationTrackingMode = call.argument("mode");
-        setMyLocationTrackingMode(myLocationTrackingMode);
-        result.success(null);
-        break;
-      }
-	    case "map#matchMapLanguageWithDeviceDefault": {
-        try {
-		      localizationPlugin.matchMapLanguageWithDeviceDefault();
-			    result.success(null);
-		    } catch (RuntimeException exception) {
-		      Log.d(TAG, exception.toString());
-			    result.error("MAPBOX LOCALIZATION PLUGIN ERROR", exception.toString(), null);
-		    }
-        break;
-      }
-	    case "map#setMapLanguage": {
-  	    final String language = call.argument("language");
-        try {
-		      localizationPlugin.setMapLanguage(language);
-		      result.success(null);
-		    } catch (RuntimeException exception) {
-		      Log.d(TAG, exception.toString());
-			    result.error("MAPBOX LOCALIZATION PLUGIN ERROR", exception.toString(), null);
-		    }
-        break;
-      }
-      case "map#getVisibleRegion": {
-        Map<String, Object> reply = new HashMap<>();
-        VisibleRegion visibleRegion = mapboxMap.getProjection().getVisibleRegion();
-        reply.put("sw", Arrays.asList(visibleRegion.nearLeft.getLatitude(), visibleRegion.nearLeft.getLongitude()));
-        reply.put("ne", Arrays.asList(visibleRegion.farRight.getLatitude(), visibleRegion.farRight.getLongitude()));
-        result.success(reply);
-        break;
-      }
-        case "map#getCameraPosition": {
-            final Map<String, Object> arguments = new HashMap<>(2);
-            arguments.put("position", Convert.toJson(mapboxMap.getCameraPosition()));
-            result.success(arguments);
-            break;
-        }
-        case "location#enableLocation": {
-            if (mapboxMap.getStyle() != null) {
-                this.myLocationEnabled = true;
-                this.myLocationTrackingMode = 1;//CameraMode.TRACKING;
-                enableLocationComponent(mapboxMap.getStyle());
+    @Override
+    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+        if (MapPluginsManager.INSTANCE.onMethodCall(id, mapView, call, result)) return;
+        switch (call.method) {
+            case "map#waitForMap":
+                if (mapboxMap != null) {
+                    result.success(true);
+                    return;
+                }
+                mapReadyResult = result;
+                break;
+            case "map#update": {
+                Convert.interpretMapboxMapOptions(call.argument("options"), this);
+                result.success(Convert.toJson(getCameraPosition()));
+                break;
             }
-            break;
-        }
-        case "location#disableLocation": {
-            setMyLocationEnabled(false);
-            result.success(null);
-            break;
-        }
-        case "location#lastKnownLocation": {
-            if (locationComponent != null) {
-                Location location = locationComponent.getLastKnownLocation();
-                if (location != null) {
-                    List<Double> latlng = new ArrayList<>();
-                    latlng.add(location.getLatitude());
-                    latlng.add(location.getLongitude());
-                    result.success(latlng);
+            case "map#updateMyLocationTrackingMode": {
+                int myLocationTrackingMode = call.argument("mode");
+                setMyLocationTrackingMode(myLocationTrackingMode);
+                result.success(null);
+                break;
+            }
+            case "map#matchMapLanguageWithDeviceDefault": {
+                try {
+                    localizationPlugin.matchMapLanguageWithDeviceDefault();
+                    result.success(null);
+                } catch (RuntimeException exception) {
+                    Log.d(TAG, exception.toString());
+                    result.error("MAPBOX LOCALIZATION PLUGIN ERROR", exception.toString(), null);
+                }
+                break;
+            }
+            case "map#setMapLanguage": {
+                final String language = call.argument("language");
+                try {
+                    localizationPlugin.setMapLanguage(language);
+                    result.success(null);
+                } catch (RuntimeException exception) {
+                    Log.d(TAG, exception.toString());
+                    result.error("MAPBOX LOCALIZATION PLUGIN ERROR", exception.toString(), null);
+                }
+                break;
+            }
+            case "map#getVisibleRegion": {
+                Map<String, Object> reply = new HashMap<>();
+                VisibleRegion visibleRegion = mapboxMap.getProjection().getVisibleRegion();
+                reply.put("sw", Arrays.asList(visibleRegion.nearLeft.getLatitude(), visibleRegion.nearLeft.getLongitude()));
+                reply.put("ne", Arrays.asList(visibleRegion.farRight.getLatitude(), visibleRegion.farRight.getLongitude()));
+                result.success(reply);
+                break;
+            }
+            case "map#getCameraPosition": {
+                final Map<String, Object> arguments = new HashMap<>(2);
+                arguments.put("position", Convert.toJson(mapboxMap.getCameraPosition()));
+                result.success(arguments);
+                break;
+            }
+            case "location#enableLocation": {
+                if (mapboxMap.getStyle() != null) {
+                    this.myLocationEnabled = true;
+                    this.myLocationTrackingMode = 1;//CameraMode.TRACKING;
+                    enableLocationComponent(mapboxMap.getStyle());
+                }
+                break;
+            }
+            case "location#disableLocation": {
+                setMyLocationEnabled(false);
+                result.success(null);
+                break;
+            }
+            case "location#lastKnownLocation": {
+                if (locationComponent != null) {
+                    Location location = locationComponent.getLastKnownLocation();
+                    if (location != null) {
+                        List<Double> latlng = new ArrayList<>();
+                        latlng.add(location.getLatitude());
+                        latlng.add(location.getLongitude());
+                        result.success(latlng);
+                    } else {
+                        result.success(null);
+                    }
                 } else {
                     result.success(null);
                 }
-            } else {
+                break;
+            }
+            case "camera#move": {
+                final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
+                if (cameraUpdate != null) {
+                    // camera transformation not handled yet
+                    mapboxMap.moveCamera(cameraUpdate, new OnCameraMoveFinishedListener() {
+                        @Override
+                        public void onFinish() {
+                            super.onFinish();
+                            result.success(true);
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            super.onCancel();
+                            result.success(false);
+                        }
+                    });
+
+                    // moveCamera(cameraUpdate);
+                } else {
+                    result.success(false);
+                }
+                break;
+            }
+            case "camera#animate": {
+                final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
+                if (cameraUpdate != null) {
+                    // camera transformation not handled yet
+                    mapboxMap.animateCamera(cameraUpdate, new OnCameraMoveFinishedListener() {
+                        @Override
+                        public void onFinish() {
+                            super.onFinish();
+                            result.success(true);
+                        }
+
+                        @Override
+                        public void onCancel() {
+                            super.onCancel();
+                            result.success(false);
+                        }
+                    });
+
+                    // animateCamera(cameraUpdate);
+                } else {
+                    result.success(false);
+                }
+                break;
+            }
+
+            case "camera#animateWithTime": {
+                final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
+                int durationMs = Integer.parseInt(call.argument("durationMs"));
+                if (cameraUpdate != null) {
+                    // camera transformation not handled yet
+                    animateCamera(cameraUpdate, durationMs, new MapboxMap.CancelableCallback() {
+                        @Override
+                        public void onCancel() {
+                        }
+
+                        @Override
+                        public void onFinish() {
+                            methodChannel.invokeMethod("camera#animateFinish", Collections.singletonMap("map", id));
+                        }
+                    });
+                }
                 result.success(null);
+                break;
             }
-            break;
-        }
-      case "camera#move": {
-        final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
-        if (cameraUpdate != null) {
-          // camera transformation not handled yet
-          mapboxMap.moveCamera(cameraUpdate, new OnCameraMoveFinishedListener(){
-            @Override
-            public void onFinish() {
-              super.onFinish();
-              result.success(true);
-            }
-
-            @Override
-            public void onCancel() {
-              super.onCancel();
-              result.success(false);
-            }
-          });
-
-         // moveCamera(cameraUpdate);
-        }else {
-          result.success(false);
-        }
-        break;
-      }
-      case "camera#animate": {
-        final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
-        if (cameraUpdate != null) {
-          // camera transformation not handled yet
-          mapboxMap.animateCamera(cameraUpdate, new OnCameraMoveFinishedListener(){
-            @Override
-            public void onFinish() {
-              super.onFinish();
-              result.success(true);
-            }
-
-            @Override
-            public void onCancel() {
-              super.onCancel();
-              result.success(false);
-            }
-          });
-
-          // animateCamera(cameraUpdate);
-        }else {
-          result.success(false);
-        }
-        break;
-      }
-
-        case "camera#animateWithTime": {
-            final CameraUpdate cameraUpdate = Convert.toCameraUpdate(call.argument("cameraUpdate"), mapboxMap, density);
-            int durationMs = Integer.parseInt(call.argument("durationMs"));
-            if (cameraUpdate != null) {
-                // camera transformation not handled yet
-                animateCamera(cameraUpdate, durationMs, new MapboxMap.CancelableCallback() {
-                    @Override
-                    public void onCancel() {
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        methodChannel.invokeMethod("camera#animateFinish", Collections.singletonMap("map", id));
-                    }
-                });
-            }
-            result.success(null);
-            break;
-        }
-      case "map#queryRenderedFeatures": {
-        Map<String, Object> reply = new HashMap<>();
-        List<Feature> features;
+            case "map#queryRenderedFeatures": {
+                Map<String, Object> reply = new HashMap<>();
+                List<Feature> features;
 
                 String[] layerIds = ((List<String>) call.argument("layerIds")).toArray(new String[0]);
+
+                //增加搜索前缀
+                Style style = mapboxMap.getStyle();
+                List<String> matchLayerIds = new ArrayList<>();
+                for (String layerId : layerIds) {
+                    if (style != null) {
+                        List<Layer> layerList = style.getLayers();
+                        for (Layer layerTemp : layerList) {
+                            if (layerTemp.getId().startsWith(layerId)) {
+                                matchLayerIds.add(layerTemp.getId());
+                            }
+                        }
+                    }
+                }
+
                 String filter = (String) call.argument("filter");
                 Expression filterExpression = filter == null ? null : Expression.Converter.convert(filter);
                 ;
@@ -624,14 +642,15 @@ final class MapboxMapController
                     Double x = call.argument("x");
                     Double y = call.argument("y");
                     PointF pixel = new PointF(x.floatValue(), y.floatValue());
-                    features = mapboxMap.queryRenderedFeatures(pixel, filterExpression, layerIds);
+                    features = mapboxMap.queryRenderedFeatures(pixel, filterExpression, matchLayerIds.toArray(new String[0]))
+                    ;
                 } else {
                     Double left = call.argument("left");
                     Double top = call.argument("top");
                     Double right = call.argument("right");
                     Double bottom = call.argument("bottom");
                     RectF rectF = new RectF(left.floatValue(), top.floatValue(), right.floatValue(), bottom.floatValue());
-                    features = mapboxMap.queryRenderedFeatures(rectF, filterExpression, layerIds);
+                    features = mapboxMap.queryRenderedFeatures(rectF, filterExpression, matchLayerIds.toArray(new String[0]));
                 }
                 List<String> featuresJson = new ArrayList<>();
                 for (Feature feature : features) {
@@ -642,33 +661,33 @@ final class MapboxMapController
                 break;
             }
             case "map#setTelemetryEnabled": {
-        final boolean enabled = call.argument("enabled");
-        Mapbox.getTelemetry().setUserTelemetryRequestState(enabled);
-        result.success(null);
-        break;
-	  }
-      case "map#getTelemetryEnabled": {
-        final TelemetryEnabler.State telemetryState = TelemetryEnabler.retrieveTelemetryStateFromPreferences();
-        result.success(telemetryState == TelemetryEnabler.State.ENABLED);
-        break;
-      }
-      case "map#invalidateAmbientCache": {
-        OfflineManager fileSource = OfflineManager.getInstance(context);
+                final boolean enabled = call.argument("enabled");
+                Mapbox.getTelemetry().setUserTelemetryRequestState(enabled);
+                result.success(null);
+                break;
+            }
+            case "map#getTelemetryEnabled": {
+                final TelemetryEnabler.State telemetryState = TelemetryEnabler.retrieveTelemetryStateFromPreferences();
+                result.success(telemetryState == TelemetryEnabler.State.ENABLED);
+                break;
+            }
+            case "map#invalidateAmbientCache": {
+                OfflineManager fileSource = OfflineManager.getInstance(context);
 
-        fileSource.invalidateAmbientCache(new OfflineManager.FileSourceCallback() {
-          @Override
-          public void onSuccess() {
-            result.success(null);
-          }
+                fileSource.invalidateAmbientCache(new OfflineManager.FileSourceCallback() {
+                    @Override
+                    public void onSuccess() {
+                        result.success(null);
+                    }
 
-          @Override
-          public void onError(@NonNull String message) {
-            result.error("MAPBOX CACHE ERROR", message, null);
-          }
-        });
-        break;
-      }
-      case "symbol#add": {
+                    @Override
+                    public void onError(@NonNull String message) {
+                        result.error("MAPBOX CACHE ERROR", message, null);
+                    }
+                });
+                break;
+            }
+            case "symbol#add": {
                 final SymbolBuilder symbolBuilder = newSymbolBuilder();
                 Convert.interpretSymbolOptions(call.argument("options"), symbolBuilder);
                 final Symbol symbol = symbolBuilder.build();
@@ -750,42 +769,43 @@ final class MapboxMapController
                 final CircleController circle = circle(circleId);
                 Convert.interpretCircleOptions(call.argument("options"), circle);
                 circle.update(circleManager);
-                result.success(null);break;
-      }
-      case "circle#getGeometry": {
-        final String circleId = call.argument("circle");
-        final CircleController circle = circle(circleId);
-        final LatLng circleLatLng = circle.getGeometry();
-        Map<String, Double> hashMapLatLng = new HashMap<>();
-        hashMapLatLng.put("latitude", circleLatLng.getLatitude());
-        hashMapLatLng.put("longitude", circleLatLng.getLongitude());
-        result.success(hashMapLatLng);
-        break;
-      }
-      case "locationComponent#getLastLocation": {
-        Log.e(TAG, "location component: getLastLocation");
-        if (this.myLocationEnabled && locationComponent != null && locationEngine != null) {
-          Map<String, Object> reply = new HashMap<>();
-          locationEngine.getLastLocation(new LocationEngineCallback<LocationEngineResult>() {
-            @Override
-            public void onSuccess(LocationEngineResult locationEngineResult) {
-              Location lastLocation = locationEngineResult.getLastLocation();
-              if (lastLocation != null) {
-                reply.put("latitude", lastLocation.getLatitude());
-                reply.put("longitude", lastLocation.getLongitude());
-                reply.put("altitude", lastLocation.getAltitude());
-                result.success(reply);
-              } else {
-                result.error("", "", null); // ???
-              }
+                result.success(null);
+                break;
             }
+            case "circle#getGeometry": {
+                final String circleId = call.argument("circle");
+                final CircleController circle = circle(circleId);
+                final LatLng circleLatLng = circle.getGeometry();
+                Map<String, Double> hashMapLatLng = new HashMap<>();
+                hashMapLatLng.put("latitude", circleLatLng.getLatitude());
+                hashMapLatLng.put("longitude", circleLatLng.getLongitude());
+                result.success(hashMapLatLng);
+                break;
+            }
+            case "locationComponent#getLastLocation": {
+                Log.e(TAG, "location component: getLastLocation");
+                if (this.myLocationEnabled && locationComponent != null && locationEngine != null) {
+                    Map<String, Object> reply = new HashMap<>();
+                    locationEngine.getLastLocation(new LocationEngineCallback<LocationEngineResult>() {
+                        @Override
+                        public void onSuccess(LocationEngineResult locationEngineResult) {
+                            Location lastLocation = locationEngineResult.getLastLocation();
+                            if (lastLocation != null) {
+                                reply.put("latitude", lastLocation.getLatitude());
+                                reply.put("longitude", lastLocation.getLongitude());
+                                reply.put("altitude", lastLocation.getAltitude());
+                                result.success(reply);
+                            } else {
+                                result.error("", "", null); // ???
+                            }
+                        }
 
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-              result.error("", "", null); // ???
-            }
-          });
-        }
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            result.error("", "", null); // ???
+                        }
+                    });
+                }
                 break;
             }
             default:
@@ -818,14 +838,15 @@ final class MapboxMapController
 
     @Override
     public void onCameraTrackingChanged(int currentMode) {
-    final Map<String, Object> arguments = new HashMap<>(2);
-    arguments.put("mode", currentMode);
-    methodChannel.invokeMethod("map#onCameraTrackingChanged", arguments);
-  }
+        final Map<String, Object> arguments = new HashMap<>(2);
+        arguments.put("mode", currentMode);
+        methodChannel.invokeMethod("map#onCameraTrackingChanged", arguments);
+    }
 
     @Override
     public void onCameraTrackingDismissed() {
-        this.myLocationTrackingMode = 0;methodChannel.invokeMethod("map#onCameraTrackingDismissed", new HashMap<>());
+        this.myLocationTrackingMode = 0;
+        methodChannel.invokeMethod("map#onCameraTrackingDismissed", new HashMap<>());
     }
 
     @Override
@@ -1048,64 +1069,63 @@ final class MapboxMapController
         }
     }
 
-  @Override
-  public void setMyLocationRenderMode(int myLocationRenderMode) {
-    if (this.myLocationRenderMode == myLocationRenderMode) {
-      return;
+    @Override
+    public void setMyLocationRenderMode(int myLocationRenderMode) {
+        if (this.myLocationRenderMode == myLocationRenderMode) {
+            return;
+        }
+        this.myLocationRenderMode = myLocationRenderMode;
+        if (mapboxMap != null && locationComponent != null) {
+            updateMyLocationRenderMode();
+        }
     }
-    this.myLocationRenderMode = myLocationRenderMode;
-    if (mapboxMap != null && locationComponent != null) {
-      updateMyLocationRenderMode();
+
+    public void setLogoViewMargins(int x, int y) {
+        mapboxMap.getUiSettings().setLogoMargins(x, 0, 0, y);
     }
-  }
 
-  public void setLogoViewMargins(int x, int y) {
-    mapboxMap.getUiSettings().setLogoMargins(x, 0, 0, y);
-  }
-
-  @Override
-  public void setCompassGravity(int gravity) {
-    switch(gravity) {
-      case 0:
-        mapboxMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.START);
-        break;
-      default:
-      case 1:
-        mapboxMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.END);
-        break;
-      case 2:
-        mapboxMap.getUiSettings().setCompassGravity(Gravity.BOTTOM | Gravity.START);
-        break;
-      case 3:
-        mapboxMap.getUiSettings().setCompassGravity(Gravity.BOTTOM | Gravity.END);
-        break;
+    @Override
+    public void setCompassGravity(int gravity) {
+        switch (gravity) {
+            case 0:
+                mapboxMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.START);
+                break;
+            default:
+            case 1:
+                mapboxMap.getUiSettings().setCompassGravity(Gravity.TOP | Gravity.END);
+                break;
+            case 2:
+                mapboxMap.getUiSettings().setCompassGravity(Gravity.BOTTOM | Gravity.START);
+                break;
+            case 3:
+                mapboxMap.getUiSettings().setCompassGravity(Gravity.BOTTOM | Gravity.END);
+                break;
+        }
     }
-  }
 
-  @Override
-  public void setCompassViewMargins(int x, int y) {
-    switch(mapboxMap.getUiSettings().getCompassGravity())
-    {
-      case Gravity.TOP | Gravity.START:
-        mapboxMap.getUiSettings().setCompassMargins(x, y, 0, 0);
-        break;
-      default:
-      case Gravity.TOP | Gravity.END:
-        mapboxMap.getUiSettings().setCompassMargins(0, y, x, 0);
-        break;
-      case Gravity.BOTTOM | Gravity.START:
-        mapboxMap.getUiSettings().setCompassMargins(x, 0, 0, y);
-        break;
-      case Gravity.BOTTOM | Gravity.END:
-        mapboxMap.getUiSettings().setCompassMargins(0, 0, x, y);
-        break;
+    @Override
+    public void setCompassViewMargins(int x, int y) {
+        switch (mapboxMap.getUiSettings().getCompassGravity()) {
+            case Gravity.TOP | Gravity.START:
+                mapboxMap.getUiSettings().setCompassMargins(x, y, 0, 0);
+                break;
+            default:
+            case Gravity.TOP | Gravity.END:
+                mapboxMap.getUiSettings().setCompassMargins(0, y, x, 0);
+                break;
+            case Gravity.BOTTOM | Gravity.START:
+                mapboxMap.getUiSettings().setCompassMargins(x, 0, 0, y);
+                break;
+            case Gravity.BOTTOM | Gravity.END:
+                mapboxMap.getUiSettings().setCompassMargins(0, 0, x, y);
+                break;
+        }
     }
-  }
 
-  @Override
-  public void setAttributionButtonMargins(int x, int y) {
-    mapboxMap.getUiSettings().setAttributionMargins(0, 0, x, y);
-  }
+    @Override
+    public void setAttributionButtonMargins(int x, int y) {
+        mapboxMap.getUiSettings().setAttributionMargins(0, 0, x, y);
+    }
 
     @Override
     public void setEnableLogo(boolean enableLogo) {
@@ -1164,12 +1184,12 @@ final class MapboxMapController
 
 
     private void updateMyLocationEnabled() {
-    if(this.locationComponent == null && myLocationEnabled == true){
-      enableLocationComponent(mapboxMap.getStyle());
-    }
+        if (this.locationComponent == null && myLocationEnabled == true) {
+            enableLocationComponent(mapboxMap.getStyle());
+        }
 
-    locationComponent.setLocationComponentEnabled(myLocationEnabled);
-  }
+        locationComponent.setLocationComponentEnabled(myLocationEnabled);
+    }
 
     private void updateMyLocationTrackingMode() {
         int[] mapboxTrackingModes = new int[]{CameraMode.NONE, CameraMode.TRACKING, CameraMode.TRACKING_COMPASS, CameraMode.TRACKING_GPS};
@@ -1177,9 +1197,11 @@ final class MapboxMapController
     }
 
     private void updateMyLocationRenderMode() {
-    int[] mapboxRenderModes = new int[] {RenderMode.NORMAL, RenderMode.COMPASS, RenderMode.GPS};
-    locationComponent.setRenderMode(mapboxRenderModes[this.myLocationRenderMode]);
-  }private boolean hasLocationPermission() {
+        int[] mapboxRenderModes = new int[]{RenderMode.NORMAL, RenderMode.COMPASS, RenderMode.GPS};
+        locationComponent.setRenderMode(mapboxRenderModes[this.myLocationRenderMode]);
+    }
+
+    private boolean hasLocationPermission() {
         return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED
                 || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -1194,62 +1216,63 @@ final class MapboxMapController
                 permission, android.os.Process.myPid(), android.os.Process.myUid());
     }
 
-  /**
-   * Tries to find highest scale image for display type
-   * @param imageId
-   * @param density
-   * @return
-   */
-  private Bitmap getScaledImage(String imageId, float density) {
-    AssetManager assetManager = registrar.context().getAssets();
-    AssetFileDescriptor assetFileDescriptor = null;
+    /**
+     * Tries to find highest scale image for display type
+     *
+     * @param imageId
+     * @param density
+     * @return
+     */
+    private Bitmap getScaledImage(String imageId, float density) {
+        AssetManager assetManager = registrar.context().getAssets();
+        AssetFileDescriptor assetFileDescriptor = null;
 
-    // Split image path into parts.
-    List<String> imagePathList = Arrays.asList(imageId.split("/"));
-    List<String> assetPathList = new ArrayList<>();
+        // Split image path into parts.
+        List<String> imagePathList = Arrays.asList(imageId.split("/"));
+        List<String> assetPathList = new ArrayList<>();
 
-    // "On devices with a device pixel ratio of 1.8, the asset .../2.0x/my_icon.png would be chosen.
-    // For a device pixel ratio of 2.7, the asset .../3.0x/my_icon.png would be chosen."
-    // Source: https://flutter.dev/docs/development/ui/assets-and-images#resolution-aware
-    for (int i = (int) Math.ceil(density); i > 0; i--) {
-      String assetPath;
-      if (i == 1) {
-        // If density is 1.0x then simply take the default asset path
-        assetPath = registrar.lookupKeyForAsset(imageId);
-      } else {
-        // Build a resolution aware asset path as follows:
-        // <directory asset>/<ratio>/<image name>
-        // where ratio is 1.0x, 2.0x or 3.0x.
-        StringBuilder stringBuilder = new StringBuilder();
-        for (int j = 0; j < imagePathList.size() - 1; j++) {
-          stringBuilder.append(imagePathList.get(j));
-          stringBuilder.append("/");
+        // "On devices with a device pixel ratio of 1.8, the asset .../2.0x/my_icon.png would be chosen.
+        // For a device pixel ratio of 2.7, the asset .../3.0x/my_icon.png would be chosen."
+        // Source: https://flutter.dev/docs/development/ui/assets-and-images#resolution-aware
+        for (int i = (int) Math.ceil(density); i > 0; i--) {
+            String assetPath;
+            if (i == 1) {
+                // If density is 1.0x then simply take the default asset path
+                assetPath = registrar.lookupKeyForAsset(imageId);
+            } else {
+                // Build a resolution aware asset path as follows:
+                // <directory asset>/<ratio>/<image name>
+                // where ratio is 1.0x, 2.0x or 3.0x.
+                StringBuilder stringBuilder = new StringBuilder();
+                for (int j = 0; j < imagePathList.size() - 1; j++) {
+                    stringBuilder.append(imagePathList.get(j));
+                    stringBuilder.append("/");
+                }
+                stringBuilder.append(((float) i) + "x");
+                stringBuilder.append("/");
+                stringBuilder.append(imagePathList.get(imagePathList.size() - 1));
+                assetPath = registrar.lookupKeyForAsset(stringBuilder.toString());
+            }
+            // Build up a list of resolution aware asset paths.
+            assetPathList.add(assetPath);
         }
-        stringBuilder.append(((float) i) + "x");
-        stringBuilder.append("/");
-        stringBuilder.append(imagePathList.get(imagePathList.size()-1));
-        assetPath = registrar.lookupKeyForAsset(stringBuilder.toString());
-      }
-      // Build up a list of resolution aware asset paths.
-      assetPathList.add(assetPath);
-    }
 
-    // Iterate over asset paths and get the highest scaled asset (as a bitmap).
-    Bitmap bitmap = null;
-    for (String assetPath : assetPathList) {
-      try {
-        // Read path (throws exception if doesn't exist).
-        assetFileDescriptor = assetManager.openFd(assetPath);
-        InputStream assetStream = assetFileDescriptor.createInputStream();
-        bitmap = BitmapFactory.decodeStream(assetStream);
-        assetFileDescriptor.close(); // Close for memory
-        break; // If exists, break
-      } catch (IOException e) {
-        // Skip
-      }
+        // Iterate over asset paths and get the highest scaled asset (as a bitmap).
+        Bitmap bitmap = null;
+        for (String assetPath : assetPathList) {
+            try {
+                // Read path (throws exception if doesn't exist).
+                assetFileDescriptor = assetManager.openFd(assetPath);
+                InputStream assetStream = assetFileDescriptor.createInputStream();
+                bitmap = BitmapFactory.decodeStream(assetStream);
+                assetFileDescriptor.close(); // Close for memory
+                break; // If exists, break
+            } catch (IOException e) {
+                // Skip
+            }
+        }
+        return bitmap;
     }
-    return bitmap;
-  }
 
     ///see https://github.com/flutter/flutter/issues/40126
     @Override
@@ -1260,16 +1283,16 @@ final class MapboxMapController
     public void onInputConnectionUnlocked() {
     }
 
-  /**
-   * Simple Listener to listen for the status of camera movements.
-   */
-  public class OnCameraMoveFinishedListener implements MapboxMap.CancelableCallback{
-    @Override
-    public void onFinish() {
-    }
+    /**
+     * Simple Listener to listen for the status of camera movements.
+     */
+    public class OnCameraMoveFinishedListener implements MapboxMap.CancelableCallback {
+        @Override
+        public void onFinish() {
+        }
 
-    @Override
-    public void onCancel() {
+        @Override
+        public void onCancel() {
+        }
     }
-  }
 }

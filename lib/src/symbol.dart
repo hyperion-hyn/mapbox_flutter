@@ -71,7 +71,7 @@ class SymbolOptions {
     this.textHaloWidth,
     this.textHaloBlur,
     this.geometry,
-    this.zIndex,
+    this.symbolSortKey,
     this.draggable,
   });
 
@@ -100,7 +100,7 @@ class SymbolOptions {
   final double textHaloWidth;
   final double textHaloBlur;
   final LatLng geometry;
-  final int zIndex;
+  final double symbolSortKey;
   final bool draggable;
 
   static const SymbolOptions defaultOptions = SymbolOptions(
@@ -137,7 +137,7 @@ class SymbolOptions {
       textHaloWidth: changes.textHaloWidth ?? textHaloWidth,
       textHaloBlur: changes.textHaloBlur ?? textHaloBlur,
       geometry: changes.geometry ?? geometry,
-      zIndex: changes.zIndex ?? zIndex,
+      symbolSortKey: changes.symbolSortKey ?? symbolSortKey,
       draggable: changes.draggable ?? draggable,
     );
   }
@@ -176,7 +176,7 @@ class SymbolOptions {
     addIfPresent('textHaloWidth', textHaloWidth);
     addIfPresent('textHaloBlur', textHaloBlur);
     addIfPresent('geometry', geometry?._toJson());
-    addIfPresent('zIndex', zIndex);
+    addIfPresent('symbolSortKey', symbolSortKey);
     addIfPresent('draggable', draggable);
     return json;
   }

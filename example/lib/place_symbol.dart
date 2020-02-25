@@ -176,13 +176,13 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
   }
 
   Future<void> _changeZIndex() async {
-    int current = _selectedSymbol.options.zIndex;
+    double current = _selectedSymbol.options.symbolSortKey;
     if (current == null) {
       // default value
       current = 0;
     }
     _updateSelectedSymbol(
-      SymbolOptions(zIndex: current == 12 ? 0 : current + 1),
+      SymbolOptions(symbolSortKey: current == 12.0 ? 0.0 : current + 1),
     );
   }
 
@@ -216,14 +216,11 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                       children: <Widget>[
                         FlatButton(
                           child: const Text('add'),
-                          onPressed: () =>
-                              (_symbolCount == 12) ? null : _add("airport-15"),
+                          onPressed: () => (_symbolCount == 12) ? null : _add("airport-15"),
                         ),
                         FlatButton(
                           child: const Text('add (custom icon)'),
-                          onPressed: () => (_symbolCount == 12)
-                              ? null
-                              : _add("assets/symbols/custom-icon.png"),
+                          onPressed: () => (_symbolCount == 12) ? null : _add("assets/symbols/custom-icon.png"),
                         ),
                         FlatButton(
                           child: const Text('remove'),
@@ -235,47 +232,35 @@ class PlaceSymbolBodyState extends State<PlaceSymbolBody> {
                       children: <Widget>[
                         FlatButton(
                           child: const Text('change alpha'),
-                          onPressed:
-                              (_selectedSymbol == null) ? null : _changeAlpha,
+                          onPressed: (_selectedSymbol == null) ? null : _changeAlpha,
                         ),
                         FlatButton(
                           child: const Text('change icon offset'),
-                          onPressed:
-                              (_selectedSymbol == null) ? null : _changeIconOffset,
+                          onPressed: (_selectedSymbol == null) ? null : _changeIconOffset,
                         ),
                         FlatButton(
                           child: const Text('change icon anchor'),
-                          onPressed: (_selectedSymbol == null)
-                              ? null
-                              : _changeIconAnchor,
+                          onPressed: (_selectedSymbol == null) ? null : _changeIconAnchor,
                         ),
                         FlatButton(
                           child: const Text('toggle draggable'),
-                          onPressed: (_selectedSymbol == null)
-                              ? null
-                              : _toggleDraggable,
+                          onPressed: (_selectedSymbol == null) ? null : _toggleDraggable,
                         ),
                         FlatButton(
                           child: const Text('change position'),
-                          onPressed: (_selectedSymbol == null)
-                              ? null
-                              : _changePosition,
+                          onPressed: (_selectedSymbol == null) ? null : _changePosition,
                         ),
                         FlatButton(
                           child: const Text('change rotation'),
-                          onPressed: (_selectedSymbol == null)
-                              ? null
-                              : _changeRotation,
+                          onPressed: (_selectedSymbol == null) ? null : _changeRotation,
                         ),
                         FlatButton(
                           child: const Text('toggle visible'),
-                          onPressed:
-                              (_selectedSymbol == null) ? null : _toggleVisible,
+                          onPressed: (_selectedSymbol == null) ? null : _toggleVisible,
                         ),
                         FlatButton(
                           child: const Text('change zIndex'),
-                          onPressed:
-                              (_selectedSymbol == null) ? null : _changeZIndex,
+                          onPressed: (_selectedSymbol == null) ? null : _changeZIndex,
                         ),
                       ],
                     ),

@@ -445,6 +445,14 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                 if let imageFromAsset = UIImage.loadFromFile(imagePath: assetPath, imageName: fileName) {
                     self.mapView.style?.setImage(imageFromAsset, forName: iconImageName)
                 }
+            }else{
+                let bundle = PodAsset.bundle(forPod: "MapboxGl")
+                if let imageFromAsset = UIImage(named: iconImageName, in: bundle, compatibleWith: nil){
+                    if let resizedImage = imageFromAsset.resize(maxWidthHeight:50.0) {
+                        self.mapView.style?.setImage(resizedImage, forName: iconImageName)
+                    }
+                   
+                }
             }
         }
     }
