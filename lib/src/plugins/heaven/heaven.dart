@@ -19,10 +19,16 @@ class _HeavenPluginState extends State<HeavenPlugin> {
 
   Future<dynamic> _addModel(HeavenDataModel model) async {
     if (MapboxMapParent.of(context).controller != null) {
-      return await MapboxMapParent.of(context)
+      //print('[mapbox_flutter] _addModel, controller not is null, ${model._toJson()}');
+      var status = await MapboxMapParent.of(context)
           .controller
           .channel
           .invokeMethod("heaven_map#addData", <String, dynamic>{'model': model._toJson()});
+      //print('[mapbox_flutter] _addModel, controller not is null, ${status}');
+
+      return status;
+    } else {
+      //print('[mapbox_flutter] _addModel, controller is null');
     }
     return null;
   }
