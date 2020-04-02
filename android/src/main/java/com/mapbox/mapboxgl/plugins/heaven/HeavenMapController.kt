@@ -119,7 +119,11 @@ class HeavenMapController(private var initModels: List<HeavenDataModel>? = null)
         if (model.sourceLayer != "poi") {
             if (imageMap[sourceLayer] != null) {
                 val newLayer = SymbolLayer(layerId, sourceId)
-                        .withProperties(iconImage(sourceLayer))
+                        .withProperties(
+                                    iconImage(sourceLayer),
+//                                    iconAllowOverlap(true),
+//                                    iconIgnorePlacement(true),
+                                    iconSize(1.5f))
                         .withSourceLayer(model.sourceLayer)
                 style?.addImage(sourceLayer, BitmapFactory.decodeResource(
                         context.resources, imageMap[sourceLayer]!!))

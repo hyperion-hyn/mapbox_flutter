@@ -635,7 +635,8 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
                        guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
                        let circlesLayer = MGLSymbolStyleLayer(identifier: layerId, source: source)
                        circlesLayer.sourceLayerIdentifier = sourceLayer
-                       circlesLayer.iconImageName = NSExpression(forConstantValue: sourceLayer);
+                       circlesLayer.iconImageName = NSExpression(forConstantValue: sourceLayer)
+                       circlesLayer.iconScale = NSExpression(forConstantValue: 1.5)
                        layer = circlesLayer
                    }
                    else {
