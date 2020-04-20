@@ -35,7 +35,7 @@ class _RouteMapScneneState extends State<_RouteMapScnene> {
           target: LatLng(23.12076, 113.322058),
           zoom: 8.0,
         ),
-        styleString: 'https://static.hyn.space/maptiles/see-it-all.json',
+        styleString: 'https://cn.tile.map3.network/see-it-all-boundary-cdn-zh.json',
         onStyleLoadedCallback: () {
           setState(() {});
         },
