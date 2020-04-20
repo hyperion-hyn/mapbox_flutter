@@ -122,6 +122,7 @@ class LatLngBounds {
     return o is LatLngBounds && o.southwest == southwest && o.northeast == northeast;
   }
 
+  //test
   @override
   int get hashCode => hashValues(southwest, northeast);
 }

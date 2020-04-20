@@ -539,36 +539,123 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
         let layerId = getHeavenMapLayerId(id: id)
 
         guard mapView.style?.source(withIdentifier: sourcId) == nil else { return }
-        let source = MGLVectorTileSource(identifier: sourcId, tileURLTemplates: [sourceUrl])
+        var source: MGLSource!
+        source = MGLVectorTileSource(identifier: sourcId, tileURLTemplates: [sourceUrl])
         mapView.style?.addSource(source)
 
         let bundle = PodAsset.bundle(forPod: "MapboxGl")
         let image = UIImage(named: sourceLayer, in: bundle, compatibleWith: nil)
-        var layer: MGLVectorStyleLayer!
-        //image = nil
-        if image != nil {
-            mapView.style?.setImage(image!, forName: sourceLayer)
-            guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
-            let circlesLayer = MGLSymbolStyleLayer(identifier: layerId, source: source)
-            circlesLayer.sourceLayerIdentifier = sourceLayer
-            circlesLayer.iconImageName = NSExpression(forConstantValue: sourceLayer);
-            layer = circlesLayer
-        }
-        else {
-            let circlesLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
-            circlesLayer.sourceLayerIdentifier = sourceLayer
-            circlesLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
-            circlesLayer.circleOpacity = NSExpression(forConstantValue: 0.8)
-            circlesLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
-            circlesLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
-            circlesLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
-            //circlesLayer.predicate = NSPredicate(format: "cluster == YES")
-            layer = circlesLayer
-        }
+        var layer: MGLVectorStyleLayer!       
+         
+        if sourceLayer == "poi" {
+                 
+            let zoomLevel = 12
+             
+            // Create a heatmap layer.
+            let heatmapLayer = MGLHeatmapStyleLayer(identifier: sourcId, source: source)
+            heatmapLayer.sourceLayerIdentifier = sourceLayer
 
+            // Adjust the color of the heatmap based on the point density.
+            
+            let colorDictionary: [NSNumber: UIColor] = [
+            0.0: .clear,
+            0.01: .white,
+            0.15: UIColor(red: 0.19, green: 0.30, blue: 0.80, alpha: 1.0),
+            0.5: UIColor(red: 0.73, green: 0.23, blue: 0.25, alpha: 1.0),
+            1: .yellow
+            ]
+            
+//            let colorDictionary: [NSNumber: UIColor] = [
+//            0.0: .init(red: 33, green: 102, blue: 172, alpha: 0),
+//            0.2: .init(red: 103, green: 169, blue: 207, alpha: 1),
+//            0.4: .init(red: 209, green: 229, blue: 240, alpha: 1),
+//            0.6: .init(red: 253, green: 219, blue: 199, alpha: 1),
+//            0.8: .init(red: 239, green: 138, blue: 98, alpha: 1),
+//            1.0: .init(red: 178, green: 24, blue: 43, alpha: 1),
+//            ]
+            
+            heatmapLayer.heatmapColor = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($heatmapDensity, 'linear', nil, %@)", colorDictionary)
+             
+            // Heatmap weight measures how much a single data point impacts the layer's appearance.
+            heatmapLayer.heatmapWeight = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:(mag, 'linear', nil, %@)",
+            [0: 0,
+            6: 1])
+             
+            // Heatmap intensity multiplies the heatmap weight based on zoom level.
+            heatmapLayer.heatmapIntensity = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
+            [0: 1,
+            zoomLevel: 3])
+            
+            heatmapLayer.heatmapRadius = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
+            [0: 2,
+            zoomLevel: 20])
+
+            // The heatmap layer should be visible up to zoom level 9.
+            heatmapLayer.heatmapOpacity = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:($zoomLevel, 'linear', nil, %@)",
+            [7: 1,
+            zoomLevel: 0])
+//            heatmapLayer.heatmapOpacity = NSExpression(format: "mgl_step:from:stops:($zoomLevel, 'linear', %@)", [7: 1, zoomLevel: 0])
+            mapView.style?.addLayer(heatmapLayer)
+          
+           
+            let circleLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
+            circleLayer.sourceLayerIdentifier = sourceLayer
+            circleLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
+            circleLayer.circleOpacity = NSExpression(format: "mgl_step:from:stops:($zoomLevel, 0, %@)", [0: 0, zoomLevel: 0.75])
+            
+            circleLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+            circleLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
+            circleLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
+            layer = circleLayer
+             
+            
+            /*
+            // Add a circle layer to represent the earthquakes at higher zoom levels.
+            let circleLayer = MGLCircleStyleLayer(identifier: "circle-layer", source: source)
+            circleLayer.sourceLayerIdentifier = sourceLayer
+            circleLayer.circleRadius = NSExpression(forConstantValue: 8)
+            
+            // The heatmap layer will have an opacity of 0.75 up to zoom level 9, when the opacity becomes 0.
+            circleLayer.circleOpacity = NSExpression(format: "mgl_step:from:stops:($zoomLevel, 0, %@)", [0: 0, zoomLevel: 0.75])
+            
+            let magnitudeDictionary: [NSNumber: UIColor] = [
+            0: .white,
+            0.5: .yellow,
+            2.5: UIColor(red: 0.73, green: 0.23, blue: 0.25, alpha: 1.0),
+            5: UIColor(red: 0.19, green: 0.30, blue: 0.80, alpha: 1.0)
+            ]
+            circleLayer.circleColor = NSExpression(format: "mgl_interpolate:withCurveType:parameters:stops:(mag, 'linear', nil, %@)", magnitudeDictionary)
+            circleLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+            circleLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
+            layer = circleLayer
+            */
+        } else {
+            if image != nil {
+                       mapView.style?.setImage(image!, forName: sourceLayer)
+                       guard mapView.style?.layer(withIdentifier: layerId) == nil else { return }
+                       let circlesLayer = MGLSymbolStyleLayer(identifier: layerId, source: source)
+                       circlesLayer.sourceLayerIdentifier = sourceLayer
+                       circlesLayer.iconImageName = NSExpression(forConstantValue: sourceLayer)
+                       circlesLayer.iconScale = NSExpression(forConstantValue: 1.5)
+                       layer = circlesLayer
+                   }
+                   else {
+                       let circleLayer = MGLCircleStyleLayer(identifier: layerId, source: source)
+                       circleLayer.sourceLayerIdentifier = sourceLayer
+                       circleLayer.circleRadius = NSExpression(forConstantValue: NSNumber(value: 8))
+                       circleLayer.circleOpacity = NSExpression(forConstantValue: 0.8)
+                       circleLayer.circleStrokeColor = NSExpression(forConstantValue: UIColor.white)
+                       circleLayer.circleStrokeWidth = NSExpression(forConstantValue: 2)
+                       circleLayer.circleColor = NSExpression(forConstantValue: UIColor.init(argb: color))
+                       layer = circleLayer
+                   }
+        }
         //let shapeID = "com.mapbox.annotations.shape."
         let pointLayerID = "com.mapbox.annotations.points"
         if let annotationPointLayer = mapView.style?.layer(withIdentifier: pointLayerID) {
+            guard layer != nil else {
+                return
+            }
             mapView.style?.insertLayer(layer, below: annotationPointLayer)
         } else {
             mapView.style?.addLayer(layer)

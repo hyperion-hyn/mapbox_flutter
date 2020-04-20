@@ -395,7 +395,7 @@ class MapboxMapController extends ChangeNotifier {
       effectiveOptionsJsonList,
     );
 
-    print("symbolIds:${symbolIds}");
+    print("[mapbox_gl] addSymbolList, symbolIds:${symbolIds}");
 
     List<Symbol> symbolList = List();
 

@@ -28,7 +28,7 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
   bool enableLogo;
   bool enableAttribute;
 
-  var layerId = "layer-heaven-1";
+  var layerId = "embassy";
 
   var showingMarker;
 
@@ -96,7 +96,7 @@ class _HeavenMapPageState extends State<_HeavenMapPage> {
               target: LatLng(35.6803997, 139.7690174),
               zoom: 8.0,
             ),
-            styleString: 'https://static.hyn.space/maptiles/see-it-all.json',
+            styleString: 'https://static.hyn.space/maptiles/see-it-all-boundary-cdn-en.json',
             onStyleLoadedCallback: () {
               setState(() {
                 print('heaven style ready');
@@ -138,7 +138,7 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
   List<HeavenDataModel> models = <HeavenDataModel>[
     HeavenDataModel(
         id: '1',
-        sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+        sourceUrl: "https://store.tile.map3.network/maps/global/embassy/{z}/{x}/{y}.vector.pbf",
         color: Colors.grey.value)
   ];
 
@@ -160,7 +160,7 @@ class _HeavenMapSceneState extends State<HeavenMapScene> {
               models = <HeavenDataModel>[
                 HeavenDataModel(
                     id: '2',
-                    sourceUrl: 'http://10.10.1.119:8080/maps/test/road/{z}/{x}/{y}.vector.pbf?auth=false',
+                    sourceUrl: "https://store.tile.map3.network/maps/global/embassy/{z}/{x}/{y}.vector.pbf",
                     color: Colors.red.value)
               ];
             });

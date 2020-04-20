@@ -243,7 +243,10 @@ class _MapboxMapState extends State<MapboxMap> {
         onMapIdle: widget.onMapIdle);
     _controller.complete(controller);
     if (widget.onMapCreated != null) {
+      //print('[mapbox_map] controller not is null');
       widget.onMapCreated(controller);
+    } else {
+      //print('[mapbox_map] controller is null');
     }
   }
 }
