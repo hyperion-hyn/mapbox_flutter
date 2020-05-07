@@ -11,7 +11,9 @@ data class NavigationDataModel(
         val startLatLng: LatLng,
         val endLatLng: LatLng,
         val directionsResponse: DirectionsResponse,
-        val profile: String = "driving"
+        val profile: String = "driving",
+        val language: String,
+        val startNavigationTips: String
 
 ) {
     companion object {
@@ -26,7 +28,9 @@ data class NavigationDataModel(
                 gson.registerTypeAdapter(Point::class.java, PointAsCoordinatesTypeAdapter())
                 val directionsResponse = gson.create().fromJson(directionsResponseStr, DirectionsResponse::class.java) as DirectionsResponse
                 val profile = if (map.containsKey("profile")) map["profile"] as String else "driving"
-                return NavigationDataModel(startLatLng, endLatLng, directionsResponse, profile)
+                val language = if (map.containsKey("language")) map["language"] as String else "zh-Hans"
+                val startTips = if (map.containsKey("startNavigationTips")) map["startNavigationTips"] as String else "开始导航"
+                return NavigationDataModel(startLatLng, endLatLng, directionsResponse, profile, language, startTips)
             } catch (e: Exception) {
                 return null
             }

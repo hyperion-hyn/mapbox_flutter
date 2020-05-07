@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.os.Parcelable;
 import android.preference.PreferenceManager;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -286,10 +287,9 @@ public class NavigationActivity extends AppCompatActivity implements OnNavigatio
     }
 
     private void playStartNavigationSpeech() {
-
-        SpeechAnnouncement speechAnnouncement = SpeechAnnouncement.builder().announcement(getString(R.string.start_navigation)).build();
+        String startNavigation = getIntent().getStringExtra("startNavigationTips");
+        SpeechAnnouncement speechAnnouncement = SpeechAnnouncement.builder().announcement(startNavigation.isEmpty() ? getString(R.string.start_navigation) : startNavigation).build();
         speechPlayer.play(speechAnnouncement);
-
     }
 
 //    private BaiduSpeechPlayer.StateCallBack stateCallBack = new BaiduSpeechPlayer.StateCallBack() {

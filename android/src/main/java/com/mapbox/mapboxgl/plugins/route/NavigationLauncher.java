@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
@@ -15,7 +16,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 public class NavigationLauncher {
 
-    public static void startNavigation(Context context, NavigationLauncherOptions options) {
+    public static void startNavigation(Context context, NavigationLauncherOptions options, String startNavigationTips) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
 
@@ -33,6 +34,7 @@ public class NavigationLauncher {
             navigationActivity.addFlags(FLAG_ACTIVITY_NEW_TASK);
         }
         storeInitialMapPosition(options, navigationActivity);
+        navigationActivity.putExtra("startNavigationTips",startNavigationTips);
         context.startActivity(navigationActivity);
     }
 

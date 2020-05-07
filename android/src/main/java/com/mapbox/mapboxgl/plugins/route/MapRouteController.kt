@@ -1,15 +1,12 @@
 package com.mapbox.mapboxgl.plugins.route
 
+import android.util.Log
 import com.mapbox.api.directions.v5.DirectionsCriteria
-import com.mapbox.api.directions.v5.models.DirectionsResponse
-import com.mapbox.api.directions.v5.models.DirectionsRoute
 import com.mapbox.api.directions.v5.models.RouteOptions
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxgl.R
-import com.mapbox.mapboxgl.language
 import com.mapbox.mapboxgl.plugins.interf.IMapPlugin
 import com.mapbox.mapboxsdk.camera.CameraPosition
-import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
 import com.mapbox.mapboxsdk.maps.MapboxMap
 import com.mapbox.mapboxsdk.maps.Style
@@ -102,7 +99,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
                 RouteOptions.builder()
                         .profile(navigationDataModel.profile)
                         .coordinates(corrdinateList)
-                        .language(language)
+                        .language(navigationDataModel.language)
                         .voiceInstructions(true)
                         .bannerInstructions(true)
                         .geometries(DirectionsCriteria.GEOMETRY_POLYLINE6)
@@ -132,7 +129,7 @@ class MapRouteController(private var initRouteDataModel: MapRouteDataModel? = nu
                 .initialMapCameraPosition(initialPosition)
                 .build()
 
-        NavigationLauncher.startNavigation(mapView!!.context, options)
+        NavigationLauncher.startNavigation(mapView!!.context, options,navigationDataModel.startNavigationTips)
     }
 
 
