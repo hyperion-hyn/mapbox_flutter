@@ -13,8 +13,10 @@ class NavigationDataModel {
   final LatLng endLatLng;
   final String directionsResponse;
   final String profile;
+  final String language;
+  final String startNavigationTips;
 
-  NavigationDataModel({this.startLatLng, this.endLatLng, this.directionsResponse, this.profile});
+  NavigationDataModel({this.startLatLng, this.endLatLng, this.directionsResponse, this.profile, this.language, this.startNavigationTips});
 
   dynamic _toJson() {
     final Map<String, dynamic> json = <String, dynamic>{};
@@ -29,6 +31,8 @@ class NavigationDataModel {
     addIfPresent('endLatLng', endLatLng?._toJson());
     addIfPresent('directionsResponse', directionsResponse);
     addIfPresent('profile', profile);
+    addIfPresent('language', language);
+    addIfPresent('startNavigationTips', startNavigationTips);
 
     return json;
   }
