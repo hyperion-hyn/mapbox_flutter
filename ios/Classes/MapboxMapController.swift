@@ -421,7 +421,7 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
 
         // todo: jison_test_navigation
         case "map_route#startNavigation":
-            //channel.invokeMethod("print", arguments: "heaven_map#startNavigation \(String(describing: methodCall.arguments))")
+//            channel?.invokeMethod("print", arguments: "heaven_map#startNavigation \(String(describing: methodCall.arguments))")
             guard let arguments = methodCall.arguments as? [String: Any] else { return }
             guard let model = arguments["model"] as? [String: Any] else { return }
             startNavigation(data: model, channel: channel!)
@@ -699,16 +699,16 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
     // MARK: navigation
     //TODO
     private func startNavigation(data: [String: Any], channel: FlutterMethodChannel){
-        print("[MapboxMapController] --> startNavigation")
+        //print("[MapboxMapController] --> startNavigation， data:\(data)")
+        
+        guard let route = MapRouteDataModel.editData(data: data, type: "startNavigation")?.routes.first, let startNavigationTips = data["startNavigationTips"] as? String else { return }
 
-        guard let route = MapRouteDataModel.editData(data: data, type: "startNavigation")?.routes.first else { return }
-
-        //        print("[MapRouteDataModel] --> startNavigation, mapview: \(mapview)")
+        //print("[MapRouteDataModel] --> startNavigation, startNavigationTips: \(startNavigationTips)")
 
         guard let window = UIApplication.shared.delegate?.window else { return }
 
         if let vc = window?.rootViewController {
-            print("[MapRouteDataModel] --> vc: \(vc)");
+            //print("[MapRouteDataModel] --> vc: \(vc)");
 
             // editRouteOptions
             // android
@@ -741,30 +741,33 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             route.speechLocale = Locale(identifier: "zh")
             route.routeIdentifier = NAVIGATION_UUID
             */
-
+            
             let directions = NavigationDirections()
             let service = MapboxNavigationService(route: route, directions: directions, simulating: .never)
-            let navigationViewController = self.navigationViewController(navigationService: service)
+            let route = service.route
+            let router = service.router
+            let styles = [TTCustomStyle()]
+            let options = NavigationOptions(styles: styles, navigationService: service)
+            let navigationViewController = NavigationViewController(for: route, options: options)
+
+    //        navigationViewController.delegate = self
+    //        navigationViewController.mapView?.delegate = self
+    //        navigationViewController.voiceController.voiceControllerDelegate = self;
+            
+            // todo: test_jison_0508
+            //let startNavigationTips = "Navigation Start"
+
             navigationViewController.modalPresentationStyle = .fullScreen
             vc.present(navigationViewController, animated: true) {
 
                 print("[MapRouteDataModel] --> finish");
+                navigationViewController.postStartNavigation(startNavigationTips: startNavigationTips, route: route, router: service.router)
             }
+        
         }
     }
-
-    func navigationViewController(navigationService: NavigationService) -> NavigationViewController {
-        let route = navigationService.route
-        let styles = [TTCustomStyle()]
-        let options = NavigationOptions(styles: styles, navigationService: navigationService)
-        let navigationViewController = NavigationViewController(for: route, options: options)
-
-//        navigationViewController.delegate = self
-//        navigationViewController.mapView?.delegate = self
-//        navigationViewController.voiceController.voiceControllerDelegate = self;
-
-        return navigationViewController
-    }
+ 
+ 
 
     func beginCarPlayNavigation() {
         print("[MapRouteDataModel] --> beginCarPlayNavigation")
@@ -1441,7 +1444,6 @@ class MapRouteDataModel {
 
 }
 
-
 class TTCustomStyle: DayStyle {
 
     required init() {
@@ -1456,4 +1458,22 @@ class TTCustomStyle: DayStyle {
 
         //BottomBannerView.appearance().backgroundColor = .orange
     }
+}
+
+extension NavigationViewController {
+    
+
+    func postStartNavigation(startNavigationTips:String, route: Route, router: Router) {
+ 
+
+            let routeProgress = RouteProgress(route: route)
+            let info: [RouteControllerNotificationUserInfoKey: Any] = [
+                    .routeProgressKey: routeProgress,
+                ]
+            NotificationCenter.default.post(name: .routeControllerDidPassSpokenInstructionPoint, object: router, userInfo: info)
+ 
+            let spokenInstructionPoint = SpokenInstruction(distanceAlongStep: CLLocationDistance(0), text: "\(startNavigationTips)!", ssmlText: "<speak>\(startNavigationTips)!</speak>")
+            self.voiceController.speak(spokenInstructionPoint)
+     }
+    
 }
