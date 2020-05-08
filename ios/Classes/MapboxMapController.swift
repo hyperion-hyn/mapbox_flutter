@@ -1465,15 +1465,14 @@ extension NavigationViewController {
 
     func postStartNavigation(startNavigationTips:String, route: Route, router: Router) {
  
+        let routeProgress = RouteProgress(route: route)
+        let info: [RouteControllerNotificationUserInfoKey: Any] = [
+                .routeProgressKey: routeProgress,
+            ]
+        NotificationCenter.default.post(name: .routeControllerDidPassSpokenInstructionPoint, object: router, userInfo: info)
 
-            let routeProgress = RouteProgress(route: route)
-            let info: [RouteControllerNotificationUserInfoKey: Any] = [
-                    .routeProgressKey: routeProgress,
-                ]
-            NotificationCenter.default.post(name: .routeControllerDidPassSpokenInstructionPoint, object: router, userInfo: info)
- 
-            let spokenInstructionPoint = SpokenInstruction(distanceAlongStep: CLLocationDistance(0), text: "\(startNavigationTips)!", ssmlText: "<speak>\(startNavigationTips)!</speak>")
-            self.voiceController.speak(spokenInstructionPoint)
+        let spokenInstructionPoint = SpokenInstruction(distanceAlongStep: CLLocationDistance(0), text: "\(startNavigationTips)!", ssmlText: "<speak>\(startNavigationTips)!</speak>")
+        self.voiceController.speak(spokenInstructionPoint)
      }
     
 }
