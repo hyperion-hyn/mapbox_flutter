@@ -745,19 +745,29 @@ class MapboxMapController: NSObject, FlutterPlatformView, MGLMapViewDelegate, Ma
             let directions = NavigationDirections()
             let service = MapboxNavigationService(route: route, directions: directions, simulating: .never)
             let route = service.route
-            let router = service.router
             let styles = [TTCustomStyle()]
             let options = NavigationOptions(styles: styles, navigationService: service)
             let navigationViewController = NavigationViewController(for: route, options: options)
 
-    //        navigationViewController.delegate = self
-    //        navigationViewController.mapView?.delegate = self
-    //        navigationViewController.voiceController.voiceControllerDelegate = self;
+//            navigationViewController.delegate = self
+//            navigationViewController.mapView?.delegate = self
+//            navigationViewController.voiceController.voiceControllerDelegate = self;
             
             // todo: test_jison_0508
             //let startNavigationTips = "Navigation Start"
 
             navigationViewController.modalPresentationStyle = .fullScreen
+            navigationViewController.showsReportFeedback = false
+            navigationViewController.showsEndOfRouteFeedback = false
+            if let subviews = navigationViewController.mapView?.subviews {
+                for item in subviews {
+                    if (item is UIButton || item is UIImageView) {
+                        item.alpha = 0
+                    }
+                }
+            }
+            
+
             vc.present(navigationViewController, animated: true) {
 
                 print("[MapRouteDataModel] --> finish");
@@ -1476,3 +1486,19 @@ extension NavigationViewController {
      }
     
 }
+
+/*
+extension MapboxMapController: NavigationViewControllerDelegate {
+    
+    public func navigationViewControllerDidDismiss(_ navigationViewController: NavigationViewController, byCanceling canceled: Bool) {
+        print("[NavigationViewControllerDelegate] --> dismiss, canceld:\(canceled)")
+        
+        guard let window = UIApplication.shared.delegate?.window else { return }
+        if let vc = window?.rootViewController {
+            vc.dismiss(animated: true)
+        }
+    }
+    
+}
+*/
+
